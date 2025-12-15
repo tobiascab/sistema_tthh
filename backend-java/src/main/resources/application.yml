@@ -1,0 +1,144 @@
+# ============================================
+# CONFIGURACIÓN SPRING BOOT - XAMPP MySQL
+# ============================================
+
+spring:
+  application:
+    name: sistema-tthh
+  
+  # ============================================
+  # FILE UPLOAD CONFIGURATION
+  # ============================================
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+      file-size-threshold: 2KB
+  
+  # ============================================
+  # DATASOURCE - MySQL (XAMPP)
+  # ============================================
+  datasource:
+    url: jdbc:mysql://localhost:3307/sistema_tthh?useSSL=false&serverTimezone=America/Asuncion&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+    username: root
+    password:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    
+    # HikariCP Configuration
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      pool-name: TthhHikariPool
+  
+  # ============================================
+  # JPA / HIBERNATE
+  # ============================================
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: update
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+        implicit-strategy: org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+        use_sql_comments: true
+        jdbc:
+          batch_size: 20
+        order_inserts: true
+        order_updates: true
+        generate_statistics: false
+  
+  # ============================================
+  # SECURITY - OAuth2 Resource Server
+  # ============================================
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8081/realms/cooperativa-reducto
+          jwk-set-uri: http://localhost:8081/realms/cooperativa-reducto/protocol/openid-connect/certs
+  
+  # ============================================
+  # LOGGING
+  # ============================================
+logging:
+  level:
+    root: INFO
+    com.coopreducto.tthh: DEBUG
+    org.springframework.web: INFO
+    org.springframework.security: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file:
+    name: logs/sistema-tthh.log
+    max-size: 10MB
+    max-history: 30
+
+# ============================================
+# SERVER
+# ============================================
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: on_param
+    include-exception: false
+
+# ============================================
+# AWS S3 (EXIGIDO POR AwsConfig.java)
+# ============================================
+aws:
+  s3:
+    bucket-name: tthh-documents
+    region: us-east-1
+    access-key: dummy-access-key
+    secret-key: dummy-secret-key
+
+# ============================================
+# CUSTOM PROPERTIES
+# ============================================
+app:
+  name: Sistema de Gestión de Talento Humano
+  version: 3.0.0
+  description: Sistema integral de RRHH para Cooperativa Reducto
+  
+  # Rate Limiting
+  rate-limit:
+    requests-per-minute: 100
+    
+  # Auditoría
+  audit:
+    enabled: true
+    
+  # Alertas
+  alerts:
+    certificacion-dias-previos: 30
+    certificacion-dias-urgente: 7
+
+  # CORS (USADO POR SecurityConfig -> @Value("${app.cors.allowed-origins}")
+  cors:
+    allowed-origins: "http://localhost:3000,http://127.0.0.1:3000"
+    allowed-methods: "GET,POST,PUT,PATCH,DELETE,OPTIONS"
+    allowed-headers: "*"
+    allow-credentials: true
+    max-age: 3600
+
+  # ============================================
+  # FILE STORAGE
+  # ============================================
+  file-storage:
+    base-path: "uploads"

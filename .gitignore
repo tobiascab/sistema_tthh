@@ -1,0 +1,14 @@
+﻿jdk-21/
+jdk-21.zip
+jdk-*.zip
+jdk-*/
+*.zip
+maven/
+target/
+*.log
+*.tmp
+Thumbs.db
+.DS_Store
+
+ 
+ 
