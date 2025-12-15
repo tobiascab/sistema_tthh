@@ -1,0 +1,1305 @@
+2025-12-09 19:37:10 [main] INFO  c.coopreducto.tthh.TthhApplication - Starting TthhApplication v1.0.0 using Java 21.0.9 with PID 3780 (C:\SISTEMA_TTHH_V2\backend-java\target\tthh-backend-1.0.0.jar started by minsfran in C:\SISTEMA_TTHH_V2)
+2025-12-09 19:37:10 [main] DEBUG c.coopreducto.tthh.TthhApplication - Running with Spring Boot v3.2.0, Spring v6.1.1
+2025-12-09 19:37:10 [main] INFO  c.coopreducto.tthh.TthhApplication - No active profile set, falling back to 1 default profile: "default"
+2025-12-09 19:37:11 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-12-09 19:37:11 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 137 ms. Found 12 JPA repository interfaces.
+2025-12-09 19:37:13 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-12-09 19:37:13 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-12-09 19:37:13 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.16]
+2025-12-09 19:37:13 [main] INFO  o.a.c.c.C.[.[localhost].[/api] - Initializing Spring embedded WebApplicationContext
+2025-12-09 19:37:13 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 3072 ms
+2025-12-09 19:37:13 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-12-09 19:37:14 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.3.1.Final
+2025-12-09 19:37:14 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-12-09 19:37:14 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-12-09 19:37:14 [main] INFO  com.zaxxer.hikari.HikariDataSource - TthhHikariPool - Starting...
+2025-12-09 19:37:15 [main] ERROR com.zaxxer.hikari.pool.HikariPool - TthhHikariPool - Exception during pool initialization.
+com.mysql.cj.jdbc.exceptions.CommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+	at com.mysql.cj.jdbc.exceptions.SQLError.createCommunicationsException(SQLError.java:175)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:64)
+	at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:819)
+	at com.mysql.cj.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:440)
+	at com.mysql.cj.jdbc.ConnectionImpl.getInstance(ConnectionImpl.java:239)
+	at com.mysql.cj.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java:188)
+	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:138)
+	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:359)
+	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:201)
+	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:470)
+	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:561)
+	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:100)
+	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:112)
+	at org.hibernate.engine.jdbc.connections.internal.DatasourceConnectionProviderImpl.getConnection(DatasourceConnectionProviderImpl.java:122)
+	at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator$ConnectionProviderJdbcConnectionAccess.obtainConnection(JdbcEnvironmentInitiator.java:424)
+	at org.hibernate.resource.transaction.backend.jdbc.internal.JdbcIsolationDelegate.delegateWork(JdbcIsolationDelegate.java:61)
+	at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator.getJdbcEnvironmentUsingJdbcMetadata(JdbcEnvironmentInitiator.java:273)
+	at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator.initiateService(JdbcEnvironmentInitiator.java:105)
+	at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator.initiateService(JdbcEnvironmentInitiator.java:66)
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.initiateService(StandardServiceRegistryImpl.java:129)
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.createService(AbstractServiceRegistryImpl.java:263)
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:238)
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:215)
+	at org.hibernate.boot.model.relational.Database.<init>(Database.java:45)
+	at org.hibernate.boot.internal.InFlightMetadataCollectorImpl.getDatabase(InFlightMetadataCollectorImpl.java:223)
+	at org.hibernate.boot.internal.InFlightMetadataCollectorImpl.<init>(InFlightMetadataCollectorImpl.java:191)
+	at org.hibernate.boot.model.process.spi.MetadataBuildingProcess.complete(MetadataBuildingProcess.java:169)
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.metadata(EntityManagerFactoryBuilderImpl.java:1432)
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:1503)
+	at org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider.createContainerEntityManagerFactory(SpringHibernateJpaPersistenceProvider.java:75)
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.createNativeEntityManagerFactory(LocalContainerEntityManagerFactoryBean.java:376)
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:409)
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.afterPropertiesSet(AbstractEntityManagerFactoryBean.java:396)
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.afterPropertiesSet(LocalContainerEntityManagerFactoryBean.java:352)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1822)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1771)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:601)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:523)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1173)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:936)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:616)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:753)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:455)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:323)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1342)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1331)
+	at com.coopreducto.tthh.TthhApplication.main(TthhApplication.java:12)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:91)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:53)
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:58)
+Caused by: com.mysql.cj.exceptions.CJCommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:62)
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:105)
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:150)
+	at com.mysql.cj.exceptions.ExceptionFactory.createCommunicationsException(ExceptionFactory.java:166)
+	at com.mysql.cj.protocol.a.NativeSocketConnection.connect(NativeSocketConnection.java:89)
+	at com.mysql.cj.NativeSession.connect(NativeSession.java:121)
+	at com.mysql.cj.jdbc.ConnectionImpl.connectOneTryOnly(ConnectionImpl.java:939)
+	at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:809)
+	... 54 common frames omitted
+Caused by: java.net.ConnectException: Connection refused: getsockopt
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:682)
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:542)
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:592)
+	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327)
+	at java.base/java.net.Socket.connect(Socket.java:751)
+	at com.mysql.cj.protocol.StandardSocketFactory.connect(StandardSocketFactory.java:153)
+	at com.mysql.cj.protocol.a.NativeSocketConnection.connect(NativeSocketConnection.java:63)
+	... 57 common frames omitted
+2025-12-09 19:37:15 [main] WARN  o.h.e.j.e.i.JdbcEnvironmentInitiator - HHH000342: Could not obtain connection to query metadata
+java.lang.NullPointerException: Cannot invoke "org.hibernate.engine.jdbc.spi.SqlExceptionHelper.convert(java.sql.SQLException, String)" because the return value of "org.hibernate.resource.transaction.backend.jdbc.internal.JdbcIsolationDelegate.sqlExceptionHelper()" is null
+	at org.hibernate.resource.transaction.backend.jdbc.internal.JdbcIsolationDelegate.delegateWork(JdbcIsolationDelegate.java:116)
+	at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator.getJdbcEnvironmentUsingJdbcMetadata(JdbcEnvironmentInitiator.java:273)
+	at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator.initiateService(JdbcEnvironmentInitiator.java:105)
+	at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator.initiateService(JdbcEnvironmentInitiator.java:66)
+	at org.hibernate.boot.registry.internal.StandardServiceRegistryImpl.initiateService(StandardServiceRegistryImpl.java:129)
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.createService(AbstractServiceRegistryImpl.java:263)
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.initializeService(AbstractServiceRegistryImpl.java:238)
+	at org.hibernate.service.internal.AbstractServiceRegistryImpl.getService(AbstractServiceRegistryImpl.java:215)
+	at org.hibernate.boot.model.relational.Database.<init>(Database.java:45)
+	at org.hibernate.boot.internal.InFlightMetadataCollectorImpl.getDatabase(InFlightMetadataCollectorImpl.java:223)
+	at org.hibernate.boot.internal.InFlightMetadataCollectorImpl.<init>(InFlightMetadataCollectorImpl.java:191)
+	at org.hibernate.boot.model.process.spi.MetadataBuildingProcess.complete(MetadataBuildingProcess.java:169)
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.metadata(EntityManagerFactoryBuilderImpl.java:1432)
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:1503)
+	at org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider.createContainerEntityManagerFactory(SpringHibernateJpaPersistenceProvider.java:75)
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.createNativeEntityManagerFactory(LocalContainerEntityManagerFactoryBean.java:376)
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:409)
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.afterPropertiesSet(AbstractEntityManagerFactoryBean.java:396)
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.afterPropertiesSet(LocalContainerEntityManagerFactoryBean.java:352)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1822)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1771)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:601)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:523)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1173)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:936)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:616)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:753)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:455)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:323)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1342)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1331)
+	at com.coopreducto.tthh.TthhApplication.main(TthhApplication.java:12)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:91)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:53)
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:58)
+2025-12-09 19:37:15 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-12-09 19:37:15 [main] WARN  org.hibernate.orm.deprecation - HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+2025-12-09 19:37:17 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-12-09 19:37:17 [main] INFO  com.zaxxer.hikari.HikariDataSource - TthhHikariPool - Starting...
+2025-12-09 19:37:18 [main] ERROR com.zaxxer.hikari.pool.HikariPool - TthhHikariPool - Exception during pool initialization.
+com.mysql.cj.jdbc.exceptions.CommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+	at com.mysql.cj.jdbc.exceptions.SQLError.createCommunicationsException(SQLError.java:175)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:64)
+	at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:819)
+	at com.mysql.cj.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:440)
+	at com.mysql.cj.jdbc.ConnectionImpl.getInstance(ConnectionImpl.java:239)
+	at com.mysql.cj.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java:188)
+	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:138)
+	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:359)
+	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:201)
+	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:470)
+	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:561)
+	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:100)
+	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:112)
+	at org.hibernate.engine.jdbc.connections.internal.DatasourceConnectionProviderImpl.getConnection(DatasourceConnectionProviderImpl.java:122)
+	at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator$ConnectionProviderJdbcConnectionAccess.obtainConnection(JdbcEnvironmentInitiator.java:424)
+	at org.hibernate.resource.transaction.backend.jdbc.internal.DdlTransactionIsolatorNonJtaImpl.getIsolatedConnection(DdlTransactionIsolatorNonJtaImpl.java:46)
+	at org.hibernate.resource.transaction.backend.jdbc.internal.DdlTransactionIsolatorNonJtaImpl.getIsolatedConnection(DdlTransactionIsolatorNonJtaImpl.java:39)
+	at org.hibernate.tool.schema.internal.exec.ImprovedExtractionContextImpl.getJdbcConnection(ImprovedExtractionContextImpl.java:63)
+	at org.hibernate.tool.schema.internal.exec.ImprovedExtractionContextImpl.getJdbcDatabaseMetaData(ImprovedExtractionContextImpl.java:70)
+	at org.hibernate.tool.schema.extract.internal.InformationExtractorJdbcDatabaseMetaDataImpl.processTableResultSet(InformationExtractorJdbcDatabaseMetaDataImpl.java:64)
+	at org.hibernate.tool.schema.extract.internal.AbstractInformationExtractorImpl.getTables(AbstractInformationExtractorImpl.java:570)
+	at org.hibernate.tool.schema.extract.internal.DatabaseInformationImpl.getTablesInformation(DatabaseInformationImpl.java:122)
+	at org.hibernate.tool.schema.internal.GroupedSchemaMigratorImpl.performTablesMigration(GroupedSchemaMigratorImpl.java:72)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.performMigration(AbstractSchemaMigrator.java:232)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.doMigration(AbstractSchemaMigrator.java:117)
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.performDatabaseAction(SchemaManagementToolCoordinator.java:286)
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.lambda$process$5(SchemaManagementToolCoordinator.java:145)
+	at java.base/java.util.HashMap.forEach(HashMap.java:1429)
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.process(SchemaManagementToolCoordinator.java:142)
+	at org.hibernate.boot.internal.SessionFactoryObserverForSchemaExport.sessionFactoryCreated(SessionFactoryObserverForSchemaExport.java:37)
+	at org.hibernate.internal.SessionFactoryObserverChain.sessionFactoryCreated(SessionFactoryObserverChain.java:35)
+	at org.hibernate.internal.SessionFactoryImpl.<init>(SessionFactoryImpl.java:295)
+	at org.hibernate.boot.internal.SessionFactoryBuilderImpl.build(SessionFactoryBuilderImpl.java:450)
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:1507)
+	at org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider.createContainerEntityManagerFactory(SpringHibernateJpaPersistenceProvider.java:75)
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.createNativeEntityManagerFactory(LocalContainerEntityManagerFactoryBean.java:376)
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:409)
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.afterPropertiesSet(AbstractEntityManagerFactoryBean.java:396)
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.afterPropertiesSet(LocalContainerEntityManagerFactoryBean.java:352)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1822)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1771)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:601)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:523)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1173)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:936)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:616)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:753)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:455)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:323)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1342)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1331)
+	at com.coopreducto.tthh.TthhApplication.main(TthhApplication.java:12)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:91)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:53)
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:58)
+Caused by: com.mysql.cj.exceptions.CJCommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:62)
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:105)
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:150)
+	at com.mysql.cj.exceptions.ExceptionFactory.createCommunicationsException(ExceptionFactory.java:166)
+	at com.mysql.cj.protocol.a.NativeSocketConnection.connect(NativeSocketConnection.java:89)
+	at com.mysql.cj.NativeSession.connect(NativeSession.java:121)
+	at com.mysql.cj.jdbc.ConnectionImpl.connectOneTryOnly(ConnectionImpl.java:939)
+	at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:809)
+	... 59 common frames omitted
+Caused by: java.net.ConnectException: Connection refused: getsockopt
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:682)
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:542)
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:592)
+	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327)
+	at java.base/java.net.Socket.connect(Socket.java:751)
+	at com.mysql.cj.protocol.StandardSocketFactory.connect(StandardSocketFactory.java:153)
+	at com.mysql.cj.protocol.a.NativeSocketConnection.connect(NativeSocketConnection.java:63)
+	... 62 common frames omitted
+2025-12-09 19:37:18 [main] WARN  o.h.e.jdbc.spi.SqlExceptionHelper - SQL Error: 0, SQLState: 08S01
+2025-12-09 19:37:18 [main] ERROR o.h.e.jdbc.spi.SqlExceptionHelper - Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+2025-12-09 19:37:18 [main] ERROR o.s.o.j.LocalContainerEntityManagerFactoryBean - Failed to initialize JPA EntityManagerFactory: [PersistenceUnit: default] Unable to build Hibernate SessionFactory; nested exception is org.hibernate.exception.JDBCConnectionException: Unable to open JDBC Connection for DDL execution [Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.] [n/a]
+2025-12-09 19:37:18 [main] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'entityManagerFactory' defined in class path resource [org/springframework/boot/autoconfigure/orm/jpa/HibernateJpaConfiguration.class]: [PersistenceUnit: default] Unable to build Hibernate SessionFactory; nested exception is org.hibernate.exception.JDBCConnectionException: Unable to open JDBC Connection for DDL execution [Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.] [n/a]
+2025-12-09 19:37:18 [main] INFO  o.a.catalina.core.StandardService - Stopping service [Tomcat]
+2025-12-09 19:37:18 [main] INFO  o.s.b.a.l.ConditionEvaluationReportLogger - 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2025-12-09 19:37:18 [main] ERROR o.s.boot.SpringApplication - Application run failed
+org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'entityManagerFactory' defined in class path resource [org/springframework/boot/autoconfigure/orm/jpa/HibernateJpaConfiguration.class]: [PersistenceUnit: default] Unable to build Hibernate SessionFactory; nested exception is org.hibernate.exception.JDBCConnectionException: Unable to open JDBC Connection for DDL execution [Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.] [n/a]
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1775)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:601)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:523)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1173)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:936)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:616)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:753)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:455)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:323)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1342)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1331)
+	at com.coopreducto.tthh.TthhApplication.main(TthhApplication.java:12)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:91)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:53)
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:58)
+Caused by: jakarta.persistence.PersistenceException: [PersistenceUnit: default] Unable to build Hibernate SessionFactory; nested exception is org.hibernate.exception.JDBCConnectionException: Unable to open JDBC Connection for DDL execution [Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.] [n/a]
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:421)
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.afterPropertiesSet(AbstractEntityManagerFactoryBean.java:396)
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.afterPropertiesSet(LocalContainerEntityManagerFactoryBean.java:352)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.invokeInitMethods(AbstractAutowireCapableBeanFactory.java:1822)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.initializeBean(AbstractAutowireCapableBeanFactory.java:1771)
+	... 21 common frames omitted
+Caused by: org.hibernate.exception.JDBCConnectionException: Unable to open JDBC Connection for DDL execution [Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.] [n/a]
+	at org.hibernate.exception.internal.SQLStateConversionDelegate.convert(SQLStateConversionDelegate.java:100)
+	at org.hibernate.exception.internal.StandardSQLExceptionConverter.convert(StandardSQLExceptionConverter.java:58)
+	at org.hibernate.engine.jdbc.spi.SqlExceptionHelper.convert(SqlExceptionHelper.java:108)
+	at org.hibernate.engine.jdbc.spi.SqlExceptionHelper.convert(SqlExceptionHelper.java:94)
+	at org.hibernate.resource.transaction.backend.jdbc.internal.DdlTransactionIsolatorNonJtaImpl.getIsolatedConnection(DdlTransactionIsolatorNonJtaImpl.java:74)
+	at org.hibernate.resource.transaction.backend.jdbc.internal.DdlTransactionIsolatorNonJtaImpl.getIsolatedConnection(DdlTransactionIsolatorNonJtaImpl.java:39)
+	at org.hibernate.tool.schema.internal.exec.ImprovedExtractionContextImpl.getJdbcConnection(ImprovedExtractionContextImpl.java:63)
+	at org.hibernate.tool.schema.internal.exec.ImprovedExtractionContextImpl.getJdbcDatabaseMetaData(ImprovedExtractionContextImpl.java:70)
+	at org.hibernate.tool.schema.extract.internal.InformationExtractorJdbcDatabaseMetaDataImpl.processTableResultSet(InformationExtractorJdbcDatabaseMetaDataImpl.java:64)
+	at org.hibernate.tool.schema.extract.internal.AbstractInformationExtractorImpl.getTables(AbstractInformationExtractorImpl.java:570)
+	at org.hibernate.tool.schema.extract.internal.DatabaseInformationImpl.getTablesInformation(DatabaseInformationImpl.java:122)
+	at org.hibernate.tool.schema.internal.GroupedSchemaMigratorImpl.performTablesMigration(GroupedSchemaMigratorImpl.java:72)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.performMigration(AbstractSchemaMigrator.java:232)
+	at org.hibernate.tool.schema.internal.AbstractSchemaMigrator.doMigration(AbstractSchemaMigrator.java:117)
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.performDatabaseAction(SchemaManagementToolCoordinator.java:286)
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.lambda$process$5(SchemaManagementToolCoordinator.java:145)
+	at java.base/java.util.HashMap.forEach(HashMap.java:1429)
+	at org.hibernate.tool.schema.spi.SchemaManagementToolCoordinator.process(SchemaManagementToolCoordinator.java:142)
+	at org.hibernate.boot.internal.SessionFactoryObserverForSchemaExport.sessionFactoryCreated(SessionFactoryObserverForSchemaExport.java:37)
+	at org.hibernate.internal.SessionFactoryObserverChain.sessionFactoryCreated(SessionFactoryObserverChain.java:35)
+	at org.hibernate.internal.SessionFactoryImpl.<init>(SessionFactoryImpl.java:295)
+	at org.hibernate.boot.internal.SessionFactoryBuilderImpl.build(SessionFactoryBuilderImpl.java:450)
+	at org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl.build(EntityManagerFactoryBuilderImpl.java:1507)
+	at org.springframework.orm.jpa.vendor.SpringHibernateJpaPersistenceProvider.createContainerEntityManagerFactory(SpringHibernateJpaPersistenceProvider.java:75)
+	at org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean.createNativeEntityManagerFactory(LocalContainerEntityManagerFactoryBean.java:376)
+	at org.springframework.orm.jpa.AbstractEntityManagerFactoryBean.buildNativeEntityManagerFactory(AbstractEntityManagerFactoryBean.java:409)
+	... 25 common frames omitted
+Caused by: com.mysql.cj.jdbc.exceptions.CommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+	at com.mysql.cj.jdbc.exceptions.SQLError.createCommunicationsException(SQLError.java:175)
+	at com.mysql.cj.jdbc.exceptions.SQLExceptionsMapping.translateException(SQLExceptionsMapping.java:64)
+	at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:819)
+	at com.mysql.cj.jdbc.ConnectionImpl.<init>(ConnectionImpl.java:440)
+	at com.mysql.cj.jdbc.ConnectionImpl.getInstance(ConnectionImpl.java:239)
+	at com.mysql.cj.jdbc.NonRegisteringDriver.connect(NonRegisteringDriver.java:188)
+	at com.zaxxer.hikari.util.DriverDataSource.getConnection(DriverDataSource.java:138)
+	at com.zaxxer.hikari.pool.PoolBase.newConnection(PoolBase.java:359)
+	at com.zaxxer.hikari.pool.PoolBase.newPoolEntry(PoolBase.java:201)
+	at com.zaxxer.hikari.pool.HikariPool.createPoolEntry(HikariPool.java:470)
+	at com.zaxxer.hikari.pool.HikariPool.checkFailFast(HikariPool.java:561)
+	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:100)
+	at com.zaxxer.hikari.HikariDataSource.getConnection(HikariDataSource.java:112)
+	at org.hibernate.engine.jdbc.connections.internal.DatasourceConnectionProviderImpl.getConnection(DatasourceConnectionProviderImpl.java:122)
+	at org.hibernate.engine.jdbc.env.internal.JdbcEnvironmentInitiator$ConnectionProviderJdbcConnectionAccess.obtainConnection(JdbcEnvironmentInitiator.java:424)
+	at org.hibernate.resource.transaction.backend.jdbc.internal.DdlTransactionIsolatorNonJtaImpl.getIsolatedConnection(DdlTransactionIsolatorNonJtaImpl.java:46)
+	... 46 common frames omitted
+Caused by: com.mysql.cj.exceptions.CJCommunicationsException: Communications link failure
+
+The last packet sent successfully to the server was 0 milliseconds ago. The driver has not received any packets from the server.
+	at java.base/jdk.internal.reflect.DirectConstructorHandleAccessor.newInstance(DirectConstructorHandleAccessor.java:62)
+	at java.base/java.lang.reflect.Constructor.newInstanceWithCaller(Constructor.java:502)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:486)
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:62)
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:105)
+	at com.mysql.cj.exceptions.ExceptionFactory.createException(ExceptionFactory.java:150)
+	at com.mysql.cj.exceptions.ExceptionFactory.createCommunicationsException(ExceptionFactory.java:166)
+	at com.mysql.cj.protocol.a.NativeSocketConnection.connect(NativeSocketConnection.java:89)
+	at com.mysql.cj.NativeSession.connect(NativeSession.java:121)
+	at com.mysql.cj.jdbc.ConnectionImpl.connectOneTryOnly(ConnectionImpl.java:939)
+	at com.mysql.cj.jdbc.ConnectionImpl.createNewIO(ConnectionImpl.java:809)
+	... 59 common frames omitted
+Caused by: java.net.ConnectException: Connection refused: getsockopt
+	at java.base/sun.nio.ch.Net.pollConnect(Native Method)
+	at java.base/sun.nio.ch.Net.pollConnectNow(Net.java:682)
+	at java.base/sun.nio.ch.NioSocketImpl.timedFinishConnect(NioSocketImpl.java:542)
+	at java.base/sun.nio.ch.NioSocketImpl.connect(NioSocketImpl.java:592)
+	at java.base/java.net.SocksSocketImpl.connect(SocksSocketImpl.java:327)
+	at java.base/java.net.Socket.connect(Socket.java:751)
+	at com.mysql.cj.protocol.StandardSocketFactory.connect(StandardSocketFactory.java:153)
+	at com.mysql.cj.protocol.a.NativeSocketConnection.connect(NativeSocketConnection.java:63)
+	... 62 common frames omitted
+2025-12-09 19:45:36 [main] INFO  c.coopreducto.tthh.TthhApplication - Starting TthhApplication v1.0.0 using Java 21.0.9 with PID 17364 (C:\SISTEMA_TTHH_V2\backend-java\target\tthh-backend-1.0.0.jar started by minsfran in C:\SISTEMA_TTHH_V2)
+2025-12-09 19:45:36 [main] DEBUG c.coopreducto.tthh.TthhApplication - Running with Spring Boot v3.2.0, Spring v6.1.1
+2025-12-09 19:45:36 [main] INFO  c.coopreducto.tthh.TthhApplication - The following 1 profile is active: "dev"
+2025-12-09 19:45:37 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-12-09 19:45:38 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 157 ms. Found 12 JPA repository interfaces.
+2025-12-09 19:45:39 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-12-09 19:45:39 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-12-09 19:45:39 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.16]
+2025-12-09 19:45:40 [main] INFO  o.a.c.c.C.[.[localhost].[/api] - Initializing Spring embedded WebApplicationContext
+2025-12-09 19:45:40 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 3875 ms
+2025-12-09 19:45:40 [main] WARN  o.s.b.w.s.c.AnnotationConfigServletWebServerApplicationContext - Exception encountered during context initialization - cancelling refresh attempt: org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'dataSourceScriptDatabaseInitializer' defined in class path resource [org/springframework/boot/autoconfigure/sql/init/DataSourceInitializationConfiguration.class]: Unsatisfied dependency expressed through method 'dataSourceScriptDatabaseInitializer' parameter 0: Error creating bean with name 'dataSource' defined in class path resource [org/springframework/boot/autoconfigure/jdbc/DataSourceConfiguration$Hikari.class]: Failed to instantiate [com.zaxxer.hikari.HikariDataSource]: Factory method 'dataSource' threw exception with message: Cannot load driver class: org.h2.Driver
+2025-12-09 19:45:40 [main] INFO  o.a.catalina.core.StandardService - Stopping service [Tomcat]
+2025-12-09 19:45:40 [main] INFO  o.s.b.a.l.ConditionEvaluationReportLogger - 
+
+Error starting ApplicationContext. To display the condition evaluation report re-run your application with 'debug' enabled.
+2025-12-09 19:45:40 [main] ERROR o.s.boot.SpringApplication - Application run failed
+org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name 'dataSourceScriptDatabaseInitializer' defined in class path resource [org/springframework/boot/autoconfigure/sql/init/DataSourceInitializationConfiguration.class]: Unsatisfied dependency expressed through method 'dataSourceScriptDatabaseInitializer' parameter 0: Error creating bean with name 'dataSource' defined in class path resource [org/springframework/boot/autoconfigure/jdbc/DataSourceConfiguration$Hikari.class]: Failed to instantiate [com.zaxxer.hikari.HikariDataSource]: Factory method 'dataSource' threw exception with message: Cannot load driver class: org.h2.Driver
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:802)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:546)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1336)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1166)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:563)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:523)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:312)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.context.support.AbstractApplicationContext.getBean(AbstractApplicationContext.java:1173)
+	at org.springframework.context.support.AbstractApplicationContext.finishBeanFactoryInitialization(AbstractApplicationContext.java:936)
+	at org.springframework.context.support.AbstractApplicationContext.refresh(AbstractApplicationContext.java:616)
+	at org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext.refresh(ServletWebServerApplicationContext.java:146)
+	at org.springframework.boot.SpringApplication.refresh(SpringApplication.java:753)
+	at org.springframework.boot.SpringApplication.refreshContext(SpringApplication.java:455)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:323)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1342)
+	at org.springframework.boot.SpringApplication.run(SpringApplication.java:1331)
+	at com.coopreducto.tthh.TthhApplication.main(TthhApplication.java:12)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:91)
+	at org.springframework.boot.loader.launch.Launcher.launch(Launcher.java:53)
+	at org.springframework.boot.loader.launch.JarLauncher.main(JarLauncher.java:58)
+Caused by: org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'dataSource' defined in class path resource [org/springframework/boot/autoconfigure/jdbc/DataSourceConfiguration$Hikari.class]: Failed to instantiate [com.zaxxer.hikari.HikariDataSource]: Factory method 'dataSource' threw exception with message: Cannot load driver class: org.h2.Driver
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:655)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiateUsingFactoryMethod(ConstructorResolver.java:643)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.instantiateUsingFactoryMethod(AbstractAutowireCapableBeanFactory.java:1336)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBeanInstance(AbstractAutowireCapableBeanFactory.java:1166)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.doCreateBean(AbstractAutowireCapableBeanFactory.java:563)
+	at org.springframework.beans.factory.support.AbstractAutowireCapableBeanFactory.createBean(AbstractAutowireCapableBeanFactory.java:523)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.lambda$doGetBean$0(AbstractBeanFactory.java:325)
+	at org.springframework.beans.factory.support.DefaultSingletonBeanRegistry.getSingleton(DefaultSingletonBeanRegistry.java:234)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.doGetBean(AbstractBeanFactory.java:323)
+	at org.springframework.beans.factory.support.AbstractBeanFactory.getBean(AbstractBeanFactory.java:199)
+	at org.springframework.beans.factory.config.DependencyDescriptor.resolveCandidate(DependencyDescriptor.java:254)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.doResolveDependency(DefaultListableBeanFactory.java:1441)
+	at org.springframework.beans.factory.support.DefaultListableBeanFactory.resolveDependency(DefaultListableBeanFactory.java:1348)
+	at org.springframework.beans.factory.support.ConstructorResolver.resolveAutowiredArgument(ConstructorResolver.java:911)
+	at org.springframework.beans.factory.support.ConstructorResolver.createArgumentArray(ConstructorResolver.java:789)
+	... 26 common frames omitted
+Caused by: org.springframework.beans.BeanInstantiationException: Failed to instantiate [com.zaxxer.hikari.HikariDataSource]: Factory method 'dataSource' threw exception with message: Cannot load driver class: org.h2.Driver
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:178)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:651)
+	... 40 common frames omitted
+Caused by: java.lang.IllegalStateException: Cannot load driver class: org.h2.Driver
+	at org.springframework.util.Assert.state(Assert.java:97)
+	at org.springframework.boot.autoconfigure.jdbc.DataSourceProperties.determineDriverClassName(DataSourceProperties.java:175)
+	at org.springframework.boot.autoconfigure.jdbc.PropertiesJdbcConnectionDetails.getDriverClassName(PropertiesJdbcConnectionDetails.java:49)
+	at org.springframework.boot.autoconfigure.jdbc.DataSourceConfiguration.createDataSource(DataSourceConfiguration.java:55)
+	at org.springframework.boot.autoconfigure.jdbc.DataSourceConfiguration$Hikari.dataSource(DataSourceConfiguration.java:117)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:140)
+	... 41 common frames omitted
+2025-12-09 19:47:43 [main] INFO  c.coopreducto.tthh.TthhApplication - Starting TthhApplication v1.0.0 using Java 21.0.9 with PID 9192 (C:\SISTEMA_TTHH_V2\backend-java\target\tthh-backend-1.0.0.jar started by minsfran in C:\SISTEMA_TTHH_V2)
+2025-12-09 19:47:43 [main] DEBUG c.coopreducto.tthh.TthhApplication - Running with Spring Boot v3.2.0, Spring v6.1.1
+2025-12-09 19:47:43 [main] INFO  c.coopreducto.tthh.TthhApplication - The following 1 profile is active: "dev"
+2025-12-09 19:47:45 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-12-09 19:47:45 [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate - Finished Spring Data repository scanning in 120 ms. Found 12 JPA repository interfaces.
+2025-12-09 19:47:46 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat initialized with port 8080 (http)
+2025-12-09 19:47:46 [main] INFO  o.a.catalina.core.StandardService - Starting service [Tomcat]
+2025-12-09 19:47:46 [main] INFO  o.a.catalina.core.StandardEngine - Starting Servlet engine: [Apache Tomcat/10.1.16]
+2025-12-09 19:47:47 [main] INFO  o.a.c.c.C.[.[localhost].[/api] - Initializing Spring embedded WebApplicationContext
+2025-12-09 19:47:47 [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext - Root WebApplicationContext: initialization completed in 2913 ms
+2025-12-09 19:47:47 [main] INFO  o.h.jpa.internal.util.LogHelper - HHH000204: Processing PersistenceUnitInfo [name: default]
+2025-12-09 19:47:47 [main] INFO  org.hibernate.Version - HHH000412: Hibernate ORM core version 6.3.1.Final
+2025-12-09 19:47:47 [main] INFO  o.h.c.i.RegionFactoryInitiator - HHH000026: Second-level cache disabled
+2025-12-09 19:47:47 [main] INFO  o.s.o.j.p.SpringPersistenceUnitInfo - No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-12-09 19:47:47 [main] INFO  com.zaxxer.hikari.HikariDataSource - TthhHikariPool - Starting...
+2025-12-09 19:47:48 [main] INFO  com.zaxxer.hikari.pool.HikariPool - TthhHikariPool - Added connection conn0: url=jdbc:h2:mem:sistema_tthh user=SA
+2025-12-09 19:47:48 [main] INFO  com.zaxxer.hikari.HikariDataSource - TthhHikariPool - Start completed.
+2025-12-09 19:47:48 [main] WARN  org.hibernate.orm.deprecation - HHH90000025: H2Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+2025-12-09 19:47:49 [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator - HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    create table asistencias (
+        id bigint generated by default as identity,
+        createdAt timestamp(6) not null,
+        documentoJustificacion varchar(500),
+        fecha date not null,
+        horaEntrada timestamp(6),
+        horaSalida timestamp(6),
+        justificado boolean,
+        minutosRetraso integer,
+        observaciones TEXT,
+        registradoPor varchar(100),
+        tipo varchar(50) not null,
+        empleado_id bigint not null,
+        primary key (id)
+    )
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    create table auditoria (
+        id bigint generated by default as identity,
+        accion varchar(50) not null,
+        createdAt timestamp(6) not null,
+        detalles TEXT,
+        entidad varchar(100) not null,
+        entidadId bigint,
+        ipAddress varchar(50),
+        userAgent varchar(200),
+        usuario varchar(100) not null,
+        primary key (id)
+    )
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    create table ausencias (
+        id bigint generated by default as identity,
+        aprobadoPor varchar(100),
+        createdAt timestamp(6) not null,
+        createdBy varchar(100),
+        diasSolicitados integer not null,
+        documentoUrl varchar(500),
+        estado varchar(50),
+        fechaAprobacion timestamp(6),
+        fechaFin date not null,
+        fechaInicio date not null,
+        motivo TEXT,
+        observaciones TEXT,
+        tipo varchar(50) not null,
+        empleado_id bigint not null,
+        primary key (id)
+    )
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    create table capacitaciones_internas (
+        id bigint generated by default as identity,
+        categoria varchar(100),
+        createdAt timestamp(6) not null,
+        createdBy varchar(100),
+        cupoDisponible integer,
+        cupoMaximo integer,
+        descripcion TEXT,
+        duracionHoras integer,
+        estado varchar(50),
+        fechaFin date,
+        fechaInicio date not null,
+        instructor varchar(200),
+        materialUrl varchar(500),
+        modalidad varchar(50),
+        nombreCapacitacion varchar(200) not null,
+        objetivos TEXT,
+        requisitos TEXT,
+        ubicacion varchar(200),
+        updatedAt timestamp(6) not null,
+        primary key (id)
+    )
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    create table certificaciones_profesionales (
+        id bigint generated by default as identity,
+        alertaEnviada boolean,
+        createdAt timestamp(6) not null,
+        descripcion TEXT,
+        documentoUrl varchar(500),
+        entidadCertificadora varchar(200) not null,
+        estado varchar(50),
+        fechaObtencion date not null,
+        fechaVencimiento date,
+        nombreCertificacion varchar(200) not null,
+        numeroCertificado varchar(100),
+        updatedAt timestamp(6) not null,
+        vigente boolean,
+        empleado_id bigint not null,
+        primary key (id)
+    )
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    create table comunicados (
+        id bigint generated by default as identity,
+        activo boolean not null,
+        contenido TEXT not null,
+        createdAt timestamp(6) not null,
+        createdBy varchar(100),
+        departamentoDestino varchar(100),
+        fechaExpiracion timestamp(6),
+        fechaPublicacion timestamp(6),
+        imagenUrl varchar(500),
+        prioridad varchar(50),
+        tipo varchar(50),
+        titulo varchar(200) not null,
+        updatedAt timestamp(6) not null,
+        primary key (id)
+    )
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    create table cursos_capacitaciones (
+        id bigint generated by default as identity,
+        aprobado boolean,
+        categoria varchar(100),
+        certificadoUrl varchar(500),
+        createdAt timestamp(6) not null,
+        descripcion TEXT,
+        duracionHoras integer,
+        estado varchar(50),
+        fechaFinalizacion date,
+        fechaInicio date,
+        institucion varchar(200) not null,
+        modalidad varchar(50),
+        nombreCurso varchar(200) not null,
+        nota numeric(5,2),
+        observaciones TEXT,
+        updatedAt timestamp(6) not null,
+        empleado_id bigint not null,
+        primary key (id)
+    )
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    create table documentos (
+        id bigint generated by default as identity,
+        alertaEnviada boolean,
+        aprobadoPor varchar(100),
+        categoria varchar(100) not null,
+        comentarioAprobacion varchar(500),
+        createdAt timestamp(6) not null,
+        descripcion varchar(500),
+        diasAlertaVencimiento integer,
+        documentoPadreId bigint,
+        entidadEmisora varchar(100),
+        esConfidencial boolean,
+        esObligatorio boolean,
+        estaAprobado boolean,
+        estado varchar(50),
+        extension varchar(50),
+        fechaAprobacion timestamp(6),
+        fechaEmision date,
+        fechaVencimiento date,
+        mimeType varchar(20),
+        nombre varchar(200) not null,
+        nombreArchivo varchar(100) not null,
+        numeroDocumento varchar(100),
+        observaciones varchar(500),
+        requiereAprobacion boolean,
+        rutaArchivo varchar(500) not null,
+        tamanioBytes bigint,
+        tipo varchar(100),
+        updatedAt timestamp(6) not null,
+        uploadedBy varchar(100),
+        version integer,
+        empleado_id bigint not null,
+        primary key (id)
+    )
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    create table empleados (
+        id bigint generated by default as identity,
+        alergias varchar(500),
+        apellidos varchar(100) not null,
+        area varchar(100),
+        bancoCuentaNumero varchar(50),
+        bancoCuentaTipo varchar(50),
+        bancoNombre varchar(100),
+        calificacionDesempeño numeric(3,2),
+        cargo varchar(100),
+        celular varchar(20),
+        ciudad varchar(100),
+        condicionesMedicas varchar(500),
+        contactoEmergenciaNombre varchar(100),
+        contactoEmergenciaRelacion varchar(50),
+        contactoEmergenciaTelefono varchar(20),
+        createdAt timestamp(6) not null,
+        createdBy varchar(100),
+        departamento varchar(100),
+        diasVacacionesAnuales integer,
+        diasVacacionesDisponibles integer,
+        diasVacacionesUsados integer,
+        direccion varchar(200),
+        email varchar(100),
+        estado varchar(50),
+        estadoCivil varchar(20),
+        fechaEgreso date,
+        fechaFinContrato date,
+        fechaIngreso date not null,
+        fechaNacimiento date not null,
+        fechaUltimaEvaluacion date,
+        fechaUltimoExamenMedico date,
+        fotoUrl varchar(500),
+        genero varchar(20),
+        horasSemanales integer,
+        institucionEducativa varchar(200),
+        jefeInmediato varchar(100),
+        jornadaLaboral varchar(50),
+        moneda varchar(50),
+        montoBonificacion numeric(10,2),
+        montoDescuentos numeric(10,2),
+        motivoBaja varchar(500),
+        nacionalidad varchar(20),
+        nivelEducativo varchar(100),
+        nombres varchar(100) not null,
+        numeroAfp varchar(50),
+        numeroDocumento varchar(20) not null,
+        numeroIps varchar(50),
+        numeroSeguroMedico varchar(50),
+        numeroSocio varchar(20),
+        observaciones varchar(1000),
+        observacionesDesempeño varchar(500),
+        profesion varchar(200),
+        salario numeric(10,2),
+        seguroMedicoPlan varchar(100),
+        sucursal varchar(100),
+        telefono varchar(20),
+        tieneBonificacion boolean,
+        tieneDescuentos boolean,
+        tipoContrato varchar(50),
+        tipoDocumento varchar(20),
+        tipoPago varchar(50),
+        tipoSangre varchar(10),
+        tituloObtenido varchar(200),
+        updatedAt timestamp(6) not null,
+        updatedBy varchar(100),
+        primary key (id)
+    )
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    create table formacion_academica (
+        id bigint generated by default as identity,
+        createdAt timestamp(6) not null,
+        documentoUrl varchar(500),
+        enCurso boolean,
+        especialidad varchar(100),
+        estado varchar(50),
+        fechaFinalizacion date,
+        fechaInicio date,
+        fechaVerificacion timestamp(6),
+        institucion varchar(200) not null,
+        nivel varchar(50) not null,
+        observaciones TEXT,
+        titulo varchar(200),
+        updatedAt timestamp(6) not null,
+        verificadoPor varchar(100),
+        empleado_id bigint not null,
+        primary key (id)
+    )
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    create table habilidades (
+        id bigint generated by default as identity,
+        aniosExperiencia integer,
+        categoria varchar(100),
+        certificada boolean,
+        createdAt timestamp(6) not null,
+        descripcion TEXT,
+        documentoUrl varchar(500),
+        nivel integer not null,
+        nombreHabilidad varchar(100) not null,
+        tipo varchar(50) not null,
+        updatedAt timestamp(6) not null,
+        empleado_id bigint not null,
+        primary key (id)
+    )
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    create table idiomas (
+        id bigint generated by default as identity,
+        certificacion varchar(100),
+        createdAt timestamp(6) not null,
+        documentoUrl varchar(500),
+        idioma varchar(50) not null,
+        nativo boolean,
+        nivelCEFR varchar(10) not null,
+        observaciones TEXT,
+        updatedAt timestamp(6) not null,
+        empleado_id bigint not null,
+        primary key (id)
+    )
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    create table inscripciones_capacitacion (
+        id bigint generated by default as identity,
+        aprobado boolean,
+        asistio boolean,
+        calificacion numeric(5,2),
+        certificadoUrl varchar(500),
+        comentarios TEXT,
+        createdAt timestamp(6) not null,
+        estado varchar(50),
+        evaluacion TEXT,
+        updatedAt timestamp(6) not null,
+        capacitacion_id bigint not null,
+        empleado_id bigint not null,
+        primary key (id)
+    )
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    create table movimientos_empleado (
+        id bigint generated by default as identity,
+        areaAnterior varchar(100),
+        areaNueva varchar(100),
+        autorizadoPor varchar(100),
+        cargoAnterior varchar(100),
+        cargoNuevo varchar(100),
+        createdAt timestamp(6) not null,
+        createdBy varchar(100),
+        documentoUrl varchar(500),
+        fechaEfectiva date not null,
+        motivo TEXT,
+        observaciones TEXT,
+        salarioAnterior numeric(10,2),
+        salarioNuevo numeric(10,2),
+        tipoMovimiento varchar(50) not null,
+        empleado_id bigint not null,
+        primary key (id)
+    )
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    create table plan_desarrollo (
+        id bigint generated by default as identity,
+        anio integer not null,
+        comentariosSupervisor TEXT,
+        createdAt timestamp(6) not null,
+        cursosRecomendados TEXT,
+        estado varchar(50),
+        fechaInicio date,
+        fechaObjetivo date,
+        gapsDetectados TEXT,
+        objetivos TEXT,
+        progreso integer,
+        supervisorId varchar(100),
+        updatedAt timestamp(6) not null,
+        empleado_id bigint not null,
+        primary key (id)
+    )
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    create table recibos_salario (
+        id bigint generated by default as identity,
+        anio integer not null,
+        bonificaciones numeric(10,2),
+        createdAt timestamp(6) not null,
+        createdBy varchar(100),
+        descuentosIps numeric(10,2),
+        descuentosJubilacion numeric(10,2),
+        estado varchar(50),
+        fechaPago date not null,
+        mes integer not null,
+        observaciones TEXT,
+        otrosDescuentos numeric(10,2),
+        pdfUrl varchar(500),
+        salarioBruto numeric(10,2) not null,
+        salarioNeto numeric(10,2) not null,
+        updatedAt timestamp(6) not null,
+        empleado_id bigint not null,
+        primary key (id)
+    )
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    create table solicitudes (
+        id bigint generated by default as identity,
+        aprobadoPor varchar(100),
+        createdAt timestamp(6) not null,
+        createdBy varchar(100),
+        datosAdicionales TEXT,
+        descripcion TEXT,
+        documentoUrl varchar(500),
+        estado varchar(50),
+        fechaAprobacion timestamp(6),
+        prioridad varchar(50),
+        respuesta TEXT,
+        tipo varchar(50) not null,
+        titulo varchar(200) not null,
+        updatedAt timestamp(6) not null,
+        empleado_id bigint not null,
+        primary key (id)
+    )
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    alter table if exists empleados 
+       drop constraint if exists UK_6fdpo2x5rmegfbngre7xb3yoh
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    alter table if exists empleados 
+       add constraint UK_6fdpo2x5rmegfbngre7xb3yoh unique (email)
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    alter table if exists empleados 
+       drop constraint if exists UK_arj63itkohwgtinhaov7jc1k0
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    alter table if exists empleados 
+       add constraint UK_arj63itkohwgtinhaov7jc1k0 unique (numeroDocumento)
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    alter table if exists empleados 
+       drop constraint if exists UK_kjwloy1dagv606xroox6t72nx
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    alter table if exists empleados 
+       add constraint UK_kjwloy1dagv606xroox6t72nx unique (numeroSocio)
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    alter table if exists asistencias 
+       add constraint FKcns2wtk86y2j4xsigqywt6cpc 
+       foreign key (empleado_id) 
+       references empleados
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    alter table if exists ausencias 
+       add constraint FKepudy4eqrql4ymyjg5d6mgxfr 
+       foreign key (empleado_id) 
+       references empleados
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    alter table if exists certificaciones_profesionales 
+       add constraint FKejuoejiu9txalvep0wlo1nfj8 
+       foreign key (empleado_id) 
+       references empleados
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    alter table if exists cursos_capacitaciones 
+       add constraint FKkpq7fhxqvmhwul6mehqpr8x8 
+       foreign key (empleado_id) 
+       references empleados
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    alter table if exists documentos 
+       add constraint FK14ilbs28iuojh1r8gh22bu8fk 
+       foreign key (empleado_id) 
+       references empleados
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    alter table if exists formacion_academica 
+       add constraint FKkil0v44jangyeeekbve1bhnfn 
+       foreign key (empleado_id) 
+       references empleados
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    alter table if exists habilidades 
+       add constraint FKeld25regiyvc0yeoh6i7clfsk 
+       foreign key (empleado_id) 
+       references empleados
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    alter table if exists idiomas 
+       add constraint FK2dap4c3w33sb2ojd6f8bgb4p7 
+       foreign key (empleado_id) 
+       references empleados
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    alter table if exists inscripciones_capacitacion 
+       add constraint FKg52709nx5me178gl4de3sfrwo 
+       foreign key (capacitacion_id) 
+       references capacitaciones_internas
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    alter table if exists inscripciones_capacitacion 
+       add constraint FKop2i37mpwjqoncnm0efoahx1n 
+       foreign key (empleado_id) 
+       references empleados
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    alter table if exists movimientos_empleado 
+       add constraint FK84tmpvbxojtcf7p6sap3bh4hx 
+       foreign key (empleado_id) 
+       references empleados
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    alter table if exists plan_desarrollo 
+       add constraint FKj69qrxiv3h2tgg3mrvlocjasg 
+       foreign key (empleado_id) 
+       references empleados
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    alter table if exists recibos_salario 
+       add constraint FKgyqmt2rc5t1p9jtogih8v7nkk 
+       foreign key (empleado_id) 
+       references empleados
+2025-12-09 19:47:49 [main] DEBUG org.hibernate.SQL - 
+    alter table if exists solicitudes 
+       add constraint FK94ryunb4ulpfm5yo6idhr6k2 
+       foreign key (empleado_id) 
+       references empleados
+2025-12-09 19:47:49 [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean - Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-12-09 19:47:50 [main] INFO  o.s.d.j.r.query.QueryEnhancerFactory - Hibernate is in classpath; If applicable, HQL parser will be used.
+2025-12-09 19:47:52 [main] INFO  c.c.t.s.impl.FileStorageServiceImpl - Directorio de almacenamiento creado/verificado: C:\SISTEMA_TTHH_V2\uploads
+2025-12-09 19:47:53 [main] WARN  o.s.b.a.o.j.JpaBaseConfiguration$JpaWebConfiguration - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2025-12-09 19:47:53 [main] INFO  o.s.s.web.DefaultSecurityFilterChain - Will secure any request with [org.springframework.security.web.session.DisableEncodeUrlFilter@3b01dbbc, org.springframework.security.web.context.request.async.WebAsyncManagerIntegrationFilter@63049f07, org.springframework.security.web.context.SecurityContextHolderFilter@43567fca, org.springframework.security.web.header.HeaderWriterFilter@7df8898a, org.springframework.web.filter.CorsFilter@54d6c1e6, org.springframework.security.web.authentication.logout.LogoutFilter@6366056e, org.springframework.security.web.savedrequest.RequestCacheAwareFilter@1eca6f5c, org.springframework.security.web.servletapi.SecurityContextHolderAwareRequestFilter@2e5fcec6, org.springframework.security.web.authentication.AnonymousAuthenticationFilter@3c91189, org.springframework.security.web.session.SessionManagementFilter@8a6eeb8, org.springframework.security.web.access.ExceptionTranslationFilter@42f16e74, org.springframework.security.web.access.intercept.AuthorizationFilter@735887b6]
+2025-12-09 19:47:55 [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer - Tomcat started on port 8080 (http) with context path '/api'
+2025-12-09 19:47:55 [main] INFO  c.coopreducto.tthh.TthhApplication - Started TthhApplication in 12.286 seconds (process running for 13.157)
+2025-12-09 19:47:55 [main] DEBUG org.hibernate.SQL - 
+    /* <criteria> */ select
+        e1_0.id,
+        e1_0.alergias,
+        e1_0.apellidos,
+        e1_0.area,
+        e1_0.bancoCuentaNumero,
+        e1_0.bancoCuentaTipo,
+        e1_0.bancoNombre,
+        e1_0.calificacionDesempeño,
+        e1_0.cargo,
+        e1_0.celular,
+        e1_0.ciudad,
+        e1_0.condicionesMedicas,
+        e1_0.contactoEmergenciaNombre,
+        e1_0.contactoEmergenciaRelacion,
+        e1_0.contactoEmergenciaTelefono,
+        e1_0.createdAt,
+        e1_0.createdBy,
+        e1_0.departamento,
+        e1_0.diasVacacionesAnuales,
+        e1_0.diasVacacionesDisponibles,
+        e1_0.diasVacacionesUsados,
+        e1_0.direccion,
+        e1_0.email,
+        e1_0.estado,
+        e1_0.estadoCivil,
+        e1_0.fechaEgreso,
+        e1_0.fechaFinContrato,
+        e1_0.fechaIngreso,
+        e1_0.fechaNacimiento,
+        e1_0.fechaUltimaEvaluacion,
+        e1_0.fechaUltimoExamenMedico,
+        e1_0.fotoUrl,
+        e1_0.genero,
+        e1_0.horasSemanales,
+        e1_0.institucionEducativa,
+        e1_0.jefeInmediato,
+        e1_0.jornadaLaboral,
+        e1_0.moneda,
+        e1_0.montoBonificacion,
+        e1_0.montoDescuentos,
+        e1_0.motivoBaja,
+        e1_0.nacionalidad,
+        e1_0.nivelEducativo,
+        e1_0.nombres,
+        e1_0.numeroAfp,
+        e1_0.numeroDocumento,
+        e1_0.numeroIps,
+        e1_0.numeroSeguroMedico,
+        e1_0.numeroSocio,
+        e1_0.observaciones,
+        e1_0.observacionesDesempeño,
+        e1_0.profesion,
+        e1_0.salario,
+        e1_0.seguroMedicoPlan,
+        e1_0.sucursal,
+        e1_0.telefono,
+        e1_0.tieneBonificacion,
+        e1_0.tieneDescuentos,
+        e1_0.tipoContrato,
+        e1_0.tipoDocumento,
+        e1_0.tipoPago,
+        e1_0.tipoSangre,
+        e1_0.tituloObtenido,
+        e1_0.updatedAt,
+        e1_0.updatedBy 
+    from
+        empleados e1_0
+2025-12-09 19:47:56 [main] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.coopreducto.tthh.entity.Empleado */insert 
+    into
+        empleados (alergias, apellidos, area, bancoCuentaNumero, bancoCuentaTipo, bancoNombre, calificacionDesempeño, cargo, celular, ciudad, condicionesMedicas, contactoEmergenciaNombre, contactoEmergenciaRelacion, contactoEmergenciaTelefono, createdAt, createdBy, departamento, diasVacacionesAnuales, diasVacacionesDisponibles, diasVacacionesUsados, direccion, email, estado, estadoCivil, fechaEgreso, fechaFinContrato, fechaIngreso, fechaNacimiento, fechaUltimaEvaluacion, fechaUltimoExamenMedico, fotoUrl, genero, horasSemanales, institucionEducativa, jefeInmediato, jornadaLaboral, moneda, montoBonificacion, montoDescuentos, motivoBaja, nacionalidad, nivelEducativo, nombres, numeroAfp, numeroDocumento, numeroIps, numeroSeguroMedico, numeroSocio, observaciones, observacionesDesempeño, profesion, salario, seguroMedicoPlan, sucursal, telefono, tieneBonificacion, tieneDescuentos, tipoContrato, tipoDocumento, tipoPago, tipoSangre, tituloObtenido, updatedAt, updatedBy, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2025-12-09 19:47:56 [main] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.coopreducto.tthh.entity.Empleado */insert 
+    into
+        empleados (alergias, apellidos, area, bancoCuentaNumero, bancoCuentaTipo, bancoNombre, calificacionDesempeño, cargo, celular, ciudad, condicionesMedicas, contactoEmergenciaNombre, contactoEmergenciaRelacion, contactoEmergenciaTelefono, createdAt, createdBy, departamento, diasVacacionesAnuales, diasVacacionesDisponibles, diasVacacionesUsados, direccion, email, estado, estadoCivil, fechaEgreso, fechaFinContrato, fechaIngreso, fechaNacimiento, fechaUltimaEvaluacion, fechaUltimoExamenMedico, fotoUrl, genero, horasSemanales, institucionEducativa, jefeInmediato, jornadaLaboral, moneda, montoBonificacion, montoDescuentos, motivoBaja, nacionalidad, nivelEducativo, nombres, numeroAfp, numeroDocumento, numeroIps, numeroSeguroMedico, numeroSocio, observaciones, observacionesDesempeño, profesion, salario, seguroMedicoPlan, sucursal, telefono, tieneBonificacion, tieneDescuentos, tipoContrato, tipoDocumento, tipoPago, tipoSangre, tituloObtenido, updatedAt, updatedBy, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2025-12-09 19:47:56 [main] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.coopreducto.tthh.entity.ReciboSalario */insert 
+    into
+        recibos_salario (anio, bonificaciones, createdAt, createdBy, descuentosIps, descuentosJubilacion, empleado_id, estado, fechaPago, mes, observaciones, otrosDescuentos, pdfUrl, salarioBruto, salarioNeto, updatedAt, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2025-12-09 19:47:56 [main] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.coopreducto.tthh.entity.ReciboSalario */insert 
+    into
+        recibos_salario (anio, bonificaciones, createdAt, createdBy, descuentosIps, descuentosJubilacion, empleado_id, estado, fechaPago, mes, observaciones, otrosDescuentos, pdfUrl, salarioBruto, salarioNeto, updatedAt, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2025-12-09 19:47:56 [main] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.coopreducto.tthh.entity.ReciboSalario */insert 
+    into
+        recibos_salario (anio, bonificaciones, createdAt, createdBy, descuentosIps, descuentosJubilacion, empleado_id, estado, fechaPago, mes, observaciones, otrosDescuentos, pdfUrl, salarioBruto, salarioNeto, updatedAt, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2025-12-09 19:47:56 [main] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.coopreducto.tthh.entity.ReciboSalario */insert 
+    into
+        recibos_salario (anio, bonificaciones, createdAt, createdBy, descuentosIps, descuentosJubilacion, empleado_id, estado, fechaPago, mes, observaciones, otrosDescuentos, pdfUrl, salarioBruto, salarioNeto, updatedAt, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2025-12-09 19:47:56 [main] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.coopreducto.tthh.entity.ReciboSalario */insert 
+    into
+        recibos_salario (anio, bonificaciones, createdAt, createdBy, descuentosIps, descuentosJubilacion, empleado_id, estado, fechaPago, mes, observaciones, otrosDescuentos, pdfUrl, salarioBruto, salarioNeto, updatedAt, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2025-12-09 19:47:56 [main] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.coopreducto.tthh.entity.ReciboSalario */insert 
+    into
+        recibos_salario (anio, bonificaciones, createdAt, createdBy, descuentosIps, descuentosJubilacion, empleado_id, estado, fechaPago, mes, observaciones, otrosDescuentos, pdfUrl, salarioBruto, salarioNeto, updatedAt, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2025-12-09 19:47:56 [main] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.coopreducto.tthh.entity.Solicitud */insert 
+    into
+        solicitudes (aprobadoPor, createdAt, createdBy, datosAdicionales, descripcion, documentoUrl, empleado_id, estado, fechaAprobacion, prioridad, respuesta, tipo, titulo, updatedAt, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2025-12-09 19:47:56 [main] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.coopreducto.tthh.entity.Solicitud */insert 
+    into
+        solicitudes (aprobadoPor, createdAt, createdBy, datosAdicionales, descripcion, documentoUrl, empleado_id, estado, fechaAprobacion, prioridad, respuesta, tipo, titulo, updatedAt, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2025-12-09 19:47:56 [main] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.coopreducto.tthh.entity.Solicitud */insert 
+    into
+        solicitudes (aprobadoPor, createdAt, createdBy, datosAdicionales, descripcion, documentoUrl, empleado_id, estado, fechaAprobacion, prioridad, respuesta, tipo, titulo, updatedAt, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2025-12-09 19:47:56 [main] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.coopreducto.tthh.entity.Solicitud */insert 
+    into
+        solicitudes (aprobadoPor, createdAt, createdBy, datosAdicionales, descripcion, documentoUrl, empleado_id, estado, fechaAprobacion, prioridad, respuesta, tipo, titulo, updatedAt, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2025-12-09 19:47:56 [main] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.coopreducto.tthh.entity.Ausencia */insert 
+    into
+        ausencias (aprobadoPor, createdAt, createdBy, diasSolicitados, documentoUrl, empleado_id, estado, fechaAprobacion, fechaFin, fechaInicio, motivo, observaciones, tipo, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2025-12-09 19:47:56 [main] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.coopreducto.tthh.entity.Ausencia */insert 
+    into
+        ausencias (aprobadoPor, createdAt, createdBy, diasSolicitados, documentoUrl, empleado_id, estado, fechaAprobacion, fechaFin, fechaInicio, motivo, observaciones, tipo, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2025-12-09 19:47:56 [main] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.coopreducto.tthh.entity.Ausencia */insert 
+    into
+        ausencias (aprobadoPor, createdAt, createdBy, diasSolicitados, documentoUrl, empleado_id, estado, fechaAprobacion, fechaFin, fechaInicio, motivo, observaciones, tipo, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2025-12-09 19:47:56 [main] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.coopreducto.tthh.entity.Ausencia */insert 
+    into
+        ausencias (aprobadoPor, createdAt, createdBy, diasSolicitados, documentoUrl, empleado_id, estado, fechaAprobacion, fechaFin, fechaInicio, motivo, observaciones, tipo, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2025-12-09 19:47:56 [main] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.coopreducto.tthh.entity.Documento */insert 
+    into
+        documentos (alertaEnviada, aprobadoPor, categoria, comentarioAprobacion, createdAt, descripcion, diasAlertaVencimiento, documentoPadreId, empleado_id, entidadEmisora, esConfidencial, esObligatorio, estaAprobado, estado, extension, fechaAprobacion, fechaEmision, fechaVencimiento, mimeType, nombre, nombreArchivo, numeroDocumento, observaciones, requiereAprobacion, rutaArchivo, tamanioBytes, tipo, updatedAt, uploadedBy, version, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2025-12-09 19:47:56 [main] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.coopreducto.tthh.entity.Documento */insert 
+    into
+        documentos (alertaEnviada, aprobadoPor, categoria, comentarioAprobacion, createdAt, descripcion, diasAlertaVencimiento, documentoPadreId, empleado_id, entidadEmisora, esConfidencial, esObligatorio, estaAprobado, estado, extension, fechaAprobacion, fechaEmision, fechaVencimiento, mimeType, nombre, nombreArchivo, numeroDocumento, observaciones, requiereAprobacion, rutaArchivo, tamanioBytes, tipo, updatedAt, uploadedBy, version, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2025-12-09 19:47:56 [main] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.coopreducto.tthh.entity.Documento */insert 
+    into
+        documentos (alertaEnviada, aprobadoPor, categoria, comentarioAprobacion, createdAt, descripcion, diasAlertaVencimiento, documentoPadreId, empleado_id, entidadEmisora, esConfidencial, esObligatorio, estaAprobado, estado, extension, fechaAprobacion, fechaEmision, fechaVencimiento, mimeType, nombre, nombreArchivo, numeroDocumento, observaciones, requiereAprobacion, rutaArchivo, tamanioBytes, tipo, updatedAt, uploadedBy, version, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2025-12-09 19:47:56 [main] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.coopreducto.tthh.entity.Documento */insert 
+    into
+        documentos (alertaEnviada, aprobadoPor, categoria, comentarioAprobacion, createdAt, descripcion, diasAlertaVencimiento, documentoPadreId, empleado_id, entidadEmisora, esConfidencial, esObligatorio, estaAprobado, estado, extension, fechaAprobacion, fechaEmision, fechaVencimiento, mimeType, nombre, nombreArchivo, numeroDocumento, observaciones, requiereAprobacion, rutaArchivo, tamanioBytes, tipo, updatedAt, uploadedBy, version, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2025-12-09 19:47:56 [main] DEBUG org.hibernate.SQL - 
+    /* insert for
+        com.coopreducto.tthh.entity.Documento */insert 
+    into
+        documentos (alertaEnviada, aprobadoPor, categoria, comentarioAprobacion, createdAt, descripcion, diasAlertaVencimiento, documentoPadreId, empleado_id, entidadEmisora, esConfidencial, esObligatorio, estaAprobado, estado, extension, fechaAprobacion, fechaEmision, fechaVencimiento, mimeType, nombre, nombreArchivo, numeroDocumento, observaciones, requiereAprobacion, rutaArchivo, tamanioBytes, tipo, updatedAt, uploadedBy, version, id) 
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, default)
+2025-12-09 19:47:56 [http-nio-8080-exec-1] INFO  o.a.c.c.C.[.[localhost].[/api] - Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-12-09 19:47:56 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Initializing Servlet 'dispatcherServlet'
+2025-12-09 19:47:56 [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet - Completed initialization in 5 ms
+2025-12-09 19:47:56 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - 
+    /* <criteria> */ select
+        count(e1_0.id) 
+    from
+        empleados e1_0 
+    where
+        e1_0.estado=?
+2025-12-09 19:47:56 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - 
+    /* <criteria> */ select
+        count(e1_0.id) 
+    from
+        empleados e1_0 
+    where
+        e1_0.estado=?
+2025-12-09 19:47:56 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - 
+    /* <criteria> */ select
+        count(s1_0.id) 
+    from
+        solicitudes s1_0 
+    where
+        s1_0.estado=?
+2025-12-09 19:47:57 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - 
+    /* SELECT
+        c 
+    FROM
+        CertificacionProfesional c 
+    WHERE
+        c.fechaVencimiento IS NOT NULL 
+        AND c.fechaVencimiento BETWEEN :fechaInicio AND :fechaFin 
+        AND c.alertaEnviada = false */ select
+            cp1_0.id,
+            cp1_0.alertaEnviada,
+            cp1_0.createdAt,
+            cp1_0.descripcion,
+            cp1_0.documentoUrl,
+            cp1_0.empleado_id,
+            cp1_0.entidadCertificadora,
+            cp1_0.estado,
+            cp1_0.fechaObtencion,
+            cp1_0.fechaVencimiento,
+            cp1_0.nombreCertificacion,
+            cp1_0.numeroCertificado,
+            cp1_0.updatedAt,
+            cp1_0.vigente 
+        from
+            certificaciones_profesionales cp1_0 
+        where
+            cp1_0.fechaVencimiento is not null 
+            and cp1_0.fechaVencimiento between ? and ? 
+            and cp1_0.alertaEnviada=false
+2025-12-09 19:47:57 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - 
+    /* SELECT
+        e.sucursal,
+        COUNT(e) 
+    FROM
+        Empleado e 
+    WHERE
+        e.estado = 'ACTIVO' 
+    GROUP BY
+        e.sucursal */ select
+            e1_0.sucursal,
+            count(e1_0.id) 
+        from
+            empleados e1_0 
+        where
+            e1_0.estado='ACTIVO' 
+        group by
+            e1_0.sucursal
+2025-12-09 19:47:57 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - 
+    /* <criteria> */ select
+        count(s1_0.id) 
+    from
+        solicitudes s1_0 
+    where
+        s1_0.estado=?
+2025-12-09 19:47:57 [http-nio-8080-exec-1] DEBUG org.hibernate.SQL - 
+    /* <criteria> */ select
+        count(s1_0.id) 
+    from
+        solicitudes s1_0 
+    where
+        s1_0.estado=?
+2025-12-09 19:48:05 [http-nio-8080-exec-2] INFO  c.c.t.controller.EmpleadoController - GET /empleados - Listando con paginación
+2025-12-09 19:48:05 [http-nio-8080-exec-2] DEBUG c.c.t.s.impl.EmpleadoServiceImpl - Listando todos los empleados con paginación
+2025-12-09 19:48:05 [http-nio-8080-exec-2] DEBUG org.hibernate.SQL - 
+    /* <criteria> */ select
+        e1_0.id,
+        e1_0.alergias,
+        e1_0.apellidos,
+        e1_0.area,
+        e1_0.bancoCuentaNumero,
+        e1_0.bancoCuentaTipo,
+        e1_0.bancoNombre,
+        e1_0.calificacionDesempeño,
+        e1_0.cargo,
+        e1_0.celular,
+        e1_0.ciudad,
+        e1_0.condicionesMedicas,
+        e1_0.contactoEmergenciaNombre,
+        e1_0.contactoEmergenciaRelacion,
+        e1_0.contactoEmergenciaTelefono,
+        e1_0.createdAt,
+        e1_0.createdBy,
+        e1_0.departamento,
+        e1_0.diasVacacionesAnuales,
+        e1_0.diasVacacionesDisponibles,
+        e1_0.diasVacacionesUsados,
+        e1_0.direccion,
+        e1_0.email,
+        e1_0.estado,
+        e1_0.estadoCivil,
+        e1_0.fechaEgreso,
+        e1_0.fechaFinContrato,
+        e1_0.fechaIngreso,
+        e1_0.fechaNacimiento,
+        e1_0.fechaUltimaEvaluacion,
+        e1_0.fechaUltimoExamenMedico,
+        e1_0.fotoUrl,
+        e1_0.genero,
+        e1_0.horasSemanales,
+        e1_0.institucionEducativa,
+        e1_0.jefeInmediato,
+        e1_0.jornadaLaboral,
+        e1_0.moneda,
+        e1_0.montoBonificacion,
+        e1_0.montoDescuentos,
+        e1_0.motivoBaja,
+        e1_0.nacionalidad,
+        e1_0.nivelEducativo,
+        e1_0.nombres,
+        e1_0.numeroAfp,
+        e1_0.numeroDocumento,
+        e1_0.numeroIps,
+        e1_0.numeroSeguroMedico,
+        e1_0.numeroSocio,
+        e1_0.observaciones,
+        e1_0.observacionesDesempeño,
+        e1_0.profesion,
+        e1_0.salario,
+        e1_0.seguroMedicoPlan,
+        e1_0.sucursal,
+        e1_0.telefono,
+        e1_0.tieneBonificacion,
+        e1_0.tieneDescuentos,
+        e1_0.tipoContrato,
+        e1_0.tipoDocumento,
+        e1_0.tipoPago,
+        e1_0.tipoSangre,
+        e1_0.tituloObtenido,
+        e1_0.updatedAt,
+        e1_0.updatedBy 
+    from
+        empleados e1_0 
+    order by
+        e1_0.id desc 
+    offset
+        ? rows 
+    fetch
+        first ? rows only
