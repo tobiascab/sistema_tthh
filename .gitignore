@@ -1,0 +1,7 @@
+﻿jdk-21/
+maven/
+target/
+*.log
+*.tmp
+Thumbs.db
+.DS_Store
