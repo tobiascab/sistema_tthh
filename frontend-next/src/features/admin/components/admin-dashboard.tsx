@@ -275,7 +275,11 @@ export function AdminDashboard() {
                                         outerRadius={100}
                                         paddingAngle={3}
                                         dataKey="value"
+<<<<<<< HEAD
                                         label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+=======
+                                        label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
+>>>>>>> 74ad7805992679a3e73f10d76e25b35fef8fada9
                                         labelLine={false}
                                     >
                                         {departamentosData.map((entry, index) => (
