@@ -56,7 +56,7 @@ export function RecibosView() {
 
     // Extraer sucursales únicas
     const sucursales = useMemo(() => {
-        const s = new Set(empleados.map(e => e.sucursal).filter(Boolean));
+        const s = new Set(empleados.map(e => e.sucursal).filter((s): s is string => !!s));
         return Array.from(s).sort();
     }, [empleados]);
 
