@@ -1,0 +1,39 @@
+# ============================================
+# CONFIGURACIÓN DEV - H2 MEMORY DATABASE
+# ============================================
+
+spring:
+  datasource:
+    # Use H2 in MySQL mode to support the data.sql syntax
+    url: jdbc:h2:mem:sistema_tthh;MODE=MySQL;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE;DATABASE_TO_UPPER=false
+    username: sa
+    password: 
+    driver-class-name: org.h2.Driver
+  
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: true
+    hibernate:
+      ddl-auto: create-drop # Valid for dev to always load fresh data
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+
+# Disable strict naming if needed or match what we have in data.sql
+# Ensuring files are stored locally in dev
+app:
+  file-storage:
+    base-path: "uploads-dev"
+
+logging:
+  level:
+    root: INFO
+    com.coopreducto: DEBUG
+    
+aws:
+  s3:
+     region: us-east-1
+     access-key: dummy
+     secret-key: dummy
+     bucket-name: dummy

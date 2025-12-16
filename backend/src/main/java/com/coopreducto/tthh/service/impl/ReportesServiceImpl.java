@@ -177,11 +177,27 @@ public class ReportesServiceImpl implements ReportesService {
         Exception e) {
             log.error("Error al obtener dashboard admin", e);
             // Retornar un dashboard vacío en lugar de fallar
-            return new DashboardAdminDTO(
-                    0L, 0L, BigDecimal.ZERO, BigDecimal.ZERO, 0L, 0L, 0, 0,
-                    new HashMap<>(), new HashMap<>(), new HashMap<>(), new HashMap<>(),
-                    new ArrayList<>(), new ArrayList<>(),
-                    new ArrayList<>(), new ArrayList<>(), new ArrayList<>());
+            DashboardAdminDTO emptyDashboard = new DashboardAdminDTO();
+            emptyDashboard.setColaboradoresActivos(0L);
+            emptyDashboard.setColaboradoresInactivos(0L);
+            emptyDashboard.setNominaMensualEstimada(BigDecimal.ZERO);
+            emptyDashboard.setNominaMensualPagada(BigDecimal.ZERO);
+            emptyDashboard.setSolicitudesPendientes(0L);
+            emptyDashboard.setCertificacionesPorVencer(0L);
+            emptyDashboard.setHorasFormacionMes(0);
+            emptyDashboard.setHorasFormacionAnio(0);
+            emptyDashboard.setCumpleaniosMesActual(0L);
+            emptyDashboard.setProximosCumpleanios(new ArrayList<>());
+            emptyDashboard.setColaboradoresPorDepartamento(new HashMap<>());
+            emptyDashboard.setColaboradoresPorCargo(new HashMap<>());
+            emptyDashboard.setSolicitudesPorTipo(new HashMap<>());
+            emptyDashboard.setSolicitudesPorEstado(new HashMap<>());
+            emptyDashboard.setNominaUltimos6Meses(new ArrayList<>());
+            emptyDashboard.setAusenciasUltimos6Meses(new ArrayList<>());
+            emptyDashboard.setAlertas(new ArrayList<>());
+            emptyDashboard.setTopHabilidades(new ArrayList<>());
+            emptyDashboard.setUltimasSolicitudes(new ArrayList<>());
+            return emptyDashboard;
         }
     }
 

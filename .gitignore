@@ -1,20 +1,5 @@
-﻿jdk-21/
-<<<<<<< HEAD
-jdk-21.zip
-jdk-*.zip
-jdk-*/
-*.zip
+﻿jdk-*/
 maven/
-target/
-*.log
-*.tmp
-Thumbs.db
-.DS_Store
-
- 
- 
-=======
-jdk-*/
 *.zip
 *.7z
 *.rar
@@ -27,8 +12,6 @@ target/
 .DS_Store
 Thumbs.db
 .idea/
-.vscode/
 dist/
 build/
 out/
->>>>>>> 74ad7805992679a3e73f10d76e25b35fef8fada9

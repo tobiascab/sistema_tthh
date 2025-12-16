@@ -1,0 +1,49 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Full Stack System",
+            "type": "node",
+            "request": "launch"
+        },
+        {
+            "type": "java",
+            "name": "Backend (Spring Boot)",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/backend",
+            "mainClass": "com.coopreducto.tthh.TthhApplication",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env",
+            "vmArgs": "-Dspring.profiles.active=dev -Dspring.jmx.enabled=false"
+        },
+        {
+            "name": "Frontend (Next.js)",
+            "type": "node",
+            "request": "launch",
+            "cwd": "${workspaceFolder}/frontend",
+            "runtimeExecutable": "npm",
+            "runtimeArgs": [
+                "run",
+                "dev"
+            ],
+            "console": "integratedTerminal",
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+            "serverReadyAction": {
+                "pattern": "started server on .+, url: (https?://.+)",
+                "uriFormat": "%s",
+                "action": "debugWithChrome"
+            }
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Backend + Frontend",
+            "configurations": [
+                "Backend (Spring Boot)",
+                "Frontend (Next.js)"
+            ]
+        }
+    ]
+}

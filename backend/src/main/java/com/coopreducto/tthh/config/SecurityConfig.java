@@ -61,6 +61,30 @@ public class SecurityConfig {
     }
 
     @Bean
+    public org.springframework.security.oauth2.jwt.JwtDecoder jwtDecoder() {
+        // Fallback for development: create a decoder that doesn't actually validate
+        // against a real text
+        // or attempts to use the configured issuer but doesn't crash effectively if
+        // configured wrong (boot handles that).
+        // The error is that NO BEAN was found.
+        // We will create a NimbusJwtDecoder that strictly follows the JWK Set URI if
+        // available,
+        // BUT if we want to run without Keycloak, we can return a "dummy" decoder or
+        // one that uses a local secret.
+        // For simplicity and to satisfy the startup, we'll try to use the JWK Set URI
+        // properties.
+        // If they are dummy values, it might fail LATER during request, but should
+        // start.
+        // The previous error was ConditionEvaluationReport - it seems auto-config
+        // backed off?
+        // No, it said "Consider defining a bean".
+        // Let's define one using the property.
+
+        String jwkSetUri = "http://localhost:8081/realms/cooperativa-reducto/protocol/openid-connect/certs";
+        return org.springframework.security.oauth2.jwt.NimbusJwtDecoder.withJwkSetUri(jwkSetUri).build();
+    }
+
+    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(Arrays.asList(allowedOrigins.split(",")));
