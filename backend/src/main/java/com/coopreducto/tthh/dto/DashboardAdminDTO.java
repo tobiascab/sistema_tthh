@@ -23,6 +23,10 @@ public class DashboardAdminDTO {
     private Integer horasFormacionMes;
     private Integer horasFormacionAnio;
 
+    // Cumpleaños del Mes
+    private Long cumpleaniosMesActual;
+    private List<CumpleaniosDTO> proximosCumpleanios;
+
     // Distribución
     private Map<String, Long> colaboradoresPorDepartamento;
     private Map<String, Long> colaboradoresPorCargo;
@@ -42,6 +46,19 @@ public class DashboardAdminDTO {
 
     // Solicitudes recientes
     private List<SolicitudResumenDTO> ultimasSolicitudes;
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class CumpleaniosDTO {
+        private Long empleadoId;
+        private String nombreCompleto;
+        private String cargo;
+        private String sucursal;
+        private Integer dia;
+        private Integer mes;
+        private String fotoUrl;
+    }
 
     @Data
     @NoArgsConstructor

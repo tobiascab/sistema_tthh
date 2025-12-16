@@ -82,6 +82,24 @@ public class ReportesServiceImpl implements ReportesService {
             }
             dashboard.setAlertas(alertas);
 
+            // Cumpleaños del Mes
+            List<com.coopreducto.tthh.entity.Empleado> cumpleanieros = empleadoRepository.findCumpleaniosDelMes();
+            dashboard.setCumpleaniosMesActual((long) cumpleanieros.size());
+
+            List<DashboardAdminDTO.CumpleaniosDTO> proximosCumples = new ArrayList<>();
+            for (com.coopreducto.tthh.entity.Empleado emp : cumpleanieros) {
+                proximosCumples.add(new DashboardAdminDTO.CumpleaniosDTO(
+                        emp.getId(),
+                        emp.getNombres() + " " + emp.getApellidos(),
+                        emp.getCargo(),
+                        emp.getSucursal(),
+                        emp.getFechaNacimiento().getDayOfMonth(),
+                        emp.getFechaNacimiento().getMonthValue(),
+                        null // fotoUrl
+                ));
+            }
+            dashboard.setProximosCumpleanios(proximosCumples);
+
             // Calcular nómina mensual estimada (suma de todos los salarios de empleados
             // activos)
             BigDecimal nominaTotal = empleadoRepository.findAll().stream()

@@ -11,6 +11,16 @@ export interface DashboardAdmin {
     nominaMensualPagada?: number;
     horasFormacionMes?: number;
     horasFormacionAnio?: number;
+    cumpleaniosMesActual?: number;
+    proximosCumpleanios?: Array<{
+        empleadoId: number;
+        nombreCompleto: string;
+        cargo: string;
+        sucursal: string;
+        dia: number;
+        mes: number;
+        fotoUrl?: string;
+    }>;
     colaboradoresPorDepartamento: Record<string, number>;
     colaboradoresPorCargo?: Record<string, number>;
     solicitudesPorEstado: Record<string, number>;

@@ -14,7 +14,12 @@ import {
     UserPlus,
     ArrowUpRight,
     Briefcase,
-    Building2
+    Building2,
+    Cake,
+    Gift,
+    PartyPopper,
+    FileSpreadsheet,
+    Download
 } from "lucide-react";
 import {
     BarChart,
@@ -48,6 +53,7 @@ import {
 } from "@/src/components/ui/table";
 import { Badge } from "@/src/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/src/components/ui/avatar";
+import { ImportCumpleaniosDialog } from "./import-cumpleanios-dialog";
 
 const COLORS = ['#16a34a', '#2563eb', '#dc2626', '#f59e0b', '#8b5cf6', '#06b6d4'];
 
@@ -142,22 +148,13 @@ export function AdminDashboard() {
             change: "Requieren atención"
         },
         {
-            title: "Certificaciones por Vencer",
-            value: dashboardData?.certificacionesPorVencer || 0,
-            icon: Award,
-            color: "red",
-            bgGradient: "from-red-500 to-rose-600",
-            lightBg: "from-red-50 to-rose-50",
-            change: "Próximos 30 días"
-        },
-        {
-            title: "Colaboradores Inactivos",
-            value: dashboardData?.colaboradoresInactivos || 0,
-            icon: Users,
-            color: "purple",
-            bgGradient: "from-purple-500 to-violet-600",
-            lightBg: "from-purple-50 to-violet-50",
-            change: "Bajas/Licencias"
+            title: "Cumpleaños del Mes",
+            value: dashboardData?.cumpleaniosMesActual || 0,
+            icon: Cake,
+            color: "pink",
+            bgGradient: "from-pink-500 to-rose-500",
+            lightBg: "from-pink-50 to-rose-50",
+            change: "¡Celebrar!"
         },
         {
             title: "Nómina Estimada",
@@ -275,11 +272,7 @@ export function AdminDashboard() {
                                         outerRadius={100}
                                         paddingAngle={3}
                                         dataKey="value"
-<<<<<<< HEAD
-                                        label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-=======
                                         label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
->>>>>>> 74ad7805992679a3e73f10d76e25b35fef8fada9
                                         labelLine={false}
                                     >
                                         {departamentosData.map((entry, index) => (
@@ -334,6 +327,59 @@ export function AdminDashboard() {
                     </CardContent>
                 </Card>
             </motion.div>
+
+            {/* Cumpleaños del Mes */}
+            {dashboardData?.proximosCumpleanios && dashboardData.proximosCumpleanios.length > 0 && (
+                <motion.div variants={itemVariants}>
+                    <Card className="shadow-sm border-neutral-200 overflow-hidden bg-gradient-to-br from-pink-50 via-white to-rose-50">
+                        <CardHeader className="border-b border-pink-100 pb-4">
+                            <CardTitle className="text-lg flex items-center gap-2 text-neutral-800">
+                                <div className="p-2 bg-gradient-to-br from-pink-500 to-rose-500 rounded-xl shadow-lg">
+                                    <Cake className="w-5 h-5 text-white" />
+                                </div>
+                                <span>🎂 Cumpleaños del Mes</span>
+                                <Badge className="ml-auto bg-pink-100 text-pink-700 border-pink-200">
+                                    {dashboardData.cumpleaniosMesActual} colaboradores
+                                </Badge>
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                                {dashboardData.proximosCumpleanios.slice(0, 6).map((cumple, index) => (
+                                    <motion.div
+                                        key={cumple.empleadoId}
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ delay: index * 0.1 }}
+                                        className="flex items-center gap-3 p-3 bg-white rounded-xl border border-pink-100 hover:shadow-md hover:border-pink-200 transition-all"
+                                    >
+                                        <Avatar className="h-12 w-12 border-2 border-pink-200 shadow-sm">
+                                            <AvatarFallback className="bg-gradient-to-br from-pink-400 to-rose-500 text-white font-bold">
+                                                {cumple.nombreCompleto.split(' ').slice(0, 2).map(n => n[0]).join('')}
+                                            </AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="font-semibold text-neutral-800 truncate">{cumple.nombreCompleto}</p>
+                                            <p className="text-xs text-neutral-500 truncate">{cumple.cargo}</p>
+                                            <p className="text-xs text-pink-600 font-medium">
+                                                🎈 {cumple.dia} de {['', 'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'][cumple.mes]}
+                                            </p>
+                                        </div>
+                                        <div className="text-2xl">🎁</div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                            {dashboardData.proximosCumpleanios.length > 6 && (
+                                <div className="text-center mt-4">
+                                    <Button variant="outline" size="sm" className="text-pink-600 border-pink-200 hover:bg-pink-50">
+                                        Ver todos ({dashboardData.proximosCumpleanios.length})
+                                    </Button>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </motion.div>
+            )}
 
             {/* Tendencia Nómina Row */}
             <motion.div variants={itemVariants}>
@@ -538,6 +584,37 @@ export function AdminDashboard() {
                                 </motion.button>
                             ))}
                         </div>
+                    </CardContent>
+                </Card>
+            </motion.div>
+
+            {/* Admin Tools */}
+            <motion.div variants={itemVariants}>
+                <Card className="shadow-sm border-neutral-200 bg-gradient-to-br from-pink-50 to-rose-50">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-lg flex items-center gap-2">
+                            <Cake className="w-5 h-5 text-pink-600" />
+                            Herramientas de Cumpleaños
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="flex flex-wrap gap-3">
+                            <ImportCumpleaniosDialog
+                                trigger={
+                                    <Button className="bg-pink-600 hover:bg-pink-700 gap-2">
+                                        <FileSpreadsheet className="w-4 h-4" />
+                                        Importar desde Excel
+                                    </Button>
+                                }
+                            />
+                            <Button variant="outline" className="gap-2 border-pink-200 text-pink-700 hover:bg-pink-50">
+                                <Download className="w-4 h-4" />
+                                Descargar Plantilla
+                            </Button>
+                        </div>
+                        <p className="text-xs text-neutral-500 mt-3">
+                            Sube un Excel con las columnas: Documento, Nombre (opcional), Fecha de Nacimiento
+                        </p>
                     </CardContent>
                 </Card>
             </motion.div>
