@@ -181,7 +181,12 @@ export function SolicitudesList({ empleadoId }: SolicitudesListProps) {
     };
 
     const handleSubmit = async (data: SolicitudFormData) => {
-        await createMutation.mutateAsync(data);
+        // Agregar empleadoId al payload antes de enviar
+        const payload = {
+            ...data,
+            empleadoId,
+        };
+        await createMutation.mutateAsync(payload as any);
     };
 
     const columns = getSolicitudesColumns({
@@ -489,8 +494,8 @@ export function SolicitudesList({ empleadoId }: SolicitudesListProps) {
                     <DataTable
                         columns={columns}
                         data={data?.content || []}
-                        searchKey="empleadoNombre"
-                        searchPlaceholder="Buscar solicitud..."
+                        searchKey={isAdminOrManager ? "empleadoNombre" : "titulo"}
+                        searchPlaceholder={isAdminOrManager ? "Buscar por colaborador..." : "Buscar por asunto..."}
                     />
                 </div>
             </motion.div>

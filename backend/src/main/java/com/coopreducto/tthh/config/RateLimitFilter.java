@@ -13,8 +13,8 @@ import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Component
 @Slf4j
+@Component
 public class RateLimitFilter implements Filter {
 
     private final Map<String, Bucket> cache = new ConcurrentHashMap<>();

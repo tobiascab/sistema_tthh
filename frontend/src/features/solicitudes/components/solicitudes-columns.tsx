@@ -29,6 +29,17 @@ export const getSolicitudesColumns = ({
 }: SolicitudesColumnsProps): ColumnDef<Solicitud>[] => {
     const columns: ColumnDef<Solicitud>[] = [
         {
+            accessorKey: "titulo",
+            header: "Asunto",
+            cell: ({ row }) => {
+                return (
+                    <div className="font-medium text-neutral-900">
+                        {row.getValue("titulo")}
+                    </div>
+                );
+            },
+        },
+        {
             accessorKey: "tipo",
             header: "Tipo Solicitud",
             cell: ({ row }) => {

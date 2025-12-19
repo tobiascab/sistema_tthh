@@ -63,8 +63,8 @@ Sistema integral de gestión de recursos humanos para Cooperativa Reducto, desar
 
 ```
 SISTEMA_TTHH_V2/
-├── frontend-next/              # Next.js 15 + React + TypeScript
-├── backend-java/               # Spring Boot 3 + Java 21
+├── frontend/              # Next.js 15 + React + TypeScript
+├── backend/               # Spring Boot 3 + Java 21
 └── infra/                      # Docker, PostgreSQL, Keycloak
 ```
 
@@ -95,14 +95,14 @@ docker-compose up -d
 
 3. **Configurar Backend**
 ```bash
-cd backend-java
+cd backend
 ./mvnw clean install
 ./mvnw spring-boot:run
 ```
 
 4. **Configurar Frontend**
 ```bash
-cd frontend-next
+cd frontend
 npm install
 npm run dev
 ```
@@ -149,8 +149,8 @@ npm run dev
 - **[FASE_2_COMPLETADA.md](FASE_2_COMPLETADA.md)** - Panel del Colaborador
 
 ### Documentación por Módulo
-- **[frontend-next/README.md](frontend-next/README.md)** - Documentación del frontend
-- **[backend-java/README.md](backend-java/README.md)** - Documentación del backend
+- **[frontend/README.md](frontend/README.md)** - Documentación del frontend
+- **[backend/README.md](backend/README.md)** - Documentación del backend
 - **[infra/README.md](infra/README.md)** - Documentación de infraestructura
 
 ## ✨ Funcionalidades Implementadas

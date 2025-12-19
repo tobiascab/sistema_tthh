@@ -20,7 +20,7 @@ public class SolicitudDTO {
     private String empleadoNombre;
 
     @NotBlank(message = "El tipo de solicitud es requerido")
-    @Pattern(regexp = "VACACIONES|PERMISO|CERTIFICADO|ACTUALIZACION_DATOS", message = "Tipo de solicitud inválido")
+    @Pattern(regexp = "VACACIONES|PERMISO|LICENCIA_MEDICA|CONSTANCIA_LABORAL|AUMENTO_SALARIO|PERMISO_ESTUDIO|CERTIFICADO|ACTUALIZACION_DATOS|OTRO", message = "Tipo de solicitud inválido")
     private String tipo;
 
     @NotBlank(message = "El título es requerido")

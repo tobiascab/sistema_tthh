@@ -13,10 +13,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+@Slf4j
 @Aspect
 @Component
 @RequiredArgsConstructor
-@Slf4j
 public class AuditAspect {
 
     private final AuditoriaService auditoriaService;

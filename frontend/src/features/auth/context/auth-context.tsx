@@ -10,6 +10,7 @@ interface User {
     nombre: string;
     apellido: string;
     roles: string[];
+    empleadoId?: number;
 }
 
 interface AuthContextType {
@@ -73,6 +74,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             nombre: payload.given_name || "",
             apellido: payload.family_name || "",
             roles: payload.realm_access?.roles || [],
+            empleadoId: payload.empleadoId,
         };
     };
 
@@ -87,7 +89,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     setUser(userData);
 
                     // Set cookie for middleware
-                    document.cookie = `access_token=${token}; path=/; max-age=3600; SameSite=Strict`;
+                    document.cookie = `access_token=${token}; path=/; max-age=3600; SameSite=Lax`;
                 } else {
                     // Invalid token
                     localStorage.removeItem("access_token");
@@ -110,20 +112,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE !== 'false';
 
             if (isDevMode) {
-                // Development mode - mock authentication
-                console.warn('🔧 DEV MODE: Using mock authentication');
+                // Development mode - authenticate against backend DB
+                console.warn('🔧 DEV MODE: Authenticating against backend database');
 
-                // Create mock token
-                const mockUser: User = {
-                    id: '1',
-                    username,
-                    email: `${username}@coopreducto.com`,
-                    nombre: username.split('.')[0] || 'Usuario',
-                    apellido: username.split('.')[1] || 'Test',
-                    roles: username.includes('admin') ? ['TTHH'] :
-                        username.includes('gerente') ? ['GERENCIA'] :
-                            username.includes('auditor') ? ['AUDITORIA'] : ['COLABORADOR'],
-                };
+                // Try to fetch user from backend by username
+                const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+                let backendUser: any = null;
+
+                try {
+                    const response = await fetch(`${API_URL}/usuarios/username/${encodeURIComponent(username)}`);
+                    if (response.ok) {
+                        backendUser = await response.json();
+                    }
+                } catch (err) {
+                    console.warn('Could not fetch user from backend:', err);
+                }
+
+                // If user found in DB, use their real data
+                let mockUser: User & { empleadoId?: number };
+
+                if (backendUser) {
+                    console.log('✅ User found in database:', backendUser.username);
+                    mockUser = {
+                        id: String(backendUser.id),
+                        username: backendUser.username,
+                        email: backendUser.email || `${username}@coopreducto.com`,
+                        nombre: backendUser.nombres || username.split('.')[0] || 'Usuario',
+                        apellido: backendUser.apellidos || username.split('.')[1] || 'Test',
+                        roles: backendUser.rolNombre ? [backendUser.rolNombre] : ['COLABORADOR'],
+                        empleadoId: backendUser.empleadoId,
+                    };
+                } else {
+                    // Fallback to simple mock (for admin testing)
+                    console.warn('⚠️ User not found in DB, using mock roles');
+                    mockUser = {
+                        id: '1',
+                        username,
+                        email: `${username}@coopreducto.com`,
+                        nombre: username.split('.')[0] || 'Usuario',
+                        apellido: username.split('.')[1] || 'Test',
+                        roles: username.includes('admin') ? ['TTHH'] :
+                            username.includes('gerente') ? ['GERENCIA'] :
+                                username.includes('auditor') ? ['AUDITORIA'] : ['COLABORADOR'],
+                    };
+                }
 
                 const mockToken = btoa(JSON.stringify({
                     sub: mockUser.id,
@@ -132,15 +164,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     given_name: mockUser.nombre,
                     family_name: mockUser.apellido,
                     realm_access: { roles: mockUser.roles },
+                    empleadoId: mockUser.empleadoId,
                     exp: Math.floor(Date.now() / 1000) + 3600,
                 }));
 
                 localStorage.setItem('access_token', `mock.${mockToken}.mock`);
                 localStorage.setItem('refresh_token', 'mock_refresh_token');
-                document.cookie = `access_token=mock.${mockToken}.mock; path=/; max-age=3600; SameSite=Strict`;
+                // Also store empleadoId for easy access by components
+                if (mockUser.empleadoId) {
+                    localStorage.setItem('empleadoId', String(mockUser.empleadoId));
+                }
+                document.cookie = `access_token=mock.${mockToken}.mock; path=/; max-age=3600; SameSite=Lax`;
 
                 setUser(mockUser);
-                router.push('/');
+                // Use location.href instead of router.push to ensure cookies are sent to server components
+                window.location.href = '/dashboard';
                 return;
             }
 
@@ -171,7 +209,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             localStorage.setItem("refresh_token", data.refresh_token);
 
             // Set cookie for middleware
-            document.cookie = `access_token=${data.access_token}; path=/; max-age=${data.expires_in}; SameSite=Strict`;
+            document.cookie = `access_token=${data.access_token}; path=/; max-age=${data.expires_in}; SameSite=Lax`;
 
             // Extract user info
             const userData = extractUserFromToken(data.access_token);
@@ -265,7 +303,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             // Update tokens
             localStorage.setItem("access_token", data.access_token);
             localStorage.setItem("refresh_token", data.refresh_token);
-            document.cookie = `access_token=${data.access_token}; path=/; max-age=${data.expires_in}; SameSite=Strict`;
+            document.cookie = `access_token=${data.access_token}; path=/; max-age=${data.expires_in}; SameSite=Lax`;
 
             // Update user
             const userData = extractUserFromToken(data.access_token);

@@ -85,6 +85,17 @@ public interface EmpleadoRepository extends JpaRepository<Empleado, Long> {
                         "ORDER BY DAY(e.fechaNacimiento)")
         List<Empleado> findCumpleaniosDelMes();
 
+        @Query(value = "SELECT * FROM empleados e WHERE e.estado = 'ACTIVO' " +
+                        "ORDER BY " +
+                        "CASE " +
+                        "  WHEN (MONTH(e.fecha_nacimiento) > MONTH(CURRENT_DATE)) OR (MONTH(e.fecha_nacimiento) = MONTH(CURRENT_DATE) AND DAY(e.fecha_nacimiento) >= DAY(CURRENT_DATE)) THEN 0 "
+                        +
+                        "  ELSE 1 " +
+                        "END, " +
+                        "MONTH(e.fecha_nacimiento), DAY(e.fecha_nacimiento) " +
+                        "LIMIT :limit", nativeQuery = true)
+        List<Empleado> findProximosCumpleanios(@Param("limit") int limit);
+
         // Aniversarios laborales (este mes)
         @Query("SELECT e FROM Empleado e WHERE " +
                         "MONTH(e.fechaIngreso) = MONTH(CURRENT_DATE) AND " +
@@ -172,9 +183,13 @@ public interface EmpleadoRepository extends JpaRepository<Empleado, Long> {
                         @Param("empleadoId") Long empleadoId);
 
         // Performance Optimization for Demographics
-        long countByFechaNacimientoBetweenAndEstado(LocalDate start, LocalDate end, String estado);
+        long countByFechaNacimientoBetweenAndEstado(@Param("start") LocalDate start, @Param("end") LocalDate end,
+                        @Param("estado") String estado);
 
-        long countByFechaNacimientoBeforeAndEstado(LocalDate date, String estado);
+        long countByFechaNacimientoBeforeAndEstado(@Param("date") LocalDate date, @Param("estado") String estado);
 
-        long countByFechaNacimientoAfterAndEstado(LocalDate date, String estado);
+        long countByFechaNacimientoAfterAndEstado(@Param("date") LocalDate date, @Param("estado") String estado);
+
+        @Query("SELECT SUM(e.salario) FROM Empleado e WHERE e.estado = :estado")
+        java.math.BigDecimal sumSalarioByEstado(String estado);
 }

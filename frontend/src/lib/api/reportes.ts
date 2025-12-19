@@ -80,5 +80,9 @@ export const reportesApi = {
             fechaFin: fin.toISOString().split('T')[0]
         });
         return get<ReporteAusentismo>(`${REPORTES_URL}/ausentismo?${params.toString()}`);
+    },
+
+    getCumpleaniosStats: async () => {
+        return get<{ porMes: Record<number, number>, totalActivos: number, esteMes: number }>('/cumpleanios/estadisticas');
     }
 };

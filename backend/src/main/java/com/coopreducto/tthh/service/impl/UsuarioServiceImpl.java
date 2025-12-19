@@ -9,15 +9,19 @@ import com.coopreducto.tthh.repository.RolRepository;
 import com.coopreducto.tthh.repository.UsuarioRepository;
 import com.coopreducto.tthh.service.UsuarioService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UsuarioServiceImpl implements UsuarioService {
@@ -211,7 +215,8 @@ public class UsuarioServiceImpl implements UsuarioService {
             u.setRequiereCambioPassword(true);
             u.setUpdatedAt(LocalDateTime.now());
             repository.save(u);
-            // TODO: Enviar email con contraseña temporal
+            log.info("CONTRASEÑA TEMPORAL GENERADA para el usuario {}: {}", u.getUsername(), tempPassword);
+            // En entorno real aquí se enviaría el email
         });
     }
 
@@ -226,7 +231,8 @@ public class UsuarioServiceImpl implements UsuarioService {
         usuario.setTokenExpiracion(LocalDateTime.now().plusHours(24));
         repository.save(usuario);
 
-        // TODO: Enviar email con link de recuperación
+        log.info("TOKEN DE RECUPERACIÓN GENERADO para el email {}: {}", email, token);
+        // En entorno real aquí se enviaría el email con el link
         return token;
     }
 
@@ -276,5 +282,110 @@ public class UsuarioServiceImpl implements UsuarioService {
     @Transactional(readOnly = true)
     public long countByRol(Long rolId) {
         return repository.countByRolId(rolId);
+    }
+
+    @Override
+    @Transactional
+    public Map<String, Object> syncEmpleadosToUsuarios() {
+        log.info("Iniciando sincronización de empleados a usuarios...");
+        List<Empleado> empleadosActivos = empleadoRepository.findByEstado("ACTIVO");
+        int creados = 0;
+        int existentes = 0;
+        int errores = 0;
+
+        Rol rolColaborador = rolRepository.findByNombre("COLABORADOR")
+                .orElseGet(() -> rolRepository.save(
+                        Rol.builder()
+                                .nombre("COLABORADOR")
+                                .descripcion("Rol por defecto para empleados")
+                                .activo(true)
+                                .createdAt(LocalDateTime.now())
+                                .updatedAt(LocalDateTime.now())
+                                .build()));
+
+        Rol rolGerencia = rolRepository.findByNombre("GERENCIA")
+                .orElse(null);
+
+        for (Empleado empleado : empleadosActivos) {
+            try {
+                // Verificar si ya tiene usuario asociado
+                if (repository.findByEmpleadoId(empleado.getId()).isPresent()) {
+                    existentes++;
+                    continue;
+                }
+
+                // Verificar si existe usuario con el mismo documento (username)
+                String username = empleado.getNumeroDocumento();
+                if (username == null || username.isBlank()) {
+                    log.warn("Empleado {} no tiene número de documento", empleado.getId());
+                    errores++;
+                    continue;
+                }
+
+                if (repository.existsByUsername(username)) {
+                    log.warn("Ya existe usuario con username {} pero no está asociado al empleado {}", username,
+                            empleado.getId());
+                    existentes++;
+                    // Aquí podríamos intentar asociarlo si la lógica de negocio lo permite,
+                    // pero por seguridad solo logueamos.
+                    continue;
+                }
+
+                // Crear usuario
+                Usuario nuevoUsuario = new Usuario();
+                nuevoUsuario.setUsername(username);
+                // Password inicial es el mismo documento
+                nuevoUsuario.setPassword(passwordEncoder.encode(username));
+                nuevoUsuario.setNombres(empleado.getNombres());
+                nuevoUsuario.setApellidos(empleado.getApellidos());
+
+                // Email: si no tiene, generamos uno dummy o lo dejamos null si la entidad lo
+                // permite (en este caso lo seteamos si existe)
+                if (empleado.getEmail() != null && !repository.existsByEmail(empleado.getEmail())) {
+                    nuevoUsuario.setEmail(empleado.getEmail());
+                } else {
+                    // Generar email dummy único si es obligatorio o null
+                    nuevoUsuario.setEmail(username + "@sinemail.com");
+                }
+
+                nuevoUsuario.setEstado("ACTIVO");
+                nuevoUsuario.setRequiereCambioPassword(true);
+                nuevoUsuario.setIntentosFallidos(0);
+                nuevoUsuario.setCreatedAt(LocalDateTime.now());
+                nuevoUsuario.setUpdatedAt(LocalDateTime.now());
+                nuevoUsuario.setEmpleado(empleado);
+
+                // Asignar Rol
+                if (rolGerencia != null && empleado.getCargo() != null &&
+                        empleado.getCargo().toUpperCase().contains("GERENTE")) {
+                    nuevoUsuario.setRol(rolGerencia);
+                } else {
+                    nuevoUsuario.setRol(rolColaborador);
+                }
+
+                repository.save(nuevoUsuario);
+                creados++;
+
+            } catch (Exception e) {
+                log.error("Error al sincronizar empleado {}: {}", empleado.getId(), e.getMessage());
+                errores++;
+            }
+        }
+
+        log.info("Sincronización finalizada. Creados: {}, Existentes: {}, Errores: {}", creados, existentes, errores);
+
+        Map<String, Object> resultado = new HashMap<>();
+        resultado.put("creados", creados);
+        resultado.put("existentes", existentes);
+        resultado.put("errores", errores);
+        resultado.put("totalProcesados", empleadosActivos.size());
+
+        return resultado;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public long count() {
+        return repository.count();
     }
 }

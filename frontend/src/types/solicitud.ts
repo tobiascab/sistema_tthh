@@ -20,6 +20,8 @@ export interface SolicitudFormData {
     tipo: 'VACACIONES' | 'PERMISO' | 'LICENCIA_MEDICA' | 'CONSTANCIA_LABORAL' | 'AUMENTO_SALARIO' | 'PERMISO_ESTUDIO';
     titulo?: string;
     descripcion?: string;
+    fechaInicio?: string; // ISO format yyyy-MM-dd
+    fechaFin?: string;    // ISO format yyyy-MM-dd
     prioridad?: 'BAJA' | 'MEDIA' | 'ALTA' | 'URGENTE';
     datosAdicionales?: string;
     documentoAdjunto?: File;

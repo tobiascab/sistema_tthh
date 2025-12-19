@@ -14,12 +14,12 @@ public class NotificacionController {
     private final NotificacionRepository repository;
 
     @GetMapping("/mis")
-    public List<Notificacion> getMisNotificaciones(@RequestParam Long usuarioId) {
+    public List<Notificacion> getMisNotificaciones(@RequestParam("usuarioId") Long usuarioId) {
         return repository.findByUsuarioIdOrderByCreatedAtDesc(usuarioId);
     }
 
     @PostMapping("/leer/{id}")
-    public void marcarLeida(@PathVariable Long id) {
+    public void marcarLeida(@PathVariable("id") Long id) {
         repository.findById(id).ifPresent(n -> {
             n.setLeido(true);
             repository.save(n);
@@ -27,8 +27,7 @@ public class NotificacionController {
     }
 
     @GetMapping("/no-leidas/count")
-    public long countNoLeidas(@RequestParam Long usuarioId) {
+    public long countNoLeidas(@RequestParam("usuarioId") Long usuarioId) {
         return repository.countByUsuarioIdAndLeidoFalse(usuarioId);
     }
 }
-

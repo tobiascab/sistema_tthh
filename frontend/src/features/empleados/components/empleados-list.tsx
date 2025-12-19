@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import { empleadosApi } from "@/src/lib/api/empleados";
@@ -95,27 +95,27 @@ export function EmpleadosList() {
         },
     });
 
-    const handleCreate = () => {
+    const handleCreate = useCallback(() => {
         setDialogMode("create");
         setSelectedEmpleado(null);
         setIsDialogOpen(true);
-    };
+    }, []);
 
-    const handleView = (empleado: Empleado) => {
+    const handleView = useCallback((empleado: Empleado) => {
         router.push(`/tthh/empleados/${empleado.id}`);
-    };
+    }, [router]);
 
-    const handleEdit = (empleado: Empleado) => {
+    const handleEdit = useCallback((empleado: Empleado) => {
         setDialogMode("edit");
         setSelectedEmpleado(empleado);
         setIsDialogOpen(true);
-    };
+    }, []);
 
-    const handleDelete = (empleado: Empleado) => {
+    const handleDelete = useCallback((empleado: Empleado) => {
         if (confirm(`¿Está seguro de eliminar a ${empleado.nombres} ${empleado.apellidos}?`)) {
             deleteMutation.mutate(empleado.id);
         }
-    };
+    }, [deleteMutation]);
 
     const handleSubmit = async (data: EmpleadoFormData) => {
         if (dialogMode === "create") {
@@ -125,11 +125,20 @@ export function EmpleadosList() {
         }
     };
 
-    const columns = getEmpleadosColumns({
+    const columns = useMemo(() => getEmpleadosColumns({
         onView: handleView,
         onEdit: handleEdit,
         onDelete: handleDelete,
-    });
+    }), [handleView, handleEdit, handleDelete]);
+
+    const statsCalculated = useMemo(() => {
+        if (!data?.content) return { activos: 0, inactivos: 0, areas: 0 };
+        return {
+            activos: data.content.filter((e) => e.estado === "ACTIVO").length,
+            inactivos: data.content.filter((e) => e.estado === "INACTIVO").length,
+            areas: new Set(data.content.map((e) => e.area || e.departamento).filter(Boolean)).size,
+        };
+    }, [data]);
 
     if (isLoading) {
         return (
@@ -201,7 +210,7 @@ export function EmpleadosList() {
                             <div>
                                 <p className="text-sm font-medium text-neutral-500 uppercase tracking-wider">Activos</p>
                                 <p className="text-3xl font-extrabold text-emerald-600 mt-2">
-                                    {data?.content.filter((e) => e.estado === "ACTIVO").length || 0}
+                                    {statsCalculated.activos}
                                 </p>
                             </div>
                             <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
@@ -215,7 +224,7 @@ export function EmpleadosList() {
                             <div>
                                 <p className="text-sm font-medium text-neutral-500 uppercase tracking-wider">Inactivos</p>
                                 <p className="text-3xl font-extrabold text-neutral-400 mt-2">
-                                    {data?.content.filter((e) => e.estado === "INACTIVO").length || 0}
+                                    {statsCalculated.inactivos}
                                 </p>
                             </div>
                             <div className="p-3 bg-neutral-100 text-neutral-500 rounded-xl">
@@ -229,7 +238,7 @@ export function EmpleadosList() {
                             <div>
                                 <p className="text-sm font-medium text-neutral-500 uppercase tracking-wider">Áreas</p>
                                 <p className="text-3xl font-extrabold text-blue-600 mt-2">
-                                    {new Set(data?.content.map((e) => e.area || e.departamento).filter(Boolean)).size || 0}
+                                    {statsCalculated.areas}
                                 </p>
                             </div>
                             <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">

@@ -7,11 +7,13 @@ import com.coopreducto.tthh.repository.EmpleadoRepository;
 import com.coopreducto.tthh.repository.SolicitudRepository;
 import com.coopreducto.tthh.service.AuditoriaService;
 import com.coopreducto.tthh.service.SolicitudService;
+import com.coopreducto.tthh.service.WebPushService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
 
 import java.time.LocalDateTime;
 
@@ -24,6 +26,7 @@ public class SolicitudServiceImpl implements SolicitudService {
     private final SolicitudRepository solicitudRepository;
     private final EmpleadoRepository empleadoRepository;
     private final AuditoriaService auditoriaService;
+    private final WebPushService webPushService;
 
     @Override
     @Transactional(readOnly = true)
@@ -54,6 +57,7 @@ public class SolicitudServiceImpl implements SolicitudService {
     }
 
     @Override
+    @CacheEvict(value = "dashboardAdmin", allEntries = true)
     public SolicitudDTO create(SolicitudDTO solicitudDTO) {
         Empleado empleado = empleadoRepository.findById(solicitudDTO.getEmpleadoId())
                 .orElseThrow(() -> new RuntimeException("Empleado no encontrado"));
@@ -73,10 +77,19 @@ public class SolicitudServiceImpl implements SolicitudService {
                 "unknown",
                 "unknown");
 
+        // Send push notification to TTHH admins
+        String empleadoNombre = empleado.getNombres() + " " + empleado.getApellidos();
+        webPushService.sendToRole(
+                "TTHH",
+                "📋 Nueva Solicitud",
+                empleadoNombre + " ha creado una solicitud de " + saved.getTipo(),
+                "/solicitudes");
+
         return convertToDTO(saved);
     }
 
     @Override
+    @CacheEvict(value = "dashboardAdmin", allEntries = true)
     public SolicitudDTO update(Long id, SolicitudDTO solicitudDTO) {
         Solicitud solicitud = solicitudRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
@@ -95,6 +108,7 @@ public class SolicitudServiceImpl implements SolicitudService {
     }
 
     @Override
+    @CacheEvict(value = "dashboardAdmin", allEntries = true)
     public SolicitudDTO aprobar(Long id, String respuesta) {
         Solicitud solicitud = solicitudRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
@@ -108,6 +122,7 @@ public class SolicitudServiceImpl implements SolicitudService {
     }
 
     @Override
+    @CacheEvict(value = "dashboardAdmin", allEntries = true)
     public SolicitudDTO rechazar(Long id, String respuesta) {
         Solicitud solicitud = solicitudRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
@@ -121,6 +136,7 @@ public class SolicitudServiceImpl implements SolicitudService {
     }
 
     @Override
+    @CacheEvict(value = "dashboardAdmin", allEntries = true)
     public void delete(Long id) {
         Solicitud solicitud = solicitudRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));

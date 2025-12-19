@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/src/features/auth/context/auth-context";
+import { useCurrentUser } from "@/src/hooks/use-current-user";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 import {
@@ -13,7 +14,8 @@ import {
     ArrowRight,
     User,
     Briefcase,
-    FileCheck
+    FileCheck,
+    AlertCircle
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -29,10 +31,11 @@ import { Progress } from "@/src/components/ui/progress";
 
 export function ColaboradorDashboard() {
     const { user } = useAuth();
+    const { empleadoId } = useCurrentUser();
     const router = useRouter();
-    // Para demo, usamos el ID del empleado de prueba (Carlos Rodríguez = ID 3).
-    // En producción, esto vendría de un mapeo usuario-empleado.
-    const empleadoId = 3;
+
+    // Show warning if user is not linked to an employee
+    const isLinked = empleadoId && empleadoId > 0;
 
     // 1. Recibos de Sueldo
     const { data: recibosPage } = useQuery({
@@ -82,6 +85,23 @@ export function ColaboradorDashboard() {
 
     return (
         <div className="space-y-8">
+            {/* Warning if not linked */}
+            {!isLinked && (
+                <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3">
+                    <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                        <p className="font-medium text-amber-800">Usuario no vinculado</p>
+                        <p className="text-sm text-amber-700 mt-1">
+                            Tu cuenta no está vinculada a un empleado en el sistema.
+                            Contacta a Talento Humano para que te asignen tu registro de empleado.
+                        </p>
+                        <p className="text-xs text-amber-600 mt-2">
+                            Usuario: {user?.username} | Email: {user?.email}
+                        </p>
+                    </div>
+                </div>
+            )}
+
             {/* Welcome Section */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-neutral-100 shadow-sm">
                 <div className="flex items-center gap-4">
@@ -209,8 +229,8 @@ export function ColaboradorDashboard() {
                                         <div key={solicitud.id} className="flex items-center justify-between p-3 bg-neutral-50 rounded-lg border border-neutral-100">
                                             <div className="flex items-center gap-3">
                                                 <div className={`p-2 rounded-full ${solicitud.estado === 'APROBADO' ? 'bg-green-100 text-green-600' :
-                                                        solicitud.estado === 'RECHAZADO' ? 'bg-red-100 text-red-600' :
-                                                            'bg-yellow-100 text-yellow-600'
+                                                    solicitud.estado === 'RECHAZADO' ? 'bg-red-100 text-red-600' :
+                                                        'bg-yellow-100 text-yellow-600'
                                                     }`}>
                                                     {solicitud.estado === 'APROBADO' ? <CheckCircle className="w-4 h-4" /> :
                                                         solicitud.estado === 'RECHAZADO' ? <XCircle className="w-4 h-4" /> :

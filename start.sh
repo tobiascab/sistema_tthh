@@ -41,7 +41,7 @@ echo "✅ Java 21 detectado"
 # Iniciar backend
 echo ""
 echo "📦 Paso 3: Iniciando backend Java..."
-cd ../backend-java
+cd ../backend
 ./mvnw spring-boot:run &
 BACKEND_PID=$!
 echo "✅ Backend iniciado (PID: $BACKEND_PID)"
@@ -58,7 +58,7 @@ echo "✅ Node.js detectado"
 # Instalar dependencias del frontend
 echo ""
 echo "📦 Paso 5: Instalando dependencias del frontend..."
-cd ../frontend-next
+cd ../frontend
 npm install
 echo "✅ Dependencias instaladas"
 

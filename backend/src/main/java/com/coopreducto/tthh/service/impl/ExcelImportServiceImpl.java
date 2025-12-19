@@ -14,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
@@ -39,7 +38,6 @@ public class ExcelImportServiceImpl implements ExcelImportService {
             // Buscar las columnas requeridas (flexibilidad en nombres)
             Row headerRow = sheet.getRow(0);
             int colDocumento = -1;
-            int colNombre = -1;
             int colFechaNacimiento = -1;
 
             for (int i = 0; i < headerRow.getLastCellNum(); i++) {
@@ -50,7 +48,7 @@ public class ExcelImportServiceImpl implements ExcelImportService {
                         colDocumento = i;
                     } else if (header.contains("nombre") || header.contains("colaborador")
                             || header.contains("empleado")) {
-                        colNombre = i;
+                        // colNombre = i; // Column found but not used for matching
                     } else if (header.contains("nacimiento") || header.contains("cumpleaños")
                             || header.contains("fecha_nac") || header.contains("birthday")) {
                         colFechaNacimiento = i;

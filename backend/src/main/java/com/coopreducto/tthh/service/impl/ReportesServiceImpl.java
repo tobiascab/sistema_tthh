@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -22,8 +23,10 @@ public class ReportesServiceImpl implements ReportesService {
     private final SolicitudRepository solicitudRepository;
     private final CertificacionProfesionalRepository certificacionRepository;
     private final AsistenciaRepository asistenciaRepository;
+    private final com.coopreducto.tthh.service.CumpleanosService cumpleanosService;
 
     @Override
+    // @Cacheable(value = "dashboardAdmin")
     public DashboardAdminDTO getDashboardAdmin() {
         try {
             DashboardAdminDTO dashboard = new DashboardAdminDTO();
@@ -82,30 +85,63 @@ public class ReportesServiceImpl implements ReportesService {
             }
             dashboard.setAlertas(alertas);
 
-            // Cumpleaños del Mes
-            List<com.coopreducto.tthh.entity.Empleado> cumpleanieros = empleadoRepository.findCumpleaniosDelMes();
-            dashboard.setCumpleaniosMesActual((long) cumpleanieros.size());
-
+            // Cumpleaños próximos (Configurable: Manual o Automático)
             List<DashboardAdminDTO.CumpleaniosDTO> proximosCumples = new ArrayList<>();
-            for (com.coopreducto.tthh.entity.Empleado emp : cumpleanieros) {
-                proximosCumples.add(new DashboardAdminDTO.CumpleaniosDTO(
-                        emp.getId(),
-                        emp.getNombres() + " " + emp.getApellidos(),
-                        emp.getCargo(),
-                        emp.getSucursal(),
-                        emp.getFechaNacimiento().getDayOfMonth(),
-                        emp.getFechaNacimiento().getMonthValue(),
-                        null // fotoUrl
-                ));
+            try {
+                List<com.coopreducto.tthh.dto.CumpleanosManualDTO> proximos = cumpleanosService.getProximos(5);
+                dashboard.setCumpleaniosMesActual((long) cumpleanosService.getCumpleanosDelMes().size());
+
+                for (com.coopreducto.tthh.dto.CumpleanosManualDTO dto : proximos) {
+                    LocalDate fechaNac = dto.getFechaNacimiento();
+                    Integer diasRestantes = 0;
+
+                    if (fechaNac != null) {
+                        LocalDate proxCumple = fechaNac.withYear(hoy.getYear());
+                        if (proxCumple.isBefore(hoy)) {
+                            proxCumple = proxCumple.plusYears(1);
+                        }
+                        diasRestantes = (int) java.time.temporal.ChronoUnit.DAYS.between(hoy, proxCumple);
+                    }
+
+                    proximosCumples.add(new DashboardAdminDTO.CumpleaniosDTO(
+                            dto.getId(),
+                            dto.getNombreCompleto(),
+                            "Colaborador",
+                            "Sucursal",
+                            fechaNac != null ? fechaNac.getDayOfMonth() : 0,
+                            fechaNac != null ? fechaNac.getMonthValue() : 0,
+                            diasRestantes,
+                            dto.getAvatarUrl()));
+                }
+            } catch (Exception e) {
+                log.warn("Error al cargar cumpleaños: {}. Usando fallback.", e.getMessage());
+                // Fallback: usar empleadoRepository directamente
+                List<com.coopreducto.tthh.entity.Empleado> cumpleanierosProximos = empleadoRepository
+                        .findProximosCumpleanios(5);
+                dashboard.setCumpleaniosMesActual((long) empleadoRepository.findCumpleaniosDelMes().size());
+                for (com.coopreducto.tthh.entity.Empleado emp : cumpleanierosProximos) {
+                    LocalDate fechaNac = emp.getFechaNacimiento();
+                    Integer diasRestantes = 0;
+                    if (fechaNac != null) {
+                        LocalDate proxCumple = fechaNac.withYear(hoy.getYear());
+                        if (proxCumple.isBefore(hoy))
+                            proxCumple = proxCumple.plusYears(1);
+                        diasRestantes = (int) java.time.temporal.ChronoUnit.DAYS.between(hoy, proxCumple);
+                    }
+                    proximosCumples.add(new DashboardAdminDTO.CumpleaniosDTO(
+                            emp.getId(), emp.getNombres() + " " + emp.getApellidos(), emp.getCargo(), emp.getSucursal(),
+                            fechaNac != null ? fechaNac.getDayOfMonth() : 0,
+                            fechaNac != null ? fechaNac.getMonthValue() : 0,
+                            diasRestantes, emp.getFotoUrl()));
+                }
             }
             dashboard.setProximosCumpleanios(proximosCumples);
 
             // Calcular nómina mensual estimada (suma de todos los salarios de empleados
             // activos)
-            BigDecimal nominaTotal = empleadoRepository.findAll().stream()
-                    .filter(e -> "ACTIVO".equals(e.getEstado()))
-                    .map(e -> e.getSalario() != null ? e.getSalario() : BigDecimal.ZERO)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+            BigDecimal nominaTotal = empleadoRepository.sumSalarioByEstado("ACTIVO");
+            if (nominaTotal == null)
+                nominaTotal = BigDecimal.ZERO;
             dashboard.setNominaMensualEstimada(nominaTotal);
 
             // Simular nómina pagada (95% de la estimada como ejemplo)
@@ -172,32 +208,30 @@ public class ReportesServiceImpl implements ReportesService {
             dashboard.setTopHabilidades(new ArrayList<>());
 
             return dashboard;
-        } catch (
-
-        Exception e) {
+        } catch (Exception e) {
             log.error("Error al obtener dashboard admin", e);
+            e.printStackTrace(); // Ver en consola directamente
             // Retornar un dashboard vacío en lugar de fallar
-            DashboardAdminDTO emptyDashboard = new DashboardAdminDTO();
-            emptyDashboard.setColaboradoresActivos(0L);
-            emptyDashboard.setColaboradoresInactivos(0L);
-            emptyDashboard.setNominaMensualEstimada(BigDecimal.ZERO);
-            emptyDashboard.setNominaMensualPagada(BigDecimal.ZERO);
-            emptyDashboard.setSolicitudesPendientes(0L);
-            emptyDashboard.setCertificacionesPorVencer(0L);
-            emptyDashboard.setHorasFormacionMes(0);
-            emptyDashboard.setHorasFormacionAnio(0);
-            emptyDashboard.setCumpleaniosMesActual(0L);
-            emptyDashboard.setProximosCumpleanios(new ArrayList<>());
-            emptyDashboard.setColaboradoresPorDepartamento(new HashMap<>());
-            emptyDashboard.setColaboradoresPorCargo(new HashMap<>());
-            emptyDashboard.setSolicitudesPorTipo(new HashMap<>());
-            emptyDashboard.setSolicitudesPorEstado(new HashMap<>());
-            emptyDashboard.setNominaUltimos6Meses(new ArrayList<>());
-            emptyDashboard.setAusenciasUltimos6Meses(new ArrayList<>());
-            emptyDashboard.setAlertas(new ArrayList<>());
-            emptyDashboard.setTopHabilidades(new ArrayList<>());
-            emptyDashboard.setUltimasSolicitudes(new ArrayList<>());
-            return emptyDashboard;
+            DashboardAdminDTO empty = new DashboardAdminDTO();
+            empty.setColaboradoresActivos(0L);
+            empty.setColaboradoresInactivos(0L);
+            empty.setNominaMensualEstimada(BigDecimal.ZERO);
+            empty.setNominaMensualPagada(BigDecimal.ZERO);
+            empty.setSolicitudesPendientes(0L);
+            empty.setCumpleaniosMesActual(0L);
+            empty.setCertificacionesPorVencer(0L);
+            empty.setHorasFormacionMes(0);
+            empty.setHorasFormacionAnio(0);
+            empty.setColaboradoresPorDepartamento(new HashMap<>());
+            empty.setColaboradoresPorCargo(new HashMap<>());
+            empty.setSolicitudesPorTipo(new HashMap<>());
+            empty.setSolicitudesPorEstado(new HashMap<>());
+            empty.setNominaUltimos6Meses(new ArrayList<>());
+            empty.setAusenciasUltimos6Meses(new ArrayList<>());
+            empty.setAlertas(new ArrayList<>());
+            empty.setTopHabilidades(new ArrayList<>());
+            empty.setUltimasSolicitudes(new ArrayList<>());
+            return empty;
         }
     }
 
@@ -240,6 +274,7 @@ public class ReportesServiceImpl implements ReportesService {
     }
 
     @Override
+    @Cacheable(value = "reporteDemografia")
     public Map<String, Object> getReporteDemografia() {
         Map<String, Object> reporte = new HashMap<>();
 
@@ -276,9 +311,6 @@ public class ReportesServiceImpl implements ReportesService {
         porEdad.put("<20", empleadoRepository.countByFechaNacimientoAfterAndEstado(
                 hoy.minusYears(20), "ACTIVO"));
 
-        // Adaptar a la salida requerida (Map<String, Integer> es lo que espera el
-        // legacy code conceptualmente, pero el controller devuelve Map<String, Object>)
-        // Simplemente pasamos esto como parte del reporte
         reporte.put("porEdad", porEdad);
 
         // Sucursal

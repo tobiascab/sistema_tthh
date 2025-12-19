@@ -156,7 +156,7 @@ SISTEMA_TTHH_V2/
 │   │   └── types/                      # TypeScript types
 │   └── package.json
 │
-├── backend-java/                       # Backend Spring Boot 3
+├── backend/                            # Backend Spring Boot 3
 │   ├── src/main/java/com/coopreducto/tthh/
 │   │   ├── TthhApplication.java
 │   │   ├── config/

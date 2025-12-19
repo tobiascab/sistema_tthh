@@ -10,6 +10,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
 
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -55,6 +57,10 @@ public class EmpleadoServiceImpl implements EmpleadoService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "dashboardAdmin", allEntries = true),
+            @CacheEvict(value = "reporteDemografia", allEntries = true)
+    })
     public EmpleadoDTO crear(EmpleadoDTO empleadoDTO) {
         log.info("Creando empleado: {}", empleadoDTO.getNombres());
 
@@ -83,6 +89,10 @@ public class EmpleadoServiceImpl implements EmpleadoService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "dashboardAdmin", allEntries = true),
+            @CacheEvict(value = "reporteDemografia", allEntries = true)
+    })
     public EmpleadoDTO actualizar(Long id, EmpleadoDTO empleadoDTO) {
         log.info("Actualizando empleado ID: {}", id);
 
@@ -122,6 +132,10 @@ public class EmpleadoServiceImpl implements EmpleadoService {
     }
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "dashboardAdmin", allEntries = true),
+            @CacheEvict(value = "reporteDemografia", allEntries = true)
+    })
     public void eliminar(Long id) {
         log.info("Eliminando empleado ID: {}", id);
 
@@ -252,6 +266,10 @@ public class EmpleadoServiceImpl implements EmpleadoService {
     // ========================================
 
     @Override
+    @Caching(evict = {
+            @CacheEvict(value = "dashboardAdmin", allEntries = true),
+            @CacheEvict(value = "reporteDemografia", allEntries = true)
+    })
     public EmpleadoDTO cambiarEstado(Long id, String nuevoEstado, String motivo) {
         log.info("Cambiando estado del empleado {} a {}", id, nuevoEstado);
 

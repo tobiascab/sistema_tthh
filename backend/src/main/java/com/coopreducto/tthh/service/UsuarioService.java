@@ -2,6 +2,7 @@ package com.coopreducto.tthh.service;
 
 import com.coopreducto.tthh.dto.UsuarioDTO;
 import java.util.List;
+import java.util.Map;
 
 public interface UsuarioService {
     List<UsuarioDTO> getAll();
@@ -45,4 +46,9 @@ public interface UsuarioService {
     long countByEstado(String estado);
 
     long countByRol(Long rolId);
+
+    // Sincronización
+    Map<String, Object> syncEmpleadosToUsuarios();
+
+    long count();
 }

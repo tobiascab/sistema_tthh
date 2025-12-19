@@ -38,7 +38,7 @@ public class EmpleadoController {
 
     @PutMapping("/{id}")
     public ResponseEntity<EmpleadoDTO> actualizar(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @Valid @RequestBody EmpleadoDTO empleadoDTO) {
         log.info("PUT /empleados/{} - Actualizando empleado", id);
         EmpleadoDTO actualizado = empleadoService.actualizar(id, empleadoDTO);
@@ -47,7 +47,7 @@ public class EmpleadoController {
 
     @PostMapping(value = "/{id}/foto", consumes = org.springframework.http.MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<EmpleadoDTO> subirFoto(
-            @PathVariable Long id,
+            @PathVariable("id") Long id,
             @RequestParam("file") org.springframework.web.multipart.MultipartFile file) {
         log.info("POST /empleados/{}/foto", id);
         EmpleadoDTO empleado = empleadoService.actualizarFoto(id, file);
@@ -55,14 +55,14 @@ public class EmpleadoController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<EmpleadoDTO> obtenerPorId(@PathVariable Long id) {
+    public ResponseEntity<EmpleadoDTO> obtenerPorId(@PathVariable("id") Long id) {
         log.info("GET /empleados/{}", id);
         EmpleadoDTO empleado = empleadoService.obtenerPorId(id);
         return ResponseEntity.ok(empleado);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
+    public ResponseEntity<Void> eliminar(@PathVariable("id") Long id) {
         log.info("DELETE /empleados/{}", id);
         empleadoService.eliminar(id);
         return ResponseEntity.noContent().build();
@@ -88,21 +88,21 @@ public class EmpleadoController {
     // ========================================
 
     @GetMapping("/buscar/documento/{numeroDocumento}")
-    public ResponseEntity<EmpleadoDTO> buscarPorDocumento(@PathVariable String numeroDocumento) {
+    public ResponseEntity<EmpleadoDTO> buscarPorDocumento(@PathVariable("numeroDocumento") String numeroDocumento) {
         log.info("GET /empleados/buscar/documento/{}", numeroDocumento);
         EmpleadoDTO empleado = empleadoService.buscarPorNumeroDocumento(numeroDocumento);
         return empleado != null ? ResponseEntity.ok(empleado) : ResponseEntity.notFound().build();
     }
 
     @GetMapping("/buscar/socio/{numeroSocio}")
-    public ResponseEntity<EmpleadoDTO> buscarPorSocio(@PathVariable String numeroSocio) {
+    public ResponseEntity<EmpleadoDTO> buscarPorSocio(@PathVariable("numeroSocio") String numeroSocio) {
         log.info("GET /empleados/buscar/socio/{}", numeroSocio);
         EmpleadoDTO empleado = empleadoService.buscarPorNumeroSocio(numeroSocio);
         return empleado != null ? ResponseEntity.ok(empleado) : ResponseEntity.notFound().build();
     }
 
     @GetMapping("/buscar/email/{email}")
-    public ResponseEntity<EmpleadoDTO> buscarPorEmail(@PathVariable String email) {
+    public ResponseEntity<EmpleadoDTO> buscarPorEmail(@PathVariable("email") String email) {
         log.info("GET /empleados/buscar/email/{}", email);
         EmpleadoDTO empleado = empleadoService.buscarPorEmail(email);
         return empleado != null ? ResponseEntity.ok(empleado) : ResponseEntity.notFound().build();
@@ -110,7 +110,7 @@ public class EmpleadoController {
 
     @GetMapping("/estado/{estado}")
     public ResponseEntity<Page<EmpleadoDTO>> listarPorEstado(
-            @PathVariable String estado,
+            @PathVariable("estado") String estado,
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         log.info("GET /empleados/estado/{}", estado);
         Page<EmpleadoDTO> empleados = empleadoService.buscarPorEstado(estado, pageable);
@@ -119,7 +119,7 @@ public class EmpleadoController {
 
     @GetMapping("/sucursal/{sucursal}")
     public ResponseEntity<Page<EmpleadoDTO>> listarPorSucursal(
-            @PathVariable String sucursal,
+            @PathVariable("sucursal") String sucursal,
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         log.info("GET /empleados/sucursal/{}", sucursal);
         Page<EmpleadoDTO> empleados = empleadoService.buscarPorSucursal(sucursal, pageable);
@@ -128,7 +128,7 @@ public class EmpleadoController {
 
     @GetMapping("/area/{area}")
     public ResponseEntity<Page<EmpleadoDTO>> listarPorArea(
-            @PathVariable String area,
+            @PathVariable("area") String area,
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         log.info("GET /empleados/area/{}", area);
         Page<EmpleadoDTO> empleados = empleadoService.buscarPorArea(area, pageable);
@@ -141,11 +141,11 @@ public class EmpleadoController {
 
     @GetMapping("/buscar")
     public ResponseEntity<Page<EmpleadoDTO>> buscar(
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) String estado,
-            @RequestParam(required = false) String sucursal,
-            @RequestParam(required = false) String area,
-            @RequestParam(required = false) String cargo,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "estado", required = false) String estado,
+            @RequestParam(value = "sucursal", required = false) String sucursal,
+            @RequestParam(value = "area", required = false) String area,
+            @RequestParam(value = "cargo", required = false) String cargo,
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
 
         log.info("GET /empleados/buscar - search: {}, estado: {}, sucursal: {}, area: {}, cargo: {}",
@@ -163,16 +163,16 @@ public class EmpleadoController {
 
     @PatchMapping("/{id}/estado")
     public ResponseEntity<EmpleadoDTO> cambiarEstado(
-            @PathVariable Long id,
-            @RequestParam String estado,
-            @RequestParam(required = false) String motivo) {
+            @PathVariable("id") Long id,
+            @RequestParam("estado") String estado,
+            @RequestParam(value = "motivo", required = false) String motivo) {
         log.info("PATCH /empleados/{}/estado - Nuevo estado: {}", id, estado);
         EmpleadoDTO empleado = empleadoService.cambiarEstado(id, estado, motivo);
         return ResponseEntity.ok(empleado);
     }
 
     @PatchMapping("/{id}/activar")
-    public ResponseEntity<EmpleadoDTO> activar(@PathVariable Long id) {
+    public ResponseEntity<EmpleadoDTO> activar(@PathVariable("id") Long id) {
         log.info("PATCH /empleados/{}/activar", id);
         EmpleadoDTO empleado = empleadoService.activar(id);
         return ResponseEntity.ok(empleado);
@@ -180,8 +180,8 @@ public class EmpleadoController {
 
     @PatchMapping("/{id}/inactivar")
     public ResponseEntity<EmpleadoDTO> inactivar(
-            @PathVariable Long id,
-            @RequestParam String motivo) {
+            @PathVariable("id") Long id,
+            @RequestParam("motivo") String motivo) {
         log.info("PATCH /empleados/{}/inactivar", id);
         EmpleadoDTO empleado = empleadoService.inactivar(id, motivo);
         return ResponseEntity.ok(empleado);
@@ -189,9 +189,9 @@ public class EmpleadoController {
 
     @PatchMapping("/{id}/suspender")
     public ResponseEntity<EmpleadoDTO> suspender(
-            @PathVariable Long id,
-            @RequestParam String motivo,
-            @RequestParam LocalDate fechaFin) {
+            @PathVariable("id") Long id,
+            @RequestParam("motivo") String motivo,
+            @RequestParam("fechaFin") LocalDate fechaFin) {
         log.info("PATCH /empleados/{}/suspender hasta {}", id, fechaFin);
         EmpleadoDTO empleado = empleadoService.suspender(id, motivo, fechaFin);
         return ResponseEntity.ok(empleado);
@@ -217,7 +217,7 @@ public class EmpleadoController {
 
     @GetMapping("/contratos-vencer")
     public ResponseEntity<List<EmpleadoDTO>> obtenerContratosProximosAVencer(
-            @RequestParam(defaultValue = "30") Integer dias) {
+            @RequestParam(value = "dias", defaultValue = "30") Integer dias) {
         log.info("GET /empleados/contratos-vencer?dias={}", dias);
         List<EmpleadoDTO> empleados = empleadoService.obtenerContratosProximosAVencer(dias);
         return ResponseEntity.ok(empleados);
@@ -225,7 +225,7 @@ public class EmpleadoController {
 
     @GetMapping("/sin-examen-medico")
     public ResponseEntity<List<EmpleadoDTO>> obtenerSinExamenMedico(
-            @RequestParam(defaultValue = "12") Integer meses) {
+            @RequestParam(value = "meses", defaultValue = "12") Integer meses) {
         log.info("GET /empleados/sin-examen-medico?meses={}", meses);
         List<EmpleadoDTO> empleados = empleadoService.obtenerEmpleadosSinExamenMedico(meses);
         return ResponseEntity.ok(empleados);
@@ -276,19 +276,20 @@ public class EmpleadoController {
     // ========================================
 
     @GetMapping("/validar/documento/{numeroDocumento}")
-    public ResponseEntity<Map<String, Boolean>> validarDocumento(@PathVariable String numeroDocumento) {
+    public ResponseEntity<Map<String, Boolean>> validarDocumento(
+            @PathVariable("numeroDocumento") String numeroDocumento) {
         boolean existe = empleadoService.existeNumeroDocumento(numeroDocumento);
         return ResponseEntity.ok(Map.of("existe", existe));
     }
 
     @GetMapping("/validar/socio/{numeroSocio}")
-    public ResponseEntity<Map<String, Boolean>> validarSocio(@PathVariable String numeroSocio) {
+    public ResponseEntity<Map<String, Boolean>> validarSocio(@PathVariable("numeroSocio") String numeroSocio) {
         boolean existe = empleadoService.existeNumeroSocio(numeroSocio);
         return ResponseEntity.ok(Map.of("existe", existe));
     }
 
     @GetMapping("/validar/email/{email}")
-    public ResponseEntity<Map<String, Boolean>> validarEmail(@PathVariable String email) {
+    public ResponseEntity<Map<String, Boolean>> validarEmail(@PathVariable("email") String email) {
         boolean existe = empleadoService.existeEmail(email);
         return ResponseEntity.ok(Map.of("existe", existe));
     }
@@ -298,7 +299,7 @@ public class EmpleadoController {
     // ========================================
 
     @PatchMapping("/{id}/vacaciones/calcular")
-    public ResponseEntity<EmpleadoDTO> calcularVacaciones(@PathVariable Long id) {
+    public ResponseEntity<EmpleadoDTO> calcularVacaciones(@PathVariable("id") Long id) {
         log.info("PATCH /empleados/{}/vacaciones/calcular", id);
         EmpleadoDTO empleado = empleadoService.calcularDiasVacaciones(id);
         return ResponseEntity.ok(empleado);
@@ -306,15 +307,15 @@ public class EmpleadoController {
 
     @PatchMapping("/{id}/vacaciones/usar")
     public ResponseEntity<EmpleadoDTO> usarVacaciones(
-            @PathVariable Long id,
-            @RequestParam Integer dias) {
+            @PathVariable("id") Long id,
+            @RequestParam("dias") Integer dias) {
         log.info("PATCH /empleados/{}/vacaciones/usar?dias={}", id, dias);
         EmpleadoDTO empleado = empleadoService.registrarVacacionesUsadas(id, dias);
         return ResponseEntity.ok(empleado);
     }
 
     @PatchMapping("/{id}/vacaciones/reiniciar")
-    public ResponseEntity<EmpleadoDTO> reiniciarVacaciones(@PathVariable Long id) {
+    public ResponseEntity<EmpleadoDTO> reiniciarVacaciones(@PathVariable("id") Long id) {
         log.info("PATCH /empleados/{}/vacaciones/reiniciar", id);
         EmpleadoDTO empleado = empleadoService.reiniciarVacaciones(id);
         return ResponseEntity.ok(empleado);

@@ -1,5 +1,7 @@
 package com.coopreducto.tthh.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -10,6 +12,7 @@ import java.time.LocalDate;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AusenciaDTO {
 
     private Long id;
@@ -20,15 +23,15 @@ public class AusenciaDTO {
     private String empleadoNombre;
 
     @NotBlank(message = "El tipo de ausencia es requerido")
-    @Pattern(regexp = "PERMISO|LICENCIA_MEDICA|VACACIONES|SUSPENSION", message = "Tipo de ausencia inválido")
+    @Pattern(regexp = "PERMISO|LICENCIA_MEDICA|VACACIONES|SUSPENSION|MATERNIDAD|PATERNIDAD|DUELO|OTRO", message = "Tipo de ausencia inválido")
     private String tipo;
 
     @NotNull(message = "La fecha de inicio es requerida")
-    @FutureOrPresent(message = "La fecha de inicio debe ser hoy o en el futuro")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate fechaInicio;
 
     @NotNull(message = "La fecha de fin es requerida")
-    @FutureOrPresent(message = "La fecha de fin debe ser hoy o en el futuro")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private LocalDate fechaFin;
 
     @NotNull(message = "Los días solicitados son requeridos")

@@ -312,12 +312,6 @@ public class DataSeeder {
                 }
         }
 
-        private Empleado crearEmpleado(String ci, String socio, String nombre, String apellido,
-                        String email, String area, String cargo, BigDecimal salario, LocalDate ingreso) {
-                return crearEmpleadoCompleto(ci, socio, nombre, apellido, email, area, cargo, salario, ingreso,
-                                "CASA MATRIZ");
-        }
-
         private Empleado crearEmpleadoCompleto(String ci, String socio, String nombre, String apellido,
                         String email, String area, String cargo, BigDecimal salario, LocalDate ingreso,
                         String sucursal) {

@@ -50,7 +50,7 @@ if ($mavenPath) {
 # Compilar proyecto
 Write-Host ""
 Write-Host "Compilando proyecto..." -ForegroundColor Yellow
-Set-Location -Path "c:\SISTEMA_TTHH_V2\backend-java"
+Set-Location -Path "c:\SISTEMA_TTHH_V2\backend"
 
 & $mavenPath clean install -DskipTests
 

@@ -36,8 +36,19 @@ public class AusenciaController {
     @PreAuthorize("hasAnyRole('TTHH', 'GERENCIA', 'AUDITORIA', 'COLABORADOR')")
     public ResponseEntity<AusenciaDTO> getAusenciaById(@PathVariable Long id,
             org.springframework.security.core.Authentication authentication) {
-        // TODO: Validate that collaborator owns this absence
-        return ResponseEntity.ok(ausenciaService.findById(id));
+
+        AusenciaDTO ausencia = ausenciaService.findById(id);
+
+        // Validate access for collaborators
+        if (authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_COLABORADOR"))) {
+            Long currentEmpleadoId = getCurrentUserId(authentication);
+            if (currentEmpleadoId == null || !currentEmpleadoId.equals(ausencia.getEmpleadoId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+        }
+
+        return ResponseEntity.ok(ausencia);
     }
 
     @GetMapping("/empleado/{empleadoId}")

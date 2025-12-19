@@ -2,6 +2,7 @@ package com.coopreducto.tthh.repository;
 
 import com.coopreducto.tthh.entity.Empleado;
 import com.coopreducto.tthh.entity.Solicitud;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
@@ -17,8 +18,10 @@ public interface SolicitudRepository extends JpaRepository<Solicitud, Long>, Jpa
 
     List<Solicitud> findByEmpleadoAndTipoOrderByCreatedAtDesc(Empleado empleado, String tipo);
 
+    @EntityGraph(attributePaths = { "empleado" })
     List<Solicitud> findByEstadoOrderByCreatedAtDesc(String estado);
 
+    @EntityGraph(attributePaths = { "empleado" })
     List<Solicitud> findByTipoAndEstadoOrderByCreatedAtDesc(String tipo, String estado);
 
     Long countByEmpleadoAndEstado(Empleado empleado, String estado);

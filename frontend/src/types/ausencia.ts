@@ -16,9 +16,10 @@ export interface Ausencia {
 export interface AusenciaFormData {
     empleadoId: number;
     tipo: 'VACACIONES' | 'PERMISO' | 'LICENCIA_MEDICA' | 'MATERNIDAD' | 'PATERNIDAD' | 'DUELO' | 'OTRO';
-    fechaInicio: string; // Puede ser Date si el form lo maneja así, pero string para JSON es seguro
+    fechaInicio: string;
     fechaFin: string;
-    observacion?: string;
+    diasSolicitados: number;
+    observaciones?: string;
     documentoAdjunto?: File;
 }
 

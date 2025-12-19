@@ -33,16 +33,16 @@ public class ReportesController {
     @GetMapping("/nomina")
     @PreAuthorize("hasAnyRole('TTHH', 'GERENCIA', 'AUDITORIA')")
     public ResponseEntity<Map<String, Object>> getReporteNomina(
-            @RequestParam Integer anio,
-            @RequestParam Integer mes) {
+            @RequestParam("anio") Integer anio,
+            @RequestParam("mes") Integer mes) {
         return ResponseEntity.ok(reportesService.getReporteNomina(anio, mes));
     }
 
     @GetMapping("/ausentismo")
     @PreAuthorize("hasAnyRole('TTHH', 'GERENCIA')")
     public ResponseEntity<Map<String, Object>> getReporteAusentismo(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
+            @RequestParam("fechaInicio") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaInicio,
+            @RequestParam("fechaFin") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaFin) {
         return ResponseEntity.ok(reportesService.getReporteAusentismo(fechaInicio, fechaFin));
     }
 
@@ -62,7 +62,7 @@ public class ReportesController {
     @PreAuthorize("hasAnyRole('TTHH', 'GERENCIA')")
     @SuppressWarnings("null")
     public ResponseEntity<byte[]> exportarExcel(
-            @RequestParam String tipoReporte,
+            @RequestParam("tipoReporte") String tipoReporte,
             @RequestParam Map<String, Object> parametros) {
         byte[] excel = reportesService.exportarReporteExcel(tipoReporte, parametros);
 
@@ -77,7 +77,7 @@ public class ReportesController {
     @PreAuthorize("hasAnyRole('TTHH', 'GERENCIA')")
     @SuppressWarnings("null")
     public ResponseEntity<byte[]> exportarPDF(
-            @RequestParam String tipoReporte,
+            @RequestParam("tipoReporte") String tipoReporte,
             @RequestParam Map<String, Object> parametros) {
         byte[] pdf = reportesService.exportarReportePDF(tipoReporte, parametros);
 

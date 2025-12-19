@@ -126,6 +126,12 @@ public class UsuarioController {
         return ResponseEntity.ok(Map.of(
                 "activos", service.countByEstado("ACTIVO"),
                 "inactivos", service.countByEstado("INACTIVO"),
-                "bloqueados", service.countByEstado("BLOQUEADO")));
+                "bloqueados", service.countByEstado("BLOQUEADO"),
+                "total", service.count()));
+    }
+
+    @PostMapping("/sync")
+    public ResponseEntity<Map<String, Object>> syncEmpleadosToUsuarios() {
+        return ResponseEntity.ok(service.syncEmpleadosToUsuarios());
     }
 }

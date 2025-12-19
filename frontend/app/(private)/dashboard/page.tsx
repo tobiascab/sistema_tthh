@@ -7,10 +7,10 @@ import apiClient from "@/src/lib/api/client";
 import { ausenciasApi } from "@/src/lib/api/ausencias";
 import { motion } from "framer-motion";
 import {
-    PieChart, Pie, Cell, ResponsiveContainer,
-    AreaChart, Area, XAxis, YAxis, CartesianGrid,
-    Tooltip as RechartsTooltip, Legend
+    PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area,
+    XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend
 } from 'recharts';
+
 import {
     Calendar,
     Clock,
@@ -21,10 +21,13 @@ import {
     Briefcase,
 
     ArrowRight,
+    Activity,
+    DollarSign,
+    Gift,
     Sun,
     Coffee,
-    Activity,
-    DollarSign
+    Building2,
+    Settings
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
 import { Skeleton } from "@/src/components/ui/skeleton";
@@ -44,6 +47,10 @@ import { es } from "date-fns/locale";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { RefreshCw } from "lucide-react";
+import { useToast } from "@/src/components/ui/use-toast";
+import { BirthdayManagerDialog } from "@/src/components/dashboard/birthday-manager-dialog";
+import { NotificationBanner } from "@/src/components/notifications/notification-banner";
 
 // ==========================================
 // ESTILO PREMIUM EMERALD
@@ -54,12 +61,41 @@ const EMERALD_THEME = {
     accentIcon: "bg-emerald-50 text-emerald-700",
     badge: "bg-emerald-50 text-emerald-700 border-emerald-100 font-medium",
     buttonPrimary: "bg-emerald-600 text-white hover:bg-emerald-700 font-bold rounded-xl shadow-lg shadow-emerald-600/20 transition-all",
-    chartColors: ['#059669', '#10B981', '#34D399', '#6EE7B7', '#A7F3D0', '#D1FAE5'],
+    chartColors: ['#10b981', '#3b82f6', '#ef4444', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6'],
     statusColors: {
-        'APROBADA': '#059669', // Emerald 600
-        'PENDIENTE': '#D97706', // Amber 600
-        'RECHAZADA': '#DC2626', // Red 600
+        'APROBADA': '#10b981', // Emerald 500
+        'APROBADO': '#10b981', // Emerald 500
+        'PENDIENTE': '#f59e0b', // Amber 500
+        'RECHAZADA': '#ef4444', // Red 500
+        'RECHAZADO': '#ef4444', // Red 500
     }
+};
+
+const getMesNombre = (mes: number) => {
+    const meses = [
+        "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+        "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"
+    ];
+    return meses[mes - 1] || "";
+};
+
+// Utils para Charts
+const getAbbreviation = (name: string) => {
+    const map: Record<string, string> = {
+        "CASA MATRIZ": "CC",
+        "CENTRO MEDICO REDUCTO": "C.M.R",
+        "SUCURSAL 5": "Suc. 5",
+        "SUCURSAL CIUDAD DEL ESTE": "CDE",
+        "SUCURSAL HERNANDARIAS": "Hern.",
+        "SUCURSAL SAN LORENZO CENTRO": "SL",
+        "SUCURSAL VILLARRICA": "VCA",
+        "CENTRO DE DISTRIBUCION": "CD",
+    };
+
+    const upperName = name.toUpperCase();
+    if (map[upperName]) return map[upperName];
+
+    return name.replace(/SUCURSAL/i, "Suc.").substring(0, 18);
 };
 
 // Utils para Charts
@@ -70,11 +106,12 @@ const transformMapToData = (mapData: Record<string, number> | undefined) => {
 
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
+        const data = payload[0].payload;
         return (
             <div className="bg-white p-3 border border-emerald-100 shadow-lg rounded-xl text-xs">
-                <p className="font-bold text-emerald-800">{label || payload[0].name}</p>
+                <p className="font-bold text-emerald-800">{data.fullName || label || data.name}</p>
                 <p className="text-emerald-600">
-                    {payload[0].value} {payload[0].name === 'monto' ? 'Gs' : ''}
+                    {payload[0].value} {data.name === 'monto' ? 'Gs' : ''}
                 </p>
             </div>
         );
@@ -83,15 +120,56 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 // 1. Dashboard Administrativo (TTHH/Gerencia)
+// 1. Dashboard Administrativo (TTHH/Gerencia)
 function AdminDashboard() {
-    const { data: dashboardData, isLoading } = useQuery({
+    const { user } = useCurrentUser();
+    const router = useRouter();
+    const { toast } = useToast();
+    const [syncing, setSyncing] = useState(false);
+    const [mounted, setMounted] = useState(false);
+    const [birthdayManagerOpen, setBirthdayManagerOpen] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    const { data: dashboardData, isLoading, refetch } = useQuery({
         queryKey: ["dashboard-admin"],
         queryFn: async () => {
             const response = await apiClient.get("/reportes/dashboard-admin");
             return response.data;
         },
     });
-    const router = useRouter();
+
+    const handleSync = async () => {
+        try {
+            setSyncing(true);
+            const response = await apiClient.post('/usuarios/sync');
+            const data = response.data;
+
+            toast({
+                title: "Sincronización completada",
+                description: `Creados: ${data.creados}, Existentes: ${data.existentes}, Errores: ${data.errores}`,
+                variant: "default",
+                className: "bg-emerald-50 border-emerald-200 text-emerald-800"
+            });
+
+            // Recargar datos
+            refetch();
+        } catch (error) {
+            console.error("Error syncing users:", error);
+            toast({
+                title: "Error de sincronización",
+                description: "No se pudieron sincronizar los usuarios.",
+                variant: "destructive",
+            });
+        } finally {
+            setSyncing(false);
+        }
+    };
+
+    // Prevent hydration mismatch
+    if (!mounted) return null;
 
     if (isLoading) {
         return (
@@ -105,7 +183,13 @@ function AdminDashboard() {
     }
 
     // Datos procesados para gráficos
-    const deptoData = transformMapToData(dashboardData?.colaboradoresPorDepartamento);
+    const deptoData = dashboardData?.colaboradoresPorDepartamento
+        ? Object.entries(dashboardData.colaboradoresPorDepartamento).map(([name, value]) => ({
+            name: getAbbreviation(name || 'Sin asignar'),
+            fullName: name || 'Sin asignar',
+            value: value || 0
+        }))
+        : [];
     const estadoData = transformMapToData(dashboardData?.solicitudesPorEstado);
     const nominaData = dashboardData?.nominaUltimos6Meses?.map((t: any) => ({
         mes: `${t.mes} ${t.anio}`,
@@ -138,6 +222,14 @@ function AdminDashboard() {
             iconBg: "bg-blue-100",
             iconColor: "text-blue-600",
         },
+        {
+            title: "Cumpleaños del Mes",
+            value: dashboardData?.cumpleaniosMesActual || 0,
+            subtitle: "Celebraciones",
+            icon: Gift,
+            iconBg: "bg-rose-100",
+            iconColor: "text-rose-600",
+        },
 
     ];
 
@@ -167,6 +259,15 @@ function AdminDashboard() {
                         </p>
                     </div>
                     <div className="flex gap-3">
+                        <Button
+                            variant="secondary"
+                            className="bg-white/90 text-emerald-800 hover:bg-white hover:shadow-lg transition-all"
+                            onClick={handleSync}
+                            disabled={syncing}
+                        >
+                            <RefreshCw className={`w-4 h-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
+                            {syncing ? 'Sincronizando...' : 'Sincronizar Usuarios'}
+                        </Button>
                         <Link href="/reportes">
                             <Button variant="secondary" className="bg-white text-emerald-800 hover:bg-emerald-50">
                                 <TrendingUp className="w-4 h-4 mr-2" />
@@ -176,6 +277,9 @@ function AdminDashboard() {
                     </div>
                 </div>
             </motion.div>
+
+            {/* Push Notification Banner for Admins */}
+            <NotificationBanner className="mb-4" />
 
             {/* KPI Cards */}
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -213,15 +317,15 @@ function AdminDashboard() {
                 ))}
             </div>
 
-            {/* Analytics Section */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* 1. Distribución por Departamento (Pie) */}
+            {/* Analytics Section - Updated to 3 columns to include Birthdays */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {/* 1. Distribución por Departamento */}
                 <motion.div initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
                     <Card className={EMERALD_THEME.card}>
                         <CardHeader>
                             <CardTitle className="text-lg font-bold text-emerald-900 flex items-center gap-2">
-                                <Briefcase className="w-5 h-5 text-emerald-600" />
-                                Distribución por Departamento
+                                <Building2 className="w-5 h-5 text-emerald-600" />
+                                Distribución por Sucursal
                             </CardTitle>
                         </CardHeader>
                         <CardContent className="h-[300px]">
@@ -248,6 +352,56 @@ function AdminDashboard() {
                             ) : (
                                 <div className="h-full flex items-center justify-center text-neutral-400">
                                     Sin datos disponibles
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+                </motion.div>
+
+                {/* 2. Próximos Cumpleaños */}
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
+                    <Card className={EMERALD_THEME.card}>
+                        <CardHeader className="flex flex-row items-center justify-between pb-2">
+                            <CardTitle className="text-lg font-bold text-emerald-900 flex items-center gap-2">
+                                <Gift className="w-5 h-5 text-pink-500" />
+                                Próximos Cumpleaños
+                            </CardTitle>
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-neutral-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-full"
+                                onClick={() => setBirthdayManagerOpen(true)}
+                            >
+                                <Settings className="w-4 h-4" />
+                            </Button>
+                        </CardHeader>
+                        <CardContent className="h-[300px] overflow-y-auto mt-2">
+                            {dashboardData?.proximosCumpleanios && dashboardData.proximosCumpleanios.length > 0 ? (
+                                <div className="space-y-4">
+                                    {dashboardData.proximosCumpleanios.map((cumple: any) => (
+                                        <div key={cumple.empleadoId} className="flex items-center gap-3 p-2 hover:bg-neutral-50 rounded-xl transition-colors border border-transparent hover:border-neutral-100">
+                                            <Avatar className="h-10 w-10 border-2 border-white shadow-sm ring-1 ring-neutral-100">
+                                                <AvatarFallback className="bg-gradient-to-br from-pink-400 to-rose-500 text-white text-xs font-bold">
+                                                    {cumple.nombreCompleto.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-semibold text-neutral-800 truncate">{cumple.nombreCompleto}</p>
+                                                <p className="text-xs text-neutral-500">{cumple.dia} de {getMesNombre(cumple.mes)}</p>
+                                            </div>
+                                            <div className="text-right">
+                                                <Badge variant="outline" className={`text-[10px] font-bold px-2 py-0 h-5 rounded-full ${cumple.diasRestantes === 0 ? 'bg-rose-500 text-white border-none animate-pulse' : 'bg-pink-50 text-pink-600 border-pink-100'
+                                                    }`}>
+                                                    {cumple.diasRestantes === 0 ? '¡HOY!' : `en ${cumple.diasRestantes}d`}
+                                                </Badge>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            ) : (
+                                <div className="h-full flex flex-col items-center justify-center text-neutral-400 py-10">
+                                    <Gift className="w-8 h-8 opacity-10 mb-2" />
+                                    <p className="text-sm italic">No hay cumpleaños próximos</p>
                                 </div>
                             )}
                         </CardContent>
@@ -297,7 +451,7 @@ function AdminDashboard() {
                 </motion.div>
 
                 {/* 3. Evolución de Nómina (Area) */}
-                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="lg:col-span-2">
+                <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className="lg:col-span-3">
                     <Card className={EMERALD_THEME.card}>
                         <CardHeader>
                             <CardTitle className="text-lg font-bold text-emerald-900 flex items-center gap-2">
@@ -447,6 +601,12 @@ function AdminDashboard() {
                     </CardContent>
                 </Card>
             </motion.div>
+
+            <BirthdayManagerDialog
+                open={birthdayManagerOpen}
+                onOpenChange={setBirthdayManagerOpen}
+                onConfigChange={() => refetch()}
+            />
         </div>
     );
 }

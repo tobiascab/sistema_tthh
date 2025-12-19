@@ -19,7 +19,9 @@ public interface CertificacionProfesionalRepository extends JpaRepository<Certif
     @Query("SELECT c FROM CertificacionProfesional c WHERE c.fechaVencimiento IS NOT NULL " +
             "AND c.fechaVencimiento BETWEEN :fechaInicio AND :fechaFin " +
             "AND c.alertaEnviada = false")
-    List<CertificacionProfesional> findProximasAVencer(LocalDate fechaInicio, LocalDate fechaFin);
+    List<CertificacionProfesional> findProximasAVencer(
+            @org.springframework.data.repository.query.Param("fechaInicio") LocalDate fechaInicio,
+            @org.springframework.data.repository.query.Param("fechaFin") LocalDate fechaFin);
 
     Long countByEmpleadoAndVigenteTrue(Empleado empleado);
 }

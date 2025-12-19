@@ -44,7 +44,7 @@ echo.
 
 REM Iniciar backend
 echo 📦 Paso 3: Iniciando backend Java...
-cd ..\backend-java
+cd ..\backend
 start "Backend Java" cmd /k "mvnw.cmd spring-boot:run"
 echo ✅ Backend iniciado
 echo.
@@ -62,7 +62,7 @@ echo.
 
 REM Instalar dependencias del frontend
 echo 📦 Paso 5: Instalando dependencias del frontend...
-cd ..\frontend-next
+cd ..\frontend
 call npm install
 if %ERRORLEVEL% NEQ 0 (
     echo ❌ Error al instalar dependencias

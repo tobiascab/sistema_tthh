@@ -28,14 +28,14 @@ docker-compose up -d
 #### 2. Iniciar Backend
 
 ```bash
-cd backend-java
+cd backend
 mvnw.cmd spring-boot:run
 ```
 
 #### 3. Iniciar Frontend
 
 ```bash
-cd frontend-next
+cd frontend
 npm install
 npm run dev
 ```
@@ -162,7 +162,7 @@ docker --version
 
 ```bash
 # Limpiar y recompilar
-cd backend-java
+cd backend
 mvnw.cmd clean install
 ```
 
@@ -170,7 +170,7 @@ mvnw.cmd clean install
 
 ```bash
 # Limpiar node_modules y reinstalar
-cd frontend-next
+cd frontend
 rmdir /s /q node_modules
 rmdir /s /q .next
 npm install
@@ -181,7 +181,7 @@ npm run dev
 
 1. ✅ Configurar Keycloak (completado arriba)
 2. 📖 Leer `FASE_0_COMPLETADA.md` para ver qué está implementado
-3. 🔍 Explorar el código en `frontend-next/` y `backend-java/`
+3. 🔍 Explorar el código en `frontend/` y `backend/`
 4. 🚀 Comenzar a desarrollar las siguientes fases
 
 ## 💡 Tips
@@ -189,7 +189,7 @@ npm run dev
 - **Hot Reload**: Tanto frontend como backend tienen hot reload activado
 - **Logs**: Revisa las consolas para ver errores
 - **Base de Datos**: Usa pgAdmin para ver las tablas creadas
-- **API Docs**: Los endpoints están documentados en `backend-java/README.md`
+- **API Docs**: Los endpoints están documentados en `backend/README.md`
 
 ## 🆘 Ayuda
 

@@ -12,7 +12,7 @@
 ### Backend
 - ✅ Java 21 instalado
 - ⚠️ Maven instalado (o usar IDE)
-- ✅ MySQL corriendo en XAMPP (puerto 3306)
+- ✅ MySQL corriendo en XAMPP (puerto 3307 preferable o 3306)
 - ✅ Base de datos `sistema_tthh` creada
 
 ### Frontend
@@ -41,7 +41,7 @@ El script:
 
 ```powershell
 # Navegar al backend
-cd backend-java
+cd backend
 
 # Compilar (si Maven está en PATH)
 mvn clean install -DskipTests
@@ -55,7 +55,7 @@ mvn spring-boot:run
 ## 🚀 Opción 3: Iniciar Backend desde IDE (Más Fácil)
 
 ### IntelliJ IDEA:
-1. Abrir `backend-java` como proyecto Maven
+1. Abrir `backend` como proyecto Maven
 2. Esperar a que descargue dependencias
 3. Buscar clase: `TthhApplication.java`
 4. Click derecho → Run 'TthhApplication'
@@ -63,12 +63,12 @@ mvn spring-boot:run
 
 ### Eclipse:
 1. Import → Existing Maven Project
-2. Seleccionar `backend-java`
+2. Seleccionar `backend`
 3. Buscar `TthhApplication.java`
 4. Run As → Java Application
 
 ### VS Code:
-1. Abrir carpeta `backend-java`
+1. Abrir carpeta `backend`
 2. Instalar extensión "Extension Pack for Java"
 3. Abrir `TthhApplication.java`
 4. Click en "Run" arriba del método main()
@@ -136,7 +136,7 @@ taskkill /PID <numero> /F
 1. Verificar XAMPP MySQL corriendo
 2. Verificar `application.yml`:
    ```yaml
-   url: jdbc:mysql://localhost:3306/sistema_tthh
+   url: jdbc:mysql://localhost:3307/sistema_tthh
    username: root
    password: 
    ```
@@ -157,7 +157,7 @@ docker-compose up -d
 |----------|--------|-----|
 | Frontend | 3000 | http://localhost:3000 |
 | Backend | 8080 | http://localhost:8080/api/v1 |
-| MySQL | 3306 | localhost:3306 |
+| MySQL | 3307 | localhost:3307 |
 | Keycloak | 8081 | http://localhost:8081 |
 | phpMyAdmin | 80 | http://localhost/phpmyadmin |
 

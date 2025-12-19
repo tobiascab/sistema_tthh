@@ -15,6 +15,7 @@ import {
 } from "@/src/components/ui/select";
 import { Empleado, EmpleadoFormData } from "@/src/types/empleado";
 import { Loader2 } from "lucide-react";
+import { DateStringInput } from "@/src/components/ui/date-input";
 
 const empleadoSchema = z.object({
     nombres: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
@@ -166,11 +167,12 @@ export function EmpleadoForm({ empleado, onSubmit, onCancel, isLoading }: Emplea
 
                     <div className="space-y-2">
                         <Label htmlFor="fechaNacimiento">Fecha de Nacimiento *</Label>
-                        <Input
+                        <DateStringInput
                             id="fechaNacimiento"
-                            type="date"
-                            {...register("fechaNacimiento")}
-                            className={errors.fechaNacimiento ? "border-destructive" : ""}
+                            value={watch("fechaNacimiento") || ""}
+                            onChange={(val) => setValue("fechaNacimiento", val)}
+                            placeholder="DD/MM/AA"
+                            className={errors.fechaNacimiento ? "[&>input]:border-destructive" : ""}
                         />
                         {errors.fechaNacimiento && (
                             <p className="text-sm text-destructive">{errors.fechaNacimiento.message}</p>
@@ -279,11 +281,12 @@ export function EmpleadoForm({ empleado, onSubmit, onCancel, isLoading }: Emplea
 
                     <div className="space-y-2">
                         <Label htmlFor="fechaIngreso">Fecha de Ingreso *</Label>
-                        <Input
+                        <DateStringInput
                             id="fechaIngreso"
-                            type="date"
-                            {...register("fechaIngreso")}
-                            className={errors.fechaIngreso ? "border-destructive" : ""}
+                            value={watch("fechaIngreso") || ""}
+                            onChange={(val) => setValue("fechaIngreso", val)}
+                            placeholder="DD/MM/AA"
+                            className={errors.fechaIngreso ? "[&>input]:border-destructive" : ""}
                         />
                         {errors.fechaIngreso && (
                             <p className="text-sm text-destructive">{errors.fechaIngreso.message}</p>

@@ -51,6 +51,7 @@ import { ausenciasApi } from "@/src/lib/api/ausencias";
 import { AusenciaFormData } from "@/src/types/ausencia";
 import { toast } from "@/src/hooks/use-toast";
 import { cn } from "@/src/lib/utils";
+import { DateInput } from "@/src/components/ui/date-input";
 
 const tiposAusencia = [
     { value: 'VACACIONES', label: 'Vacaciones', description: 'Días de descanso anuales' },
@@ -133,12 +134,14 @@ export function NuevaAusenciaDialog({
     });
 
     const onSubmit = (values: FormValues) => {
+        const dias = differenceInDays(values.fechaFin, values.fechaInicio) + 1;
         const data: AusenciaFormData = {
             empleadoId,
             tipo: values.tipo,
             fechaInicio: format(values.fechaInicio, 'yyyy-MM-dd'),
             fechaFin: format(values.fechaFin, 'yyyy-MM-dd'),
-            observacion: values.observacion,
+            diasSolicitados: dias,
+            observaciones: values.observacion,
             documentoAdjunto: selectedFile || undefined,
         };
         createMutation.mutate(data);
@@ -215,37 +218,13 @@ export function NuevaAusenciaDialog({
                             render={({ field }) => (
                                 <FormItem className="flex flex-col">
                                     <FormLabel>Fecha de Inicio</FormLabel>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <FormControl>
-                                                <Button
-                                                    variant="outline"
-                                                    className={cn(
-                                                        "w-full pl-3 text-left font-normal",
-                                                        !field.value && "text-muted-foreground"
-                                                    )}
-                                                >
-                                                    {field.value ? (
-                                                        format(field.value, "PPP", { locale: es })
-                                                    ) : (
-                                                        <span>Selecciona una fecha</span>
-                                                    )}
-                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                </Button>
-                                            </FormControl>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0" align="start">
-                                            <Calendar
-                                                mode="single"
-                                                selected={field.value}
-                                                onSelect={field.onChange}
-                                                disabled={(date) =>
-                                                    date < new Date(new Date().setHours(0, 0, 0, 0))
-                                                }
-                                                initialFocus
-                                            />
-                                        </PopoverContent>
-                                    </Popover>
+                                    <FormControl>
+                                        <DateInput
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            placeholder="DD/MM/AA"
+                                        />
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -258,37 +237,13 @@ export function NuevaAusenciaDialog({
                             render={({ field }) => (
                                 <FormItem className="flex flex-col">
                                     <FormLabel>Fecha de Fin</FormLabel>
-                                    <Popover>
-                                        <PopoverTrigger asChild>
-                                            <FormControl>
-                                                <Button
-                                                    variant="outline"
-                                                    className={cn(
-                                                        "w-full pl-3 text-left font-normal",
-                                                        !field.value && "text-muted-foreground"
-                                                    )}
-                                                >
-                                                    {field.value ? (
-                                                        format(field.value, "PPP", { locale: es })
-                                                    ) : (
-                                                        <span>Selecciona una fecha</span>
-                                                    )}
-                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                </Button>
-                                            </FormControl>
-                                        </PopoverTrigger>
-                                        <PopoverContent className="w-auto p-0" align="start">
-                                            <Calendar
-                                                mode="single"
-                                                selected={field.value}
-                                                onSelect={field.onChange}
-                                                disabled={(date) =>
-                                                    date < (watchFechaInicio || new Date(new Date().setHours(0, 0, 0, 0)))
-                                                }
-                                                initialFocus
-                                            />
-                                        </PopoverContent>
-                                    </Popover>
+                                    <FormControl>
+                                        <DateInput
+                                            value={field.value}
+                                            onChange={field.onChange}
+                                            placeholder="DD/MM/AA"
+                                        />
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}

@@ -21,9 +21,10 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 @Transactional
-@lombok.extern.slf4j.Slf4j
 @SuppressWarnings("null")
 public class ReciboSalarioServiceImpl implements ReciboSalarioService {
+
+        private static final org.slf4j.Logger log = org.slf4j.LoggerFactory.getLogger(ReciboSalarioServiceImpl.class);
 
         private final ReciboSalarioRepository reciboSalarioRepository;
         private final EmpleadoRepository empleadoRepository;
