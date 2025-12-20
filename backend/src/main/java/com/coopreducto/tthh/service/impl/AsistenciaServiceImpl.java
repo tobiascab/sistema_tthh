@@ -14,10 +14,14 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 @Slf4j
@@ -33,6 +37,13 @@ public class AsistenciaServiceImpl implements AsistenciaService {
 
     // Horario de entrada predeterminado: 08:00 AM
     private static final LocalTime HORARIO_ENTRADA = LocalTime.of(8, 0);
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<AsistenciaDTO> listarTodas(Pageable pageable) {
+        return asistenciaRepository.findAll(pageable)
+                .map(asistenciaMapper::toDTO);
+    }
 
     @Override
     public AsistenciaDTO registrarAsistencia(AsistenciaDTO dto) {
@@ -158,11 +169,56 @@ public class AsistenciaServiceImpl implements AsistenciaService {
         return asistenciaMapper.toDTO(asistenciaRepository.save(asistencia));
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public com.coopreducto.tthh.dto.AttendanceGlobalReportDTO obtenerReporteGlobal(int anio, int mes) {
+        log.info("Generando reporte global de asistencia para {}-{}", anio, mes);
+        List<Empleado> empleados = empleadoRepository.findAll();
+        List<com.coopreducto.tthh.dto.AttendanceGlobalReportDTO.ColaboradorTardanzaDTO> listado = new ArrayList<>();
+
+        for (Empleado e : empleados) {
+            Long minutos = asistenciaRepository.sumMinutosRetrasoMensual(e.getId(), mes, anio);
+            Long cantTardanzas = asistenciaRepository.countTardanzasMensual(e.getId(), mes, anio);
+
+            if (minutos > 0 || cantTardanzas > 0) {
+                BigDecimal salario = e.getSalario() != null ? e.getSalario() : BigDecimal.ZERO;
+                BigDecimal salarioDiario = salario.divide(new BigDecimal("30"), 2, RoundingMode.HALF_UP);
+                BigDecimal salarioHora = salarioDiario.divide(new BigDecimal("8"), 2, RoundingMode.HALF_UP);
+                BigDecimal salarioMinuto = salarioHora.divide(new BigDecimal("60"), 2, RoundingMode.HALF_UP);
+                BigDecimal descuento = salarioMinuto.multiply(BigDecimal.valueOf(minutos));
+
+                listado.add(com.coopreducto.tthh.dto.AttendanceGlobalReportDTO.ColaboradorTardanzaDTO.builder()
+                        .empleadoId(e.getId())
+                        .colaborador(e.getNombreCompleto())
+                        .cantidadTardanzas(cantTardanzas.intValue())
+                        .totalMinutosRetraso(minutos)
+                        .totalDescuento(descuento)
+                        .build());
+            }
+        }
+
+        // Ordenar por total descuento (descendente)
+        listado.sort(Comparator
+                .comparing(com.coopreducto.tthh.dto.AttendanceGlobalReportDTO.ColaboradorTardanzaDTO::getTotalDescuento)
+                .reversed());
+
+        return com.coopreducto.tthh.dto.AttendanceGlobalReportDTO.builder()
+                .anio(anio)
+                .mes(mes)
+                .tardanzas(listado)
+                .build();
+    }
+
     private void calcularRetraso(Asistencia asistencia) {
-        if (asistencia.getHoraEntrada() != null) {
+        if (asistencia.getHoraEntrada() != null && asistencia.getEmpleado() != null) {
+            LocalTime horaEstablecida = asistencia.getEmpleado().getHorarioEntrada();
+            if (horaEstablecida == null) {
+                horaEstablecida = LocalTime.of(8, 0); // Fallback predeterminado
+            }
+
             LocalTime horaLlegada = asistencia.getHoraEntrada().toLocalTime();
-            if (horaLlegada.isAfter(HORARIO_ENTRADA.plusMinutes(15))) { // 15 min de tolerancia
-                long minutos = ChronoUnit.MINUTES.between(HORARIO_ENTRADA, horaLlegada);
+            if (horaLlegada.isAfter(horaEstablecida)) {
+                long minutos = ChronoUnit.MINUTES.between(horaEstablecida, horaLlegada);
                 asistencia.setMinutosRetraso((int) minutos);
                 asistencia.setTipo("TARDANZA");
             } else {

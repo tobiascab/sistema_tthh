@@ -1,0 +1,7 @@
+{
+  "/page": "app/page.js",
+  "/(private)/dashboard/page": "app/(private)/dashboard/page.js",
+  "/(private)/tthh/empleados/page": "app/(private)/tthh/empleados/page.js",
+  "/(private)/tthh/nominas/page": "app/(private)/tthh/nominas/page.js",
+  "/(private)/colaborador/recibos/page": "app/(private)/colaborador/recibos/page.js"
+}

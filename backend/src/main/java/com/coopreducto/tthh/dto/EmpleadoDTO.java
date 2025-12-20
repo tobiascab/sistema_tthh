@@ -152,6 +152,8 @@ public class EmpleadoDTO {
     @Size(max = 100, message = "El jefe inmediato no puede exceder 100 caracteres")
     private String jefeInmediato;
 
+    private java.time.LocalTime horarioEntrada;
+
     @DecimalMin(value = "0.0", message = "El salario no puede ser negativo")
     private BigDecimal salario;
 

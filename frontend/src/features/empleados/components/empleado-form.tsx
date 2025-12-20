@@ -16,6 +16,7 @@ import {
 import { Empleado, EmpleadoFormData } from "@/src/types/empleado";
 import { Loader2 } from "lucide-react";
 import { DateStringInput } from "@/src/components/ui/date-input";
+import { SUCURSALES } from "@/src/constants/sucursales";
 
 const empleadoSchema = z.object({
     nombres: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
@@ -35,6 +36,7 @@ const empleadoSchema = z.object({
     fechaIngreso: z.string().min(1, "La fecha de ingreso es requerida"),
     tipoContrato: z.string().optional(),
     salarioBase: z.number().optional(),
+    horarioEntrada: z.string().optional(),
     estado: z.enum(["ACTIVO", "INACTIVO", "SUSPENDIDO"]),
 });
 
@@ -268,13 +270,11 @@ export function EmpleadoForm({ empleado, onSubmit, onCancel, isLoading }: Emplea
                                 <SelectValue placeholder="Seleccione" />
                             </SelectTrigger>
                             <SelectContent>
-                                <SelectItem value="Casa Central">Casa Central</SelectItem>
-                                <SelectItem value="Sucursal 5">Sucursal 5</SelectItem>
-                                <SelectItem value="Centro Medico Reducto">Centro Medico Reducto</SelectItem>
-                                <SelectItem value="San Lorenzo Centro">San Lorenzo Centro</SelectItem>
-                                <SelectItem value="Hernandarias">Hernandarias</SelectItem>
-                                <SelectItem value="Ciudad del Este">Ciudad del Este</SelectItem>
-                                <SelectItem value="Villarrica">Villarrica</SelectItem>
+                                {SUCURSALES.map((sucursal) => (
+                                    <SelectItem key={sucursal} value={sucursal}>
+                                        {sucursal}
+                                    </SelectItem>
+                                ))}
                             </SelectContent>
                         </Select>
                     </div>
@@ -319,6 +319,15 @@ export function EmpleadoForm({ empleado, onSubmit, onCancel, isLoading }: Emplea
                             step="0.01"
                             {...register("salarioBase", { valueAsNumber: true })}
                             placeholder="0.00"
+                        />
+                    </div>
+
+                    <div className="space-y-2">
+                        <Label htmlFor="horarioEntrada">Horario de Entrada</Label>
+                        <Input
+                            id="horarioEntrada"
+                            type="time"
+                            {...register("horarioEntrada")}
                         />
                     </div>
 

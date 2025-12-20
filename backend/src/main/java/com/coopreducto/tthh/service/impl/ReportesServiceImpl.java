@@ -11,6 +11,7 @@ import org.springframework.cache.annotation.Cacheable;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Slf4j
@@ -50,13 +51,21 @@ public class ReportesServiceImpl implements ReportesService {
             }
 
             // Distribución por departamento (Real)
-            List<Object[]> sucStats = empleadoRepository.countBySucursal();
-            Map<String, Long> porSucursal = new HashMap<>();
-            for (Object[] row : sucStats) {
-                porSucursal.put((String) row[0], (Long) row[1]);
+            try {
+                List<Object[]> sucStats = empleadoRepository.countBySucursal();
+                Map<String, Long> porSucursal = new HashMap<>();
+                if (sucStats != null) {
+                    for (Object[] row : sucStats) {
+                        if (row != null && row.length >= 2 && row[0] != null) {
+                            porSucursal.put(row[0].toString(), (Long) row[1]);
+                        }
+                    }
+                }
+                dashboard.setColaboradoresPorDepartamento(porSucursal);
+            } catch (Exception e) {
+                log.error("Error en distribución por sucursal: {}", e.getMessage());
+                dashboard.setColaboradoresPorDepartamento(new HashMap<>());
             }
-            // Mapeamos sucursal a departamento para el dashboard por ahora
-            dashboard.setColaboradoresPorDepartamento(porSucursal);
 
             // Solicitudes por estado
             Map<String, Long> porEstado = new HashMap<>();
@@ -144,6 +153,8 @@ public class ReportesServiceImpl implements ReportesService {
                 nominaTotal = BigDecimal.ZERO;
             dashboard.setNominaMensualEstimada(nominaTotal);
 
+            log.info("KPIs cargados con éxito para {} empleados.", dashboard.getColaboradoresActivos());
+
             // Simular nómina pagada (95% de la estimada como ejemplo)
             dashboard.setNominaMensualPagada(nominaTotal.multiply(new BigDecimal("0.95")));
 
@@ -179,20 +190,24 @@ public class ReportesServiceImpl implements ReportesService {
             // Últimas solicitudes pendientes (Top 20)
             List<DashboardAdminDTO.SolicitudResumenDTO> ultimas = new ArrayList<>();
             try {
-                // Necesitamos importar Solicitud si no está, asumimos que sí o usamos FQN
                 List<com.coopreducto.tthh.entity.Solicitud> pendientes = solicitudRepository
                         .findTop20ByEstadoOrderByCreatedAtDesc("PENDIENTE");
-                for (com.coopreducto.tthh.entity.Solicitud s : pendientes) {
-                    ultimas.add(new DashboardAdminDTO.SolicitudResumenDTO(
-                            s.getId(),
-                            s.getTitulo(),
-                            s.getTipo(),
-                            s.getEstado(),
-                            s.getPrioridad(),
-                            s.getEmpleado() != null
-                                    ? s.getEmpleado().getNombres() + " " + s.getEmpleado().getApellidos()
-                                    : "Sin asignar",
-                            s.getCreatedAt().toString()));
+                if (pendientes != null) {
+                    for (com.coopreducto.tthh.entity.Solicitud s : pendientes) {
+                        if (s == null)
+                            continue;
+                        ultimas.add(new DashboardAdminDTO.SolicitudResumenDTO(
+                                s.getId(),
+                                s.getTitulo() != null ? s.getTitulo() : "Sin título",
+                                s.getTipo() != null ? s.getTipo() : "OTRO",
+                                s.getEstado() != null ? s.getEstado() : "PENDIENTE",
+                                s.getPrioridad() != null ? s.getPrioridad() : "MEDIA",
+                                s.getEmpleado() != null
+                                        ? s.getEmpleado().getNombres() + " " + s.getEmpleado().getApellidos()
+                                        : "Sin asignar",
+                                s.getCreatedAt() != null ? s.getCreatedAt().toString()
+                                        : LocalDateTime.now().toString()));
+                    }
                 }
             } catch (Exception ex) {
                 log.error("Error cargando solicitudes pendientes: " + ex.getMessage());
@@ -314,12 +329,21 @@ public class ReportesServiceImpl implements ReportesService {
         reporte.put("porEdad", porEdad);
 
         // Sucursal
-        List<Object[]> sucursalStats = empleadoRepository.countBySucursal();
-        Map<String, Long> porSucursal = new HashMap<>();
-        for (Object[] row : sucursalStats) {
-            porSucursal.put((String) row[0], (Long) row[1]);
+        try {
+            List<Object[]> sucursalStats = empleadoRepository.countBySucursal();
+            Map<String, Long> porSucursal = new HashMap<>();
+            if (sucursalStats != null) {
+                for (Object[] row : sucursalStats) {
+                    if (row != null && row.length >= 2) {
+                        porSucursal.put(row[0] != null ? row[0].toString() : "SIN SUCURSAL", (Long) row[1]);
+                    }
+                }
+            }
+            reporte.put("porSucursal", porSucursal);
+        } catch (Exception e) {
+            log.error("Error en reporte demografía (sucursal): {}", e.getMessage());
+            reporte.put("porSucursal", new HashMap<>());
         }
-        reporte.put("porSucursal", porSucursal);
 
         return reporte;
     }

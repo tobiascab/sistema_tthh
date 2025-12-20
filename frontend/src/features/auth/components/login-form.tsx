@@ -35,19 +35,19 @@ export function LoginForm() {
     } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
         defaultValues: {
-            username: 'admin.tthh',
-            password: 'password' // Default password for dev
+            username: 'admin',
+            password: 'admin123'
         }
     });
 
     const handleTabChange = (tab: 'admin' | 'colaborador') => {
         setActiveTab(tab);
         if (tab === 'admin') {
-            setValue('username', 'admin.tthh');
-            setValue('password', 'password');
+            setValue('username', 'admin');
+            setValue('password', 'admin123');
         } else {
-            setValue('username', 'colaborador.test');
-            setValue('password', 'password');
+            setValue('username', 'empleado_0.CI-5000000');
+            setValue('password', 'admin123');
         }
     };
 

@@ -12,6 +12,7 @@ import { EmpleadoForm } from "@/src/features/empleados/components/empleado-form"
 import { DocumentosList } from "@/src/features/documentos/components/documentos-list";
 import { SolicitudesList } from "@/src/features/solicitudes/components/solicitudes-list";
 import { RecibosList } from "@/src/features/payroll/components/recibos-list";
+import { ComisionesList } from "@/src/features/comisiones/components/comisiones-list";
 import { EmpleadoFormData } from "@/src/types/empleado";
 import { useToast } from "@/src/hooks/use-toast";
 import { AvatarUpload } from "@/src/features/empleados/components/avatar-upload";
@@ -141,6 +142,13 @@ export default function EmpleadoDetailPage({ params }: EmpleadoDetailPageProps) 
                             Recibos de Salario
                         </TabsTrigger>
                         <TabsTrigger
+                            value="comisiones"
+                            className="h-12 border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 rounded-none px-0"
+                        >
+                            <DollarSign className="w-4 h-4 mr-2" />
+                            Comisiones
+                        </TabsTrigger>
+                        <TabsTrigger
                             value="asistencia"
                             className="h-12 border-b-2 border-transparent data-[state=active]:border-green-600 data-[state=active]:text-green-700 rounded-none px-0"
                         >
@@ -174,6 +182,10 @@ export default function EmpleadoDetailPage({ params }: EmpleadoDetailPageProps) 
 
                     <TabsContent value="recibos" className="m-0 focus-visible:outline-none">
                         <RecibosList empleadoId={empleadoId} isAdmin={true} />
+                    </TabsContent>
+
+                    <TabsContent value="comisiones" className="m-0 focus-visible:outline-none">
+                        <ComisionesList empleadoId={empleadoId} isAdmin={true} />
                     </TabsContent>
 
                     <TabsContent value="asistencia" className="m-0 focus-visible:outline-none">

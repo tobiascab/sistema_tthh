@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { GenerarPlanillaDialog } from "./generar-planilla-dialog";
 import { Button } from "@/src/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
@@ -14,35 +14,78 @@ import {
     Users,
     ArrowRight,
     TrendingUp,
-    FileText
+    FileText,
+    CheckCircle2,
+    Clock,
+    Lock
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { motion } from "framer-motion";
-import { MESES } from "@/src/types/payroll";
-
-// Mock data until we have a proper endpoint for "Payroll Runs"
-const MOCK_NOMINAS = [
-    { id: 1, mes: 11, anio: 2025, totalEmpleados: 148, totalNeto: 450000000, estado: "CERRADA", fechaGeneracion: "2025-11-25T10:00:00" },
-    { id: 2, mes: 10, anio: 2025, totalEmpleados: 145, totalNeto: 442000000, estado: "CERRADA", fechaGeneracion: "2025-10-25T09:30:00" },
-    { id: 3, mes: 9, anio: 2025, totalEmpleados: 142, totalNeto: 438000000, estado: "CERRADA", fechaGeneracion: "2025-09-26T11:15:00" },
-];
+import { payrollApi } from "@/src/lib/api/payroll";
+import { MESES, ESTADOS_RECIBO } from "@/src/types/payroll";
+import { useToast } from "@/src/hooks/use-toast";
 
 export function NominaDashboard() {
+    const { toast } = useToast();
+    const queryClient = useQueryClient();
     const [isGenerarOpen, setIsGenerarOpen] = useState(false);
 
-    // In a real app, useQuery to fetch /api/payroll/nominas
-    const { data: nominas = MOCK_NOMINAS, isLoading } = useQuery({
-        queryKey: ["nominas"],
-        queryFn: async () => {
-            // Simulate API call
-            await new Promise(r => setTimeout(r, 1000));
-            return MOCK_NOMINAS;
+    // Obtener datos reales del dashboard
+    const { data: dashboard, isLoading } = useQuery({
+        queryKey: ["payroll-dashboard"],
+        queryFn: () => payrollApi.getDashboardSummary(),
+    });
+
+    // Mutación para cerrar/aprobar nómina
+    const closeMutation = useMutation({
+        mutationFn: ({ anio, mes }: { anio: number; mes: number }) => payrollApi.cerrar(anio, mes),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["payroll-dashboard"] });
+            toast({
+                title: "Nómina Cerrada",
+                description: "La planilla ha sido aprobada y los recibos están disponibles.",
+            });
+        },
+        onError: () => {
+            toast({
+                title: "Error",
+                description: "No se pudo cerrar la nómina.",
+                variant: "destructive",
+            });
         }
     });
 
+    const nominas = dashboard?.historial || [];
+
     const formatCurrency = (val: number) =>
         new Intl.NumberFormat("es-PY", { style: "currency", currency: "PYG", maximumFractionDigits: 0 }).format(val);
+
+    const handleExport = async (anio: number, mes: number) => {
+        try {
+            const blob = await payrollApi.exportPlanilla(anio, mes);
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `planilla_bancaria_${mes}_${anio}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            toast({
+                title: "Exportación exitosa",
+                description: "La planilla bancaria se ha descargado correctamente.",
+            });
+        } catch (error) {
+            console.error("Error exporting bank sheet:", error);
+            toast({
+                title: "Error",
+                description: "No se pudo exportar la planilla bancaria.",
+                variant: "destructive",
+            });
+        }
+    };
 
     return (
         <div className="space-y-8">
@@ -77,10 +120,10 @@ export function NominaDashboard() {
                         <DollarSign className="h-4 w-4 text-emerald-600" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-neutral-900">{formatCurrency(1330000000)}</div>
+                        <div className="text-2xl font-bold text-neutral-900">{formatCurrency(dashboard?.totalPagadoAnio || 0)}</div>
                         <p className="text-xs text-emerald-600 flex items-center mt-1 font-medium">
                             <TrendingUp className="w-3 h-3 mr-1" />
-                            +12% vs año anterior
+                            Acumulado real
                         </p>
                     </CardContent>
                 </Card>
@@ -92,9 +135,11 @@ export function NominaDashboard() {
                         <Calendar className="h-4 w-4 text-blue-600" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-neutral-900">{formatCurrency(450000000)}</div>
+                        <div className="text-2xl font-bold text-neutral-900">{formatCurrency(dashboard?.ultimoMontoNeto || 0)}</div>
                         <p className="text-xs text-neutral-500 mt-1">
-                            Noviembre 2025
+                            {dashboard?.mesUltimaNomina ?
+                                `${MESES.find(m => m.value === dashboard.mesUltimaNomina)?.label} ${dashboard.anioUltimaNomina}` :
+                                "Sin registros"}
                         </p>
                     </CardContent>
                 </Card>
@@ -106,9 +151,9 @@ export function NominaDashboard() {
                         <Users className="h-4 w-4 text-purple-600" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-neutral-900">148</div>
+                        <div className="text-2xl font-bold text-neutral-900">{dashboard?.ultimoConteoEmpleados || 0}</div>
                         <p className="text-xs text-neutral-500 mt-1">
-                            Activos en último cierre
+                            En el último periodo generado
                         </p>
                     </CardContent>
                 </Card>
@@ -140,7 +185,7 @@ export function NominaDashboard() {
                                 </TableRow>
                             ) : (
                                 nominas.map((nomina) => (
-                                    <TableRow key={nomina.id} className="hover:bg-neutral-50 transition-colors">
+                                    <TableRow key={`${nomina.anio}-${nomina.mes}`} className="hover:bg-neutral-50 transition-colors">
                                         <TableCell className="pl-6 font-medium text-neutral-900">
                                             {MESES.find(m => m.value === nomina.mes)?.label} {nomina.anio}
                                         </TableCell>
@@ -154,15 +199,42 @@ export function NominaDashboard() {
                                             {formatCurrency(nomina.totalNeto)}
                                         </TableCell>
                                         <TableCell>
-                                            <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200">
-                                                {nomina.estado}
+                                            <Badge variant="outline" className={ESTADOS_RECIBO[nomina.estado as keyof typeof ESTADOS_RECIBO]?.color || "bg-neutral-50"}>
+                                                {nomina.estado === 'BORRADOR' && <Clock className="w-3 h-3 mr-1" />}
+                                                {nomina.estado === 'GENERADO' && <CheckCircle2 className="w-3 h-3 mr-1" />}
+                                                {ESTADOS_RECIBO[nomina.estado as keyof typeof ESTADOS_RECIBO]?.label || nomina.estado}
                                             </Badge>
                                         </TableCell>
                                         <TableCell className="text-right pr-6">
-                                            <Button variant="ghost" size="sm" className="hover:text-emerald-600">
-                                                Ver Detalle
-                                                <ArrowRight className="ml-2 w-4 h-4" />
-                                            </Button>
+                                            <div className="flex justify-end gap-2">
+                                                {nomina.estado === 'BORRADOR' && (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="border-emerald-200 text-emerald-700 hover:bg-emerald-50"
+                                                        onClick={() => closeMutation.mutate({ anio: nomina.anio, mes: nomina.mes })}
+                                                        disabled={closeMutation.isPending}
+                                                    >
+                                                        {closeMutation.isPending ? "Cerrando..." : "Cerrar Nómina"}
+                                                        <Lock className="ml-2 w-3 h-3" />
+                                                    </Button>
+                                                )}
+                                                {(nomina.estado === 'GENERADO' || nomina.estado === 'ENVIADO') && (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                                                        onClick={() => handleExport(nomina.anio, nomina.mes)}
+                                                    >
+                                                        Planilla Bancaria
+                                                        <FileText className="ml-2 w-3 h-3" />
+                                                    </Button>
+                                                )}
+                                                <Button variant="ghost" size="sm" className="hover:text-emerald-600">
+                                                    Ver Detalle
+                                                    <ArrowRight className="ml-2 w-4 h-4" />
+                                                </Button>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ))

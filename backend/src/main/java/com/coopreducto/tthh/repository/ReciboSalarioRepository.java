@@ -17,6 +17,8 @@ public interface ReciboSalarioRepository
 
     Page<ReciboSalario> findByEmpleado(Empleado empleado, Pageable pageable);
 
+    Page<ReciboSalario> findByEmpleadoAndAnio(Empleado empleado, Integer anio, Pageable pageable);
+
     List<ReciboSalario> findByEmpleadoOrderByAnioDescMesDesc(Empleado empleado);
 
     List<ReciboSalario> findByEmpleadoAndAnioOrderByMesDesc(Empleado empleado, Integer anio);
@@ -29,5 +31,6 @@ public interface ReciboSalarioRepository
 
     Page<ReciboSalario> findByAnio(Integer anio, Pageable pageable);
 
-    Page<ReciboSalario> findByEmpleadoAndAnio(Empleado empleado, Integer anio, Pageable pageable);
+    @org.springframework.data.jpa.repository.Query("SELECT r.anio, r.mes, COUNT(r), SUM(r.salarioNeto), MAX(r.estado), MAX(r.createdAt) FROM ReciboSalario r GROUP BY r.anio, r.mes ORDER BY r.anio DESC, r.mes DESC")
+    List<Object[]> findPayrollRuns();
 }

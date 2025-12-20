@@ -33,21 +33,27 @@ public class PayrollController {
     @GetMapping
     @PreAuthorize("hasAnyRole('TTHH', 'GERENCIA', 'COLABORADOR')")
     public ResponseEntity<Page<ReciboSalarioDTO>> getRecibos(
+            @RequestParam(required = false) String sucursal,
             @RequestParam(required = false) Long empleadoId,
+            @RequestParam(required = false) Integer mes,
             @RequestParam(required = false) Integer anio,
             Authentication authentication,
             Pageable pageable) {
 
-        // Si es colaborador, solo puede ver sus propios recibos
-        if (authentication.getAuthorities().stream()
-                .anyMatch(a -> a.getAuthority().equals("ROLE_COLABORADOR"))) {
+        boolean isAdminOrManager = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_TTHH") || a.getAuthority().equals("ROLE_GERENCIA"));
+
+        // Si NO es admin ni gerente, y es colaborador (o cualquier otro rol
+        // restringido), solo puede ver sus propios recibos
+        if (!isAdminOrManager) {
             empleadoId = getCurrentUserId(authentication);
+            sucursal = null; // No filtrar por sucursal si es usuario normal
             if (empleadoId == null) {
                 return ResponseEntity.ok(org.springframework.data.domain.Page.empty());
             }
         }
 
-        return ResponseEntity.ok(reciboSalarioService.findByEmpleadoAndAnio(empleadoId, anio, pageable));
+        return ResponseEntity.ok(reciboSalarioService.findByFilters(sucursal, empleadoId, mes, anio, pageable));
     }
 
     @GetMapping("/{id}")
@@ -104,6 +110,21 @@ public class PayrollController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/summary")
+    @PreAuthorize("hasAnyRole('TTHH', 'GERENCIA')")
+    public ResponseEntity<com.coopreducto.tthh.dto.PayrollDashboardDTO> getSummary() {
+        return ResponseEntity.ok(reciboSalarioService.getDashboardSummary());
+    }
+
+    @PostMapping("/cerrar")
+    @PreAuthorize("hasAnyRole('TTHH', 'GERENCIA')")
+    public ResponseEntity<Void> cerrarNomina(
+            @RequestParam Integer anio,
+            @RequestParam Integer mes) {
+        reciboSalarioService.cerrarNomina(anio, mes);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping
     @PreAuthorize("hasRole('TTHH')")
     public ResponseEntity<ReciboSalarioDTO> createRecibo(@Valid @RequestBody ReciboSalarioDTO reciboDTO) {
@@ -116,5 +137,51 @@ public class PayrollController {
     public ResponseEntity<Void> sendReciboByEmail(@PathVariable Long id) {
         reciboSalarioService.sendByEmail(id);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/exportar-planilla")
+    @PreAuthorize("hasAnyRole('TTHH', 'GERENCIA')")
+    public ResponseEntity<Resource> exportarPlanilla(
+            @RequestParam Integer anio,
+            @RequestParam Integer mes) {
+        Resource resource = reciboSalarioService.exportarPlanillaBancaria(anio, mes);
+
+        return ResponseEntity.ok()
+                .contentType(
+                        MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"planilla_bancaria_" + mes + "_" + anio + ".xlsx\"")
+                .body(resource);
+    }
+
+    @GetMapping("/exportar-excel")
+    @PreAuthorize("hasAnyRole('TTHH', 'GERENCIA')")
+    public ResponseEntity<Resource> exportarExcel(
+            @RequestParam(required = false) String sucursal,
+            @RequestParam(required = false) Long empleadoId,
+            @RequestParam(required = false) Integer mes,
+            @RequestParam(required = false) Integer anio) {
+        Resource resource = reciboSalarioService.exportarExcel(sucursal, empleadoId, mes, anio);
+
+        return ResponseEntity.ok()
+                .contentType(
+                        MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"))
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"reporte_salarios.xlsx\"")
+                .body(resource);
+    }
+
+    @GetMapping("/exportar-pdf")
+    @PreAuthorize("hasAnyRole('TTHH', 'GERENCIA')")
+    public ResponseEntity<Resource> exportarPdf(
+            @RequestParam(required = false) String sucursal,
+            @RequestParam(required = false) Long empleadoId,
+            @RequestParam(required = false) Integer mes,
+            @RequestParam(required = false) Integer anio) {
+        Resource resource = reciboSalarioService.exportarPdf(sucursal, empleadoId, mes, anio);
+
+        return ResponseEntity.ok()
+                .contentType(MediaType.APPLICATION_PDF)
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"reporte_salarios.pdf\"")
+                .body(resource);
     }
 }

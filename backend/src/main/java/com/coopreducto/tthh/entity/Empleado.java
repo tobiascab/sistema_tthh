@@ -163,6 +163,9 @@ public class Empleado {
     @Column(length = 100)
     private String jefeInmediato; // Puede ser el nombre o ID de otro empleado
 
+    @Column
+    private java.time.LocalTime horarioEntrada;
+
     @Column(precision = 10, scale = 2)
     private BigDecimal salario;
 

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/cumpleanos")
+@RequestMapping("/api/cumpleanos")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
 public class CumpleanosController {

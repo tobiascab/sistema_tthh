@@ -2,8 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/src/features/auth/context/auth-context';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+import { get, post } from '@/src/lib/api/client';
 
 interface PushNotificationState {
     isSupported: boolean;
@@ -88,8 +87,7 @@ export function usePushNotifications() {
             await navigator.serviceWorker.ready;
 
             // Get VAPID public key from server
-            const response = await fetch(`${API_URL}/push/vapid-public-key`);
-            const { publicKey } = await response.json();
+            const { publicKey } = await get<{ publicKey: string }>('/push/vapid-public-key');
 
             // Convert VAPID key to Uint8Array
             const applicationServerKey = urlBase64ToUint8Array(publicKey);
@@ -105,12 +103,10 @@ export function usePushNotifications() {
                 hasRole('GERENCIA') ? 'GERENCIA' :
                     hasRole('COLABORADOR') ? 'COLABORADOR' : 'OTHER';
 
+            const usuarioId = user?.id ? `&usuarioId=${user.id}` : '';
+
             // Send subscription to server
-            await fetch(`${API_URL}/push/subscribe?rolName=${rolName}`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(subscription)
-            });
+            await post(`/push/subscribe?rolName=${rolName}${usuarioId}`, subscription);
 
             setState(prev => ({
                 ...prev,
@@ -129,7 +125,7 @@ export function usePushNotifications() {
             }));
             return false;
         }
-    }, [state.isSupported, hasRole]);
+    }, [state.isSupported, hasRole, user]);
 
     // Unsubscribe from push notifications
     const unsubscribe = useCallback(async () => {
@@ -142,11 +138,7 @@ export function usePushNotifications() {
             if (subscription) {
                 await subscription.unsubscribe();
 
-                await fetch(`${API_URL}/push/unsubscribe`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ endpoint: subscription.endpoint })
-                });
+                await post('/push/unsubscribe', { endpoint: subscription.endpoint });
             }
 
             setState(prev => ({

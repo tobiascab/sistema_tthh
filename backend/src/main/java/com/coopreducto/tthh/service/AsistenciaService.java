@@ -8,6 +8,8 @@ import java.util.List;
 
 public interface AsistenciaService {
 
+    Page<AsistenciaDTO> listarTodas(Pageable pageable);
+
     AsistenciaDTO registrarAsistencia(AsistenciaDTO asistenciaDTO);
 
     AsistenciaDTO actualizarAsistencia(Long id, AsistenciaDTO asistenciaDTO);
@@ -28,4 +30,6 @@ public interface AsistenciaService {
     AsistenciaDTO marcarReloj(Long empleadoId, String tipoMarca);
 
     AsistenciaDTO justificar(Long id, String motivo, String documentoUrl);
+
+    com.coopreducto.tthh.dto.AttendanceGlobalReportDTO obtenerReporteGlobal(int anio, int mes);
 }

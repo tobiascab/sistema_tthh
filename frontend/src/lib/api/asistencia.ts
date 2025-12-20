@@ -5,6 +5,16 @@ import { PageResponse, PaginationParams } from '@/src/types/api';
 const ASISTENCIA_URL = '/asistencia';
 
 export const asistenciaApi = {
+    // Listar todas las asistencias (admin)
+    getAll: async (params?: PaginationParams) => {
+        const queryParams = new URLSearchParams();
+        if (params?.page !== undefined) queryParams.append('page', params.page.toString());
+        if (params?.size !== undefined) queryParams.append('size', params.size.toString());
+        if (params?.sort) queryParams.append('sort', params.sort);
+
+        return get<PageResponse<Asistencia>>(`${ASISTENCIA_URL}?${queryParams.toString()}`);
+    },
+
     // Listar asistencia por empleado (paginado)
     getByEmpleado: async (empleadoId: number, params?: PaginationParams) => {
         const queryParams = new URLSearchParams();
@@ -33,5 +43,10 @@ export const asistenciaApi = {
     // Justificar
     justificar: async (id: number, motivo: string) => {
         return put<Asistencia>(`${ASISTENCIA_URL}/${id}/justificar?motivo=${encodeURIComponent(motivo)}`);
+    },
+
+    // Obtener reporte global de tardanzas y descuentos
+    getReporteGlobal: async (anio: number, mes: number) => {
+        return get<import('@/src/types/asistencia').AttendanceGlobalReport>(`${ASISTENCIA_URL}/reporte-global?anio=${anio}&mes=${mes}`);
     }
 };

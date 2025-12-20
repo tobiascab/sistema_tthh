@@ -12,8 +12,10 @@ import { Badge } from "@/src/components/ui/badge";
 import { Card, CardContent } from "@/src/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/src/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/components/ui/tabs";
+import { SalaryReceiptCard } from "@/src/features/payroll/components/salary-receipt-card";
 import { useAuth } from "@/src/features/auth/context/auth-context";
 import { cn } from "@/src/lib/utils";
+import { SUCURSALES } from "@/src/constants/sucursales";
 
 export function RecibosView() {
     const { hasRole, user } = useAuth();
@@ -55,10 +57,7 @@ export function RecibosView() {
         : undefined; // Si es colaborador normal, el backend lo deduce o usa el contexto
 
     // Extraer sucursales únicas
-    const sucursales = useMemo(() => {
-        const s = new Set(empleados.map(e => e.sucursal).filter(Boolean));
-        return Array.from(s).sort();
-    }, [empleados]);
+    const sucursales = SUCURSALES;
 
     // Filtrar empleados por sucursal seleccionada
     const empleadosFiltrados = useMemo(() => {
@@ -365,85 +364,13 @@ export function RecibosView() {
                         {/* ... (Loop de recibos igual que antes) */}
                         {filteredRecibos.length > 0 ? (
                             filteredRecibos.map((recibo) => (
-                                <div
+                                <SalaryReceiptCard
                                     key={recibo.id}
-                                    className="bg-white rounded-xl border border-neutral-200 p-6 hover:shadow-md transition-shadow relative overflow-hidden group"
-                                >
-                                    <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
-                                        <FileText className="w-24 h-24 text-green-600 transform rotate-12" />
-                                    </div>
-                                    <div className="flex items-center justify-between mb-4 relative z-10">
-                                        <div className="flex items-center gap-3">
-                                            <div className="p-2 bg-green-100 rounded-lg">
-                                                <FileText className="w-5 h-5 text-green-600" />
-                                            </div>
-                                            <div>
-                                                <h3 className="text-lg font-semibold text-neutral-800">
-                                                    {getMesNombre(recibo.mes)}
-                                                </h3>
-                                                <p className="text-xs text-neutral-500">
-                                                    {new Date(recibo.fechaPago).toLocaleDateString()}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <Badge className={ESTADOS_RECIBO[recibo.estado]?.color || "bg-gray-100"}>
-                                            {ESTADOS_RECIBO[recibo.estado]?.label || recibo.estado}
-                                        </Badge>
-                                    </div>
-
-                                    {isAdminOrManager && (
-                                        <div className="text-xs text-neutral-500 mb-2 font-medium bg-neutral-50 p-1.5 rounded-lg inline-block">
-                                            {recibo.empleadoNombre}
-                                        </div>
-                                    )}
-
-                                    <div className="space-y-3 mb-6 relative z-10">
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-neutral-600">Salario Bruto</span>
-                                            <span className="font-medium">{formatCurrency(recibo.salarioBruto)}</span>
-                                        </div>
-                                        <div className="flex justify-between text-sm">
-                                            <span className="text-neutral-600">Descuentos</span>
-                                            <span className="font-medium text-red-600">
-                                                - {formatCurrency(
-                                                    (recibo.descuentosIps || 0) +
-                                                    (recibo.descuentosJubilacion || 0) +
-                                                    (recibo.otrosDescuentos || 0)
-                                                )}
-                                            </span>
-                                        </div>
-                                        {recibo.bonificaciones > 0 && (
-                                            <div className="flex justify-between text-sm">
-                                                <span className="text-neutral-600">Bonificaciones</span>
-                                                <span className="font-medium text-green-600">
-                                                    + {formatCurrency(recibo.bonificaciones)}
-                                                </span>
-                                            </div>
-                                        )}
-                                        <div className="pt-3 border-t border-neutral-100">
-                                            <div className="flex justify-between items-end">
-                                                <span className="font-semibold text-neutral-800">Neto a Cobrar</span>
-                                                <span className="font-bold text-green-700 text-lg">
-                                                    {formatCurrency(recibo.salarioNeto)}
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <Button
-                                        className="w-full bg-white border-2 border-green-600 text-green-700 hover:bg-green-50 relative z-10"
-                                        variant="outline"
-                                        onClick={() => handleDownloadPDF(recibo.id, `${recibo.mes}_${recibo.anio}`)}
-                                        disabled={downloadingId === recibo.id}
-                                    >
-                                        {downloadingId === recibo.id ? (
-                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-green-700 mr-2"></div>
-                                        ) : (
-                                            <Download className="w-4 h-4 mr-2" />
-                                        )}
-                                        {downloadingId === recibo.id ? "Descargando..." : "Descargar Recibo"}
-                                    </Button>
-                                </div>
+                                    recibo={recibo}
+                                    onDownload={handleDownloadPDF}
+                                    isDownloading={downloadingId === recibo.id}
+                                    showEmployeeName={isAdminOrManager}
+                                />
                             ))
                         ) : (
                             <div className="col-span-full flex flex-col items-center justify-center py-16 bg-white rounded-xl border border-neutral-200 border-dashed">

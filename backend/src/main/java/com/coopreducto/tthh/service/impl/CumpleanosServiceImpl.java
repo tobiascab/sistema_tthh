@@ -32,16 +32,15 @@ public class CumpleanosServiceImpl implements CumpleanosService {
     private static final String VALUE_MANUAL = "MANUAL";
 
     @Override
-    @Transactional
+    @Transactional(readOnly = true)
     public ConfiguracionDTO getConfiguracion() {
         Configuracion config = configRepository.findByClave(CONFIG_KEY)
-                .orElseGet(() -> configRepository.save(
-                        Configuracion.builder()
-                                .clave(CONFIG_KEY)
-                                .valor(VALUE_EMPLOYEES)
-                                .descripcion("Fuente de datos para cumpleaños: EMPLOYEES o MANUAL")
-                                .updatedAt(LocalDateTime.now())
-                                .build()));
+                .orElse(Configuracion.builder()
+                        .clave(CONFIG_KEY)
+                        .valor(VALUE_EMPLOYEES)
+                        .descripcion("Fuente de datos para cumpleaños: EMPLOYEES o MANUAL (Default en memoria)")
+                        .updatedAt(LocalDateTime.now())
+                        .build());
 
         return toConfigDTO(config);
     }

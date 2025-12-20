@@ -17,3 +17,17 @@ export interface AsistenciaStats {
     tardanzas: number;
     ausencias: number;
 }
+
+export interface ColaboradorTardanza {
+    empleadoId: number;
+    colaborador: string;
+    cantidadTardanzas: number;
+    totalMinutosRetraso: number;
+    totalDescuento: number;
+}
+
+export interface AttendanceGlobalReport {
+    mes: number;
+    anio: number;
+    tardanzas: ColaboradorTardanza[];
+}

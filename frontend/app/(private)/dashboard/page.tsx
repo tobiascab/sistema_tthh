@@ -27,7 +27,8 @@ import {
     Sun,
     Coffee,
     Building2,
-    Settings
+    Settings,
+    BookOpen
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/components/ui/card";
 import { Skeleton } from "@/src/components/ui/skeleton";
@@ -50,6 +51,7 @@ import { useRouter } from "next/navigation";
 import { RefreshCw } from "lucide-react";
 import { useToast } from "@/src/components/ui/use-toast";
 import { BirthdayManagerDialog } from "@/src/components/dashboard/birthday-manager-dialog";
+import { FrasesManagerDialog } from "@/src/components/dashboard/frases-manager-dialog";
 import { NotificationBanner } from "@/src/components/notifications/notification-banner";
 
 // ==========================================
@@ -128,6 +130,7 @@ function AdminDashboard() {
     const [syncing, setSyncing] = useState(false);
     const [mounted, setMounted] = useState(false);
     const [birthdayManagerOpen, setBirthdayManagerOpen] = useState(false);
+    const [frasesManagerOpen, setFrasesManagerOpen] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -139,6 +142,20 @@ function AdminDashboard() {
             const response = await apiClient.get("/reportes/dashboard-admin");
             return response.data;
         },
+    });
+
+    // Frase del día desde la API
+    const { data: fraseDelDia } = useQuery({
+        queryKey: ["frase-del-dia"],
+        queryFn: async () => {
+            try {
+                const response = await apiClient.get("/frases-del-dia/hoy");
+                return response.data;
+            } catch {
+                return { texto: "Cada día es una nueva oportunidad para crecer.", autor: "Equipo de HR" };
+            }
+        },
+        staleTime: 1000 * 60 * 60, // Cache por 1 hora
     });
 
     const handleSync = async () => {
@@ -230,86 +247,206 @@ function AdminDashboard() {
             iconBg: "bg-rose-100",
             iconColor: "text-rose-600",
         },
-
     ];
 
+    // Saludo dinámico según la hora
+    const getSaludo = () => {
+        const hora = new Date().getHours();
+        if (hora < 12) return "Buenos días";
+        if (hora < 18) return "Buenas tardes";
+        return "Buenas noches";
+    };
+
+    const saludo = getSaludo();
+    const nombreUsuario = user?.nombre || user?.username || "Admin";
+    const solicitudesPendientesCount = dashboardData?.solicitudesPendientes || 0;
+
     return (
-        <div className="space-y-8 pb-10">
-            {/* Header Emerald */}
+        <div className="space-y-6 pb-10">
+            {/* Header Compacto Premium - Estilo Opción 2 */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={EMERALD_THEME.gradientHeader}
             >
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                    <div>
-                        <div className="flex items-center gap-2 mb-2">
-                            <span className="p-1.5 bg-white/20 rounded-lg backdrop-blur-sm">
-                                <Activity className="w-5 h-5 text-emerald-50" />
-                            </span>
-                            <span className="text-emerald-100 font-medium text-sm tracking-wide uppercase">
-                                Vista Gerencial
-                            </span>
+                <div className="bg-gradient-to-r from-emerald-100 via-teal-50 to-cyan-100 rounded-2xl p-6 shadow-sm border border-emerald-200/50 relative overflow-hidden">
+                    {/* Decorative blur */}
+                    <div className="absolute top-0 right-1/3 w-32 h-32 bg-emerald-200/30 rounded-full blur-3xl"></div>
+                    <div className="absolute bottom-0 right-0 w-24 h-24 bg-cyan-200/30 rounded-full blur-2xl"></div>
+
+                    <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                        {/* Left Section - Avatar + Greeting + Mini Stats */}
+                        <div className="flex items-center gap-5 flex-1">
+                            {/* Avatar Circular con Estado */}
+                            <div className="relative flex-shrink-0">
+                                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg ring-4 ring-white">
+                                    <span className="text-2xl font-bold text-white">
+                                        {nombreUsuario.charAt(0).toUpperCase()}
+                                    </span>
+                                </div>
+                                <div className="absolute -bottom-0.5 -right-0.5 w-5 h-5 bg-green-500 rounded-full border-3 border-white shadow-sm flex items-center justify-center">
+                                    <CheckCircle2 className="w-3 h-3 text-white" />
+                                </div>
+                            </div>
+
+                            {/* Greeting + Stats Inline */}
+                            <div className="flex-1 min-w-0">
+                                <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2 flex-wrap">
+                                    {saludo}, {nombreUsuario}
+                                    <motion.span
+                                        animate={{ rotate: [0, 14, -8, 14, -4, 10, 0] }}
+                                        transition={{ duration: 2, repeat: Infinity, repeatDelay: 4 }}
+                                        className="inline-block text-2xl"
+                                    >
+                                        👋
+                                    </motion.span>
+                                </h1>
+
+                                {/* Mini Stats Row */}
+                                <div className="flex items-center gap-4 mt-2 flex-wrap">
+                                    <div className="flex items-center gap-1.5 text-gray-600">
+                                        <Users className="w-4 h-4 text-emerald-600" />
+                                        <span className="font-bold text-gray-800">{dashboardData?.colaboradoresActivos || 0}</span>
+                                        <span className="text-sm">Colaboradores</span>
+                                    </div>
+                                    <div className="w-px h-4 bg-gray-300"></div>
+                                    <div className="flex items-center gap-1.5 text-gray-600">
+                                        <Clock className="w-4 h-4 text-amber-500" />
+                                        <span className="font-bold text-gray-800">{solicitudesPendientesCount}</span>
+                                        <span className="text-sm">Pendientes</span>
+                                        {solicitudesPendientesCount > 0 && (
+                                            <Badge className="bg-amber-100 text-amber-700 text-[10px] px-1.5 py-0 h-5 font-bold border-none ml-1">
+                                                {solicitudesPendientesCount > 10 ? '10+' : solicitudesPendientesCount} nuevos
+                                            </Badge>
+                                        )}
+                                    </div>
+                                    <div className="w-px h-4 bg-gray-300 hidden md:block"></div>
+                                    <div className="flex items-center gap-1.5 text-gray-600 hidden md:flex">
+                                        <DollarSign className="w-4 h-4 text-emerald-600" />
+                                        <span className="font-bold text-gray-800">Gs {((dashboardData?.nominaMensualEstimada || 0) / 1000000).toFixed(0)}M</span>
+                                        <span className="text-sm">Nómina</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <h1 className="text-3xl font-bold tracking-tight mb-1">
-                            Panel TTHH & Analytics
-                        </h1>
-                        <p className="text-emerald-100 opacity-90">
-                            Visión estratégica y control operativo.
-                        </p>
-                    </div>
-                    <div className="flex gap-3">
-                        <Button
-                            variant="secondary"
-                            className="bg-white/90 text-emerald-800 hover:bg-white hover:shadow-lg transition-all"
-                            onClick={handleSync}
-                            disabled={syncing}
-                        >
-                            <RefreshCw className={`w-4 h-4 mr-2 ${syncing ? 'animate-spin' : ''}`} />
-                            {syncing ? 'Sincronizando...' : 'Sincronizar Usuarios'}
-                        </Button>
-                        <Link href="/reportes">
-                            <Button variant="secondary" className="bg-white text-emerald-800 hover:bg-emerald-50">
-                                <TrendingUp className="w-4 h-4 mr-2" />
-                                Ver Reportes
+
+                        {/* Right Section - Tip del Día con botón de edición */}
+                        {fraseDelDia && (
+                            <div className="hidden xl:flex flex-col items-end max-w-xs text-right flex-shrink-0 relative group">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wider">
+                                        Texto del día:
+                                    </p>
+                                    <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100"
+                                        onClick={() => setFrasesManagerOpen(true)}
+                                        title="Gestionar textos"
+                                    >
+                                        <Settings className="w-3 h-3" />
+                                    </Button>
+                                </div>
+                                <p className="text-sm text-gray-600 leading-relaxed italic">
+                                    "{fraseDelDia.texto}"
+                                </p>
+                                <p className="text-xs text-gray-400 mt-1">— {fraseDelDia.autor}</p>
+                            </div>
+                        )}
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-2 flex-shrink-0 items-center">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="bg-white/80 border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400 font-medium"
+                                onClick={() => setFrasesManagerOpen(true)}
+                                title="Gestionar textos/frases"
+                            >
+                                <BookOpen className="w-4 h-4 mr-1.5" />
+                                Textos
                             </Button>
-                        </Link>
+
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                className="bg-white/80 border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400 font-medium"
+                                onClick={handleSync}
+                                disabled={syncing}
+                            >
+                                <RefreshCw className={`w-4 h-4 mr-1.5 ${syncing ? 'animate-spin' : ''}`} />
+                                {syncing ? 'Sync...' : 'Sincronizar'}
+                            </Button>
+
+                            <Link href="/reportes">
+                                <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-medium shadow-sm">
+                                    <TrendingUp className="w-4 h-4 mr-1.5" />
+                                    Reportes
+                                </Button>
+                            </Link>
+                        </div>
                     </div>
                 </div>
+
+                {/* Alert Banner for Pending Requests - Más compacto */}
+                {solicitudesPendientesCount > 0 && (
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="mt-3 bg-gradient-to-r from-amber-50 to-orange-50 border border-amber-200 rounded-xl px-4 py-3 flex items-center justify-between shadow-sm"
+                    >
+                        <div className="flex items-center gap-3">
+                            <div className="p-1.5 bg-amber-100 rounded-lg">
+                                <AlertCircle className="w-4 h-4 text-amber-600" />
+                            </div>
+                            <p className="font-medium text-amber-800 text-sm">
+                                ⚡ {solicitudesPendientesCount} solicitud{solicitudesPendientesCount !== 1 ? 'es' : ''} requiere{solicitudesPendientesCount === 1 ? '' : 'n'} tu atención
+                            </p>
+                        </div>
+                        <Link href="/colaborador/solicitudes">
+                            <Button size="sm" className="bg-amber-500 hover:bg-amber-600 text-white font-medium shadow-sm h-8">
+                                Revisar ahora
+                                <ArrowRight className="w-3 h-3 ml-1.5" />
+                            </Button>
+                        </Link>
+                    </motion.div>
+                )}
             </motion.div>
 
             {/* Push Notification Banner for Admins */}
-            <NotificationBanner className="mb-4" />
+            <NotificationBanner className="mb-2" />
 
-            {/* KPI Cards */}
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            {/* KPI Cards - Compactas */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 {metricsConfig.map((metric, index) => (
                     <motion.div
                         key={metric.title}
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.1 }}
+                        transition={{ delay: index * 0.08 }}
                     >
                         <Card className={`${EMERALD_THEME.card} border-l-4 border-l-emerald-500`}>
-                            <CardContent className="p-6">
-                                <div className="flex items-start justify-between mb-4">
-                                    <div className={`p-3 rounded-xl ${metric.iconBg}`}>
-                                        <metric.icon className={`w-6 h-6 ${metric.iconColor}`} />
+                            <CardContent className="p-4">
+                                <div className="flex items-center gap-3">
+                                    <div className={`p-2.5 rounded-xl ${metric.iconBg}`}>
+                                        <metric.icon className={`w-5 h-5 ${metric.iconColor}`} />
                                     </div>
-                                    {metric.alert && (
-                                        <div className="flex relative h-3 w-3">
-                                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                                            <span className="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2">
+                                            <h3 className="text-xl font-bold text-neutral-800 tracking-tight truncate">
+                                                {metric.value}
+                                            </h3>
+                                            {metric.alert && (
+                                                <div className="flex relative h-2.5 w-2.5">
+                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
-                                </div>
-                                <div className="space-y-1">
-                                    <h3 className="text-2xl font-bold text-neutral-800 tracking-tight truncate">
-                                        {metric.value}
-                                    </h3>
-                                    <p className="font-medium text-neutral-500 text-sm">
-                                        {metric.title}
-                                    </p>
+                                        <p className="font-medium text-neutral-500 text-xs mt-0.5">
+                                            {metric.title}
+                                        </p>
+                                    </div>
                                 </div>
                             </CardContent>
                         </Card>
@@ -607,6 +744,11 @@ function AdminDashboard() {
                 onOpenChange={setBirthdayManagerOpen}
                 onConfigChange={() => refetch()}
             />
+
+            <FrasesManagerDialog
+                open={frasesManagerOpen}
+                onOpenChange={setFrasesManagerOpen}
+            />
         </div>
     );
 }
@@ -628,7 +770,19 @@ function ColaboradorDashboard() {
         enabled: !!empleadoId,
     });
 
-
+    // Frase del día desde la API
+    const { data: fraseDelDia } = useQuery({
+        queryKey: ["frase-del-dia"],
+        queryFn: async () => {
+            try {
+                const response = await apiClient.get("/frases-del-dia/hoy");
+                return response.data;
+            } catch {
+                return { texto: "Cada día es una nueva oportunidad para crecer.", autor: "Equipo de HR" };
+            }
+        },
+        staleTime: 1000 * 60 * 60, // Cache por 1 hora
+    });
 
     const solicitudesPendientes = ausencias?.content?.filter(a => a.estado === "PENDIENTE")?.length || 0;
 
@@ -643,42 +797,93 @@ function ColaboradorDashboard() {
     const GreetIcon = greet.icon;
 
     return (
-        <div className="space-y-8 pb-10">
-            {/* Banner Emerald Colaborador */}
+        <div className="space-y-6 pb-10">
+            {/* Banner Compacto Colaborador con Tip del Día */}
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className={`${EMERALD_THEME.gradientHeader} relative overflow-hidden`}
             >
-                <div className="absolute top-0 right-0 p-32 bg-white/5 rounded-full blur-3xl translate-x-1/2 -translate-y-1/2"></div>
-                <div className="flex flex-col md:flex-row items-center justify-between relative z-10">
-                    <div className="space-y-4">
-                        <div className="flex items-center gap-3">
-                            <span className="p-2 bg-white/10 rounded-xl backdrop-blur-md">
-                                <GreetIcon className="w-7 h-7 text-emerald-50" />
-                            </span>
-                            <h1 className="text-3xl font-bold tracking-tight">
-                                {greet.text}, {user?.nombre || user?.username}
-                            </h1>
+                <div className="bg-gradient-to-r from-emerald-100 via-teal-50 to-cyan-100 rounded-2xl p-6 shadow-sm border border-emerald-200/50 relative overflow-hidden">
+                    {/* Decorative blur */}
+                    <div className="absolute top-0 right-1/3 w-32 h-32 bg-emerald-200/30 rounded-full blur-3xl"></div>
+                    <div className="absolute bottom-0 right-0 w-24 h-24 bg-cyan-200/30 rounded-full blur-2xl"></div>
+
+                    <div className="relative z-10 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
+                        {/* Left Section - Avatar + Greeting */}
+                        <div className="flex items-center gap-5 flex-1">
+                            {/* Avatar Circular con Estado */}
+                            <div className="relative flex-shrink-0">
+                                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg ring-4 ring-white">
+                                    <span className="text-xl font-bold text-white">
+                                        {(user?.nombre || user?.username || "U").charAt(0).toUpperCase()}
+                                    </span>
+                                </div>
+                                <div className="absolute -bottom-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full border-2 border-white shadow-sm flex items-center justify-center">
+                                    <CheckCircle2 className="w-2.5 h-2.5 text-white" />
+                                </div>
+                            </div>
+
+                            {/* Greeting + Info */}
+                            <div className="flex-1 min-w-0">
+                                <h1 className="text-xl font-bold text-gray-800 flex items-center gap-2 flex-wrap">
+                                    {greet.text}, {user?.nombre || user?.username}
+                                    <motion.span
+                                        animate={{ rotate: [0, 14, -8, 14, -4, 10, 0] }}
+                                        transition={{ duration: 2, repeat: Infinity, repeatDelay: 4 }}
+                                        className="inline-block text-xl"
+                                    >
+                                        👋
+                                    </motion.span>
+                                </h1>
+
+                                {/* Info Row */}
+                                <div className="flex items-center gap-3 mt-1.5 flex-wrap text-sm">
+                                    <Badge className="bg-emerald-100 text-emerald-700 border-emerald-200 font-medium px-2 py-0 h-5">
+                                        Socio Nº {numeroSocio}
+                                    </Badge>
+                                    <span className="text-gray-400">•</span>
+                                    <span className="text-gray-600">
+                                        {format(new Date(), "EEEE, dd 'de' MMMM", { locale: es })}
+                                    </span>
+                                </div>
+                            </div>
                         </div>
-                        <div className="flex items-center gap-3 text-sm">
-                            <Badge className="bg-emerald-800/50 text-emerald-50 border-none font-medium px-3 backdrop-blur-md">
-                                Socio Nº {numeroSocio}
-                            </Badge>
-                            <span className="text-emerald-200/50">•</span>
-                            <span className="text-emerald-100 font-medium">
-                                {format(new Date(), "EEEE, dd 'de' MMMM", { locale: es })}
-                            </span>
+
+                        {/* Center - Texto del día */}
+                        {fraseDelDia && (
+                            <div className="hidden lg:flex flex-col max-w-sm flex-shrink-0 bg-white/50 backdrop-blur-sm rounded-xl p-4 border border-emerald-100">
+                                <p className="text-xs font-semibold text-emerald-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                    <Activity className="w-3 h-3" />
+                                    Texto del día
+                                </p>
+                                <p className="text-sm text-gray-600 italic leading-relaxed">
+                                    "{fraseDelDia.texto}"
+                                </p>
+                                <p className="text-xs text-gray-400 mt-1">— {fraseDelDia.autor}</p>
+                            </div>
+                        )}
+
+                        {/* Right - Días Disponibles */}
+                        <div className="bg-white/60 backdrop-blur-sm rounded-xl p-4 border border-emerald-100 min-w-[140px] text-center shadow-sm flex-shrink-0">
+                            <p className="text-emerald-600 font-bold text-[10px] tracking-wider uppercase mb-0.5">Días Disponibles</p>
+                            <p className="text-3xl font-black text-gray-800">
+                                {loadingSaldo ? "..." : saldoVacaciones?.diasDisponibles || 0}
+                            </p>
+                            <p className="text-gray-500 text-xs">Vacaciones</p>
                         </div>
-                    </div>
-                    <div className="mt-6 md:mt-0 bg-white/10 backdrop-blur-md rounded-2xl p-5 border border-white/10 min-w-[180px] text-center shadow-lg">
-                        <p className="text-emerald-200 font-bold text-xs tracking-wider uppercase mb-1">Días Disponibles</p>
-                        <p className="text-4xl font-black text-white">
-                            {loadingSaldo ? "..." : saldoVacaciones?.diasDisponibles || 0}
-                        </p>
-                        <p className="text-emerald-100 text-xs mt-1">Vacaciones</p>
                     </div>
                 </div>
+
+                {/* Texto del día en móvil (debajo del header) */}
+                {fraseDelDia && (
+                    <div className="lg:hidden mt-3 bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100 rounded-xl px-4 py-3 flex items-start gap-3">
+                        <Activity className="w-4 h-4 text-emerald-500 mt-0.5 flex-shrink-0" />
+                        <div>
+                            <p className="text-sm text-gray-600 italic">"{fraseDelDia.texto}"</p>
+                            <p className="text-xs text-gray-400 mt-1">— {fraseDelDia.autor}</p>
+                        </div>
+                    </div>
+                )}
             </motion.div>
 
             {/* Accesos Rápidos */}

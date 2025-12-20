@@ -24,5 +24,18 @@ public interface ReciboSalarioService {
 
     void generarNominaMensual(Integer anio, Integer mes);
 
+    void cerrarNomina(Integer anio, Integer mes);
+
     BigDecimal calcularAguinaldoProyectado(Long empleadoId);
+
+    com.coopreducto.tthh.dto.PayrollDashboardDTO getDashboardSummary();
+
+    Resource exportarPlanillaBancaria(Integer anio, Integer mes);
+
+    Page<ReciboSalarioDTO> findByFilters(String sucursal, Long empleadoId, Integer mes, Integer anio,
+            Pageable pageable);
+
+    Resource exportarExcel(String sucursal, Long empleadoId, Integer mes, Integer anio);
+
+    Resource exportarPdf(String sucursal, Long empleadoId, Integer mes, Integer anio);
 }

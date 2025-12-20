@@ -2,6 +2,7 @@ import { RoleGuard } from "@/src/features/auth/components/role-guard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/src/components/ui/tabs";
 import { DemografiaCharts } from "@/src/features/reportes/components/demografia-charts";
 import { AusentismoChart } from "@/src/features/reportes/components/ausentismo-chart";
+import { RecibosList } from "@/src/features/payroll/components/recibos-list";
 import { FileText, Users, Activity } from "lucide-react";
 
 export default function ReportesPage() {
@@ -32,9 +33,9 @@ export default function ReportesPage() {
                             <Activity className="w-4 h-4 mr-2" />
                             Ausentismo
                         </TabsTrigger>
-                        <TabsTrigger value="nomina" disabled className="opacity-50 cursor-not-allowed">
+                        <TabsTrigger value="nomina" className="data-[state=active]:bg-green-50 data-[state=active]:text-green-700">
                             <FileText className="w-4 h-4 mr-2" />
-                            Nómina (Próximamente)
+                            Nóminas
                         </TabsTrigger>
                     </TabsList>
 
@@ -44,6 +45,10 @@ export default function ReportesPage() {
 
                     <TabsContent value="ausentismo" className="mt-6">
                         <AusentismoChart />
+                    </TabsContent>
+
+                    <TabsContent value="nomina" className="mt-6">
+                        <RecibosList isAdmin />
                     </TabsContent>
                 </Tabs>
             </div>

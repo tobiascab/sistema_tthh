@@ -67,14 +67,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const payload = parseJwt(token);
         if (!payload) return null;
 
+        // Support both Keycloak format (realm_access.roles) and local JWT format (roles directly)
+        const roles = payload.roles || payload.realm_access?.roles || ['COLABORADOR'];
+
         return {
-            id: payload.sub,
+            id: payload.sub || payload.userId,
             username: payload.preferred_username || payload.sub,
             email: payload.email || "",
             nombre: payload.given_name || "",
             apellido: payload.family_name || "",
-            roles: payload.realm_access?.roles || [],
-            empleadoId: payload.empleadoId,
+            roles: roles,
+            empleadoId: payload.empleadoId || payload.userId,
         };
     };
 
@@ -103,137 +106,58 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         checkAuth();
     }, []);
 
-    // Login with Keycloak (or dev mode)
+    // Login with real backend authentication
     const login = async (username: string, password: string) => {
         setIsLoading(true);
 
         try {
-            // Check if dev mode is enabled (default to true for easy setup)
-            const isDevMode = process.env.NEXT_PUBLIC_DEV_MODE !== 'false';
+            // Call real backend authentication endpoint
+            const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
 
-            if (isDevMode) {
-                // Development mode - authenticate against backend DB
-                console.warn('🔧 DEV MODE: Authenticating against backend database');
-
-                // Try to fetch user from backend by username
-                const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
-                let backendUser: any = null;
-
-                try {
-                    const response = await fetch(`${API_URL}/usuarios/username/${encodeURIComponent(username)}`);
-                    if (response.ok) {
-                        backendUser = await response.json();
-                    }
-                } catch (err) {
-                    console.warn('Could not fetch user from backend:', err);
-                }
-
-                // If user found in DB, use their real data
-                let mockUser: User & { empleadoId?: number };
-
-                if (backendUser) {
-                    console.log('✅ User found in database:', backendUser.username);
-                    mockUser = {
-                        id: String(backendUser.id),
-                        username: backendUser.username,
-                        email: backendUser.email || `${username}@coopreducto.com`,
-                        nombre: backendUser.nombres || username.split('.')[0] || 'Usuario',
-                        apellido: backendUser.apellidos || username.split('.')[1] || 'Test',
-                        roles: backendUser.rolNombre ? [backendUser.rolNombre] : ['COLABORADOR'],
-                        empleadoId: backendUser.empleadoId,
-                    };
-                } else {
-                    // Fallback to simple mock (for admin testing)
-                    console.warn('⚠️ User not found in DB, using mock roles');
-                    mockUser = {
-                        id: '1',
-                        username,
-                        email: `${username}@coopreducto.com`,
-                        nombre: username.split('.')[0] || 'Usuario',
-                        apellido: username.split('.')[1] || 'Test',
-                        roles: username.includes('admin') ? ['TTHH'] :
-                            username.includes('gerente') ? ['GERENCIA'] :
-                                username.includes('auditor') ? ['AUDITORIA'] : ['COLABORADOR'],
-                    };
-                }
-
-                const mockToken = btoa(JSON.stringify({
-                    sub: mockUser.id,
-                    preferred_username: mockUser.username,
-                    email: mockUser.email,
-                    given_name: mockUser.nombre,
-                    family_name: mockUser.apellido,
-                    realm_access: { roles: mockUser.roles },
-                    empleadoId: mockUser.empleadoId,
-                    exp: Math.floor(Date.now() / 1000) + 3600,
-                }));
-
-                localStorage.setItem('access_token', `mock.${mockToken}.mock`);
-                localStorage.setItem('refresh_token', 'mock_refresh_token');
-                // Also store empleadoId for easy access by components
-                if (mockUser.empleadoId) {
-                    localStorage.setItem('empleadoId', String(mockUser.empleadoId));
-                }
-                document.cookie = `access_token=mock.${mockToken}.mock; path=/; max-age=3600; SameSite=Lax`;
-
-                setUser(mockUser);
-                // Use location.href instead of router.push to ensure cookies are sent to server components
-                window.location.href = '/dashboard';
-                return;
-            }
-
-            // Production mode - use Keycloak
-            const tokenEndpoint = `${KEYCLOAK_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token`;
-
-            const response = await fetch(tokenEndpoint, {
-                method: "POST",
+            const response = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
                 headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
+                    'Content-Type': 'application/json',
                 },
-                body: new URLSearchParams({
-                    client_id: KEYCLOAK_CLIENT_ID,
-                    username,
-                    password,
-                    grant_type: "password",
-                }),
+                body: JSON.stringify({ username, password }),
             });
 
             if (!response.ok) {
-                throw new Error("Credenciales inválidas");
+                const errorData = await response.json().catch(() => ({}));
+                throw new Error(errorData.message || 'Credenciales inválidas');
             }
 
             const data = await response.json();
 
-            // Store tokens
-            localStorage.setItem("access_token", data.access_token);
-            localStorage.setItem("refresh_token", data.refresh_token);
+            // Store the real JWT token
+            localStorage.setItem('access_token', data.token);
+            localStorage.setItem('refresh_token', data.token); // Use same token for now
 
-            // Set cookie for middleware
-            document.cookie = `access_token=${data.access_token}; path=/; max-age=${data.expires_in}; SameSite=Lax`;
-
-            // Extract user info
-            const userData = extractUserFromToken(data.access_token);
-            setUser(userData);
-
-            // Log audit event
-            try {
-                await fetch("/api/audit", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${data.access_token}`,
-                    },
-                    body: JSON.stringify({
-                        accion: "LOGIN",
-                        entidad: "AUTH",
-                        detalles: `Usuario ${username} inició sesión`,
-                    }),
-                });
-            } catch (auditError) {
-                console.warn('Audit log failed:', auditError);
+            // Store empleadoId for easy access
+            if (data.user?.empleadoId) {
+                localStorage.setItem('empleadoId', String(data.user.empleadoId));
             }
 
-            router.push("/");
+            // Set cookie for middleware
+            document.cookie = `access_token=${data.token}; path=/; max-age=${data.expiresIn || 28800}; SameSite=Lax`;
+
+            // Map backend response to User object
+            const userData: User = {
+                id: String(data.user.id),
+                username: data.user.username,
+                email: data.user.email || '',
+                nombre: data.user.nombres || '',
+                apellido: data.user.apellidos || '',
+                roles: data.user.roles || ['COLABORADOR'],
+                empleadoId: data.user.empleadoId,
+            };
+
+            setUser(userData);
+
+            console.log('✅ Login exitoso para:', userData.username);
+
+            // Redirect to dashboard
+            window.location.href = '/dashboard';
         } catch (error) {
             console.error("Login error:", error);
             throw error;
@@ -246,74 +170,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const logout = async () => {
         const token = localStorage.getItem("access_token");
 
-        if (token) {
-            // Log audit event
-            await fetch("/api/audit", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    accion: "LOGOUT",
-                    entidad: "AUTH",
-                    detalles: `Usuario ${user?.username} cerró sesión`,
-                }),
-            });
-        }
-
         // Clear tokens
         localStorage.removeItem("access_token");
         localStorage.removeItem("refresh_token");
+        localStorage.removeItem("empleadoId");
         document.cookie = "access_token=; path=/; max-age=0";
 
         setUser(null);
         router.push("/login");
     };
 
-    // Refresh token
+    // Refresh token (simplified - for now just logout if token expires)
     const refreshToken = async () => {
-        const refresh = localStorage.getItem("refresh_token");
+        const token = localStorage.getItem("access_token");
 
-        if (!refresh) {
-            throw new Error("No refresh token available");
+        if (!token) {
+            throw new Error("No token available");
         }
 
-        try {
-            const tokenEndpoint = `${KEYCLOAK_URL}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token`;
-
-            const response = await fetch(tokenEndpoint, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
-                },
-                body: new URLSearchParams({
-                    client_id: KEYCLOAK_CLIENT_ID,
-                    refresh_token: refresh,
-                    grant_type: "refresh_token",
-                }),
-            });
-
-            if (!response.ok) {
-                throw new Error("Failed to refresh token");
-            }
-
-            const data = await response.json();
-
-            // Update tokens
-            localStorage.setItem("access_token", data.access_token);
-            localStorage.setItem("refresh_token", data.refresh_token);
-            document.cookie = `access_token=${data.access_token}; path=/; max-age=${data.expires_in}; SameSite=Lax`;
-
-            // Update user
-            const userData = extractUserFromToken(data.access_token);
-            setUser(userData);
-        } catch (error) {
-            console.error("Token refresh error:", error);
-            // If refresh fails, logout
-            await logout();
-            throw error;
-        }
+        // For now, just logout if refresh is called (token expired)
+        // In the future, implement proper refresh endpoint
+        console.warn('Token refresh not implemented, logging out');
+        await logout();
     };
 
     // Check if user has specific role

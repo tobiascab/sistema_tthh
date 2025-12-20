@@ -15,6 +15,7 @@ import {
     Settings,
     Shield,
     DollarSign,
+    BadgeDollarSign,
     ChevronLeft,
     ChevronRight,
     Menu,
@@ -56,6 +57,18 @@ const menuItems = [
         roles: ["TTHH", "GERENCIA"],
     },
     {
+        title: "Gestión de Comisiones",
+        href: "/admin/comisiones",
+        icon: BadgeDollarSign,
+        roles: ["TTHH", "GERENCIA"],
+    },
+    {
+        title: "Marcaciones",
+        href: "/admin/marcaciones",
+        icon: Calendar,
+        roles: ["TTHH", "GERENCIA", "AUDITORIA"],
+    },
+    {
         title: "Centro de Solicitudes",
         href: "/colaborador/solicitudes",
         icon: ClipboardList,
@@ -65,7 +78,13 @@ const menuItems = [
         title: "Recibos de Salario",
         href: "/colaborador/recibos",
         icon: FileText,
-        roles: ["TTHH", "GERENCIA", "COLABORADOR"],
+        roles: ["TTHH", "GERENCIA", "COLABORADOR", "ASESOR_DE_CREDITO", "JUDICIAL", "RECUPERADOR_DE_CREDITO"],
+    },
+    {
+        title: "Recibos de Comisión",
+        href: "/colaborador/comisiones",
+        icon: BadgeDollarSign,
+        roles: ["TTHH", "GERENCIA", "ASESOR_DE_CREDITO", "JUDICIAL", "RECUPERADOR_DE_CREDITO"],
     },
     {
         title: "Reportes",

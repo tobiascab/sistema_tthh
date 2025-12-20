@@ -18,6 +18,7 @@ export interface Empleado {
     fechaIngreso: string;
     tipoContrato?: string;
     salarioBase?: number;
+    horarioEntrada?: string;
     estado: 'ACTIVO' | 'INACTIVO' | 'SUSPENDIDO';
     nombreCompleto?: string;
     fotoUrl?: string;
@@ -43,5 +44,6 @@ export interface EmpleadoFormData {
     fechaIngreso: string;
     tipoContrato?: string;
     salarioBase?: number;
+    horarioEntrada?: string;
     estado: 'ACTIVO' | 'INACTIVO' | 'SUSPENDIDO';
 }

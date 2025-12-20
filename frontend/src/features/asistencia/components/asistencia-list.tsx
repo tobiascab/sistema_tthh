@@ -29,25 +29,29 @@ import { useToast } from "@/src/hooks/use-toast";
 import { Asistencia } from "@/src/types/asistencia";
 
 interface AsistenciaListProps {
-    empleadoId: number;
+    empleadoId?: number;
     readonly?: boolean;
+    isAdmin?: boolean;
 }
 
-export function AsistenciaList({ empleadoId, readonly = false }: AsistenciaListProps) {
+export function AsistenciaList({ empleadoId, readonly = false, isAdmin = false }: AsistenciaListProps) {
     const { toast } = useToast();
     const queryClient = useQueryClient();
     const [currentDate] = useState(new Date());
 
-    // Fetch stats
+    // Fetch stats (only if single employee)
     const { data: stats } = useQuery({
         queryKey: ["asistencia-stats", empleadoId, currentDate.getFullYear(), currentDate.getMonth() + 1],
-        queryFn: () => asistenciaApi.getStats(empleadoId, currentDate.getFullYear(), currentDate.getMonth() + 1),
+        queryFn: () => empleadoId ? asistenciaApi.getStats(empleadoId, currentDate.getFullYear(), currentDate.getMonth() + 1) : null,
+        enabled: !!empleadoId,
     });
 
     // Fetch history
     const { data: historial, isLoading } = useQuery({
-        queryKey: ["asistencia-historial", empleadoId],
-        queryFn: () => asistenciaApi.getByEmpleado(empleadoId, { page: 0, size: 30, sort: "fecha,desc" }),
+        queryKey: empleadoId ? ["asistencia-historial", empleadoId] : ["asistencia-global"],
+        queryFn: () => empleadoId
+            ? asistenciaApi.getByEmpleado(empleadoId, { page: 0, size: 30, sort: "fecha,desc" })
+            : asistenciaApi.getAll({ page: 0, size: 50, sort: "fecha,desc" }),
     });
 
     // Marcar reloj mutation
@@ -96,46 +100,48 @@ export function AsistenciaList({ empleadoId, readonly = false }: AsistenciaListP
     return (
         <div className="space-y-6">
             {/* Header & Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white p-4 rounded-xl border border-neutral-200 shadow-sm md:col-span-2 flex items-center justify-between">
-                    <div>
-                        <h3 className="font-semibold text-neutral-800">Control de Asistencia</h3>
-                        <p className="text-sm text-neutral-500">
-                            {format(currentDate, "MMMM yyyy", { locale: es })}
-                        </p>
+            {empleadoId && (
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div className="bg-white p-4 rounded-xl border border-neutral-200 shadow-sm md:col-span-2 flex items-center justify-between">
+                        <div>
+                            <h3 className="font-semibold text-neutral-800">Control de Asistencia</h3>
+                            <p className="text-sm text-neutral-500">
+                                {format(currentDate, "MMMM yyyy", { locale: es })}
+                            </p>
+                        </div>
+                        {!readonly && (
+                            <Button
+                                onClick={() => marcarMutation.mutate()}
+                                disabled={marcarMutation.isPending}
+                                className="bg-neutral-900 hover:bg-neutral-800"
+                            >
+                                <Fingerprint className="w-4 h-4 mr-2" />
+                                {marcarMutation.isPending ? "Marcando..." : "Marcar Reloj"}
+                            </Button>
+                        )}
                     </div>
-                    {!readonly && (
-                        <Button
-                            onClick={() => marcarMutation.mutate()}
-                            disabled={marcarMutation.isPending}
-                            className="bg-neutral-900 hover:bg-neutral-800"
-                        >
-                            <Fingerprint className="w-4 h-4 mr-2" />
-                            {marcarMutation.isPending ? "Marcando..." : "Marcar Reloj"}
-                        </Button>
-                    )}
-                </div>
 
-                <div className="bg-white p-4 rounded-xl border border-neutral-200 shadow-sm flex items-center gap-3">
-                    <div className="p-2 bg-yellow-100 rounded-lg">
-                        <Clock className="w-5 h-5 text-yellow-600" />
+                    <div className="bg-white p-4 rounded-xl border border-neutral-200 shadow-sm flex items-center gap-3">
+                        <div className="p-2 bg-yellow-100 rounded-lg">
+                            <Clock className="w-5 h-5 text-yellow-600" />
+                        </div>
+                        <div>
+                            <p className="text-sm text-neutral-500">Llegadas Tardías</p>
+                            <p className="text-2xl font-bold text-neutral-800">{stats?.tardanzas || 0}</p>
+                        </div>
                     </div>
-                    <div>
-                        <p className="text-sm text-neutral-500">Llegadas Tardías</p>
-                        <p className="text-2xl font-bold text-neutral-800">{stats?.tardanzas || 0}</p>
-                    </div>
-                </div>
 
-                <div className="bg-white p-4 rounded-xl border border-neutral-200 shadow-sm flex items-center gap-3">
-                    <div className="p-2 bg-red-100 rounded-lg">
-                        <AlertCircle className="w-5 h-5 text-red-600" />
-                    </div>
-                    <div>
-                        <p className="text-sm text-neutral-500">Ausencias</p>
-                        <p className="text-2xl font-bold text-neutral-800">{stats?.ausencias || 0}</p>
+                    <div className="bg-white p-4 rounded-xl border border-neutral-200 shadow-sm flex items-center gap-3">
+                        <div className="p-2 bg-red-100 rounded-lg">
+                            <AlertCircle className="w-5 h-5 text-red-600" />
+                        </div>
+                        <div>
+                            <p className="text-sm text-neutral-500">Ausencias</p>
+                            <p className="text-2xl font-bold text-neutral-800">{stats?.ausencias || 0}</p>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
 
             {/* Table */}
             <div className="bg-white rounded-lg border border-neutral-200 overflow-hidden">
@@ -143,6 +149,7 @@ export function AsistenciaList({ empleadoId, readonly = false }: AsistenciaListP
                     <TableHeader>
                         <TableRow>
                             <TableHead>Fecha</TableHead>
+                            {isAdmin && <TableHead>Colaborador</TableHead>}
                             <TableHead>Estado</TableHead>
                             <TableHead>Entrada</TableHead>
                             <TableHead>Salida</TableHead>
@@ -163,6 +170,11 @@ export function AsistenciaList({ empleadoId, readonly = false }: AsistenciaListP
                                     <TableCell className="font-medium">
                                         {format(new Date(record.fecha), "dd/MM/yyyy")}
                                     </TableCell>
+                                    {isAdmin && (
+                                        <TableCell className="font-semibold text-neutral-700">
+                                            {record.empleadoNombre || "N/A"}
+                                        </TableCell>
+                                    )}
                                     <TableCell>{getTipoBadge(record.tipo)}</TableCell>
                                     <TableCell>
                                         {record.horaEntrada

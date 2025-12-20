@@ -23,6 +23,11 @@ public class AsistenciaController {
         return ResponseEntity.ok(asistenciaService.registrarAsistencia(dto));
     }
 
+    @GetMapping
+    public ResponseEntity<Page<AsistenciaDTO>> listarTodas(Pageable pageable) {
+        return ResponseEntity.ok(asistenciaService.listarTodas(pageable));
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<AsistenciaDTO> actualizar(@PathVariable Long id, @RequestBody AsistenciaDTO dto) {
         return ResponseEntity.ok(asistenciaService.actualizarAsistencia(id, dto));
@@ -64,5 +69,12 @@ public class AsistenciaController {
             @RequestParam String motivo,
             @RequestParam(required = false) String documentoUrl) {
         return ResponseEntity.ok(asistenciaService.justificar(id, motivo, documentoUrl));
+    }
+
+    @GetMapping("/reporte-global")
+    public ResponseEntity<com.coopreducto.tthh.dto.AttendanceGlobalReportDTO> obtenerReporteGlobal(
+            @RequestParam int anio,
+            @RequestParam int mes) {
+        return ResponseEntity.ok(asistenciaService.obtenerReporteGlobal(anio, mes));
     }
 }

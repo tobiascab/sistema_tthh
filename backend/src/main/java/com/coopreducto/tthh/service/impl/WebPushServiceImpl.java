@@ -14,9 +14,12 @@ public class WebPushServiceImpl implements WebPushService {
 
     private static final Logger log = LoggerFactory.getLogger(WebPushServiceImpl.class);
 
+    @org.springframework.beans.factory.annotation.Value("${webpush.vapid.public-key}")
+    private String publicKey;
+
     @Override
     public String getPublicKey() {
-        return "BMkXmF5cR7hy3J9s_1hT7e0_y5p5t5r5e5w5q5a5s5d5f5g5h5j5k5l";
+        return publicKey;
     }
 
     @Override

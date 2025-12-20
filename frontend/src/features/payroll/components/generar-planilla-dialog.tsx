@@ -8,14 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/src/components/ui/label";
 import { MESES } from "@/src/types/payroll";
 import { Loader2, Calendar } from "lucide-react";
-import { toast } from "@/src/components/ui/use-toast";
-
-// Mock API function for now, replace with actual API import
-const generarPlanilla = async (data: { mes: number; anio: number }) => {
-    // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    return { success: true, count: 150 };
-};
+import { useToast } from "@/src/hooks/use-toast";
+import { payrollApi } from "@/src/lib/api/payroll";
 
 interface GenerarPlanillaDialogProps {
     open: boolean;
@@ -23,6 +17,7 @@ interface GenerarPlanillaDialogProps {
 }
 
 export function GenerarPlanillaDialog({ open, onOpenChange }: GenerarPlanillaDialogProps) {
+    const { toast } = useToast();
     const queryClient = useQueryClient();
     const currentYear = new Date().getFullYear();
     const currentMonth = new Date().getMonth() + 1;
@@ -31,18 +26,17 @@ export function GenerarPlanillaDialog({ open, onOpenChange }: GenerarPlanillaDia
     const [anio, setAnio] = useState<number>(currentYear);
 
     const mutation = useMutation({
-        mutationFn: generarPlanilla,
+        mutationFn: ({ anio, mes }: { anio: number; mes: number }) => payrollApi.generar(anio, mes),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["nominas"] });
+            queryClient.invalidateQueries({ queryKey: ["payroll-dashboard"] });
             onOpenChange(false);
             toast({
                 title: "Planilla Generada",
                 description: `Se han generado los recibos para ${MESES.find(m => m.value === mes)?.label} ${anio}`,
-                variant: "default", // Corrected variant
             });
         },
         onError: () => {
-             toast({
+            toast({
                 title: "Error",
                 description: "No se pudo generar la planilla.",
                 variant: "destructive",
@@ -112,8 +106,8 @@ export function GenerarPlanillaDialog({ open, onOpenChange }: GenerarPlanillaDia
                     <Button variant="outline" onClick={() => onOpenChange(false)} disabled={mutation.isPending}>
                         Cancelar
                     </Button>
-                    <Button 
-                        onClick={handleGenerar} 
+                    <Button
+                        onClick={handleGenerar}
                         disabled={mutation.isPending}
                         className="bg-emerald-600 hover:bg-emerald-700 text-white"
                     >

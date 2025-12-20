@@ -16,7 +16,7 @@ const apiClient = axios.create({
 apiClient.interceptors.request.use(
     (config) => {
         const token = localStorage.getItem('access_token');
-        // Send (mock) token to backend so it doesn't complain about missing header immediately
+        // Always send Bearer prefix for all tokens (mock and real JWT)
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }

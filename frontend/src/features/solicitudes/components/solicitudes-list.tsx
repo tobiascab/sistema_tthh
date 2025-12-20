@@ -207,10 +207,26 @@ export function SolicitudesList({ empleadoId }: SolicitudesListProps) {
         );
     }
 
-    // Calcular estadísticas en tiempo de render (si no tenemos endpoints de stats)
-    const total = data?.totalElements || 0;
-    const pendientes = data?.content.filter(s => s.estado === 'PENDIENTE').length || 0;
-    const aprobadas = data?.content.filter(s => s.estado === 'APROBADA').length || 0;
+    // Estadísticas globales (usamos el total de la respuesta de la API)
+    const totalGlobal = data?.totalElements || 0;
+
+    // Como la API filtra por estado, si estamos filtrando, el totalGlobal coincide con ese estado.
+    // Si no estamos filtrando, el totalGlobal es el total de todo.
+    // Para simplificar sin hacer 3 queries extra, usaremos los datos de la respuesta actual si están disponibles.
+    const counts = {
+        total: totalGlobal,
+        pendientes: filterEstado === 'PENDIENTE' ? totalGlobal : data?.content.filter(s => s.estado === 'PENDIENTE').length || 0,
+        aprobadas: filterEstado === 'APROBADA' ? totalGlobal : data?.content.filter(s => s.estado === 'APROBADA').length || 0,
+        rechazadas: filterEstado === 'RECHAZADA' ? totalGlobal : data?.content.filter(s => s.estado === 'RECHAZADA').length || 0,
+    };
+
+    // Si hay más elementos en el servidor de los que estamos viendo en la página actual,
+    // y no estamos filtrando específicamente por ese estado, añadimos un "+" para indicar que hay más.
+    const showPlus = (estado?: string) => {
+        if (!data) return false;
+        if (filterEstado === estado) return false; // Si filtramos por ese estado, el totalGlobal es exacto.
+        return data.totalElements > data.content.length;
+    };
 
     return (
         <>
@@ -225,7 +241,7 @@ export function SolicitudesList({ empleadoId }: SolicitudesListProps) {
                         <h2 className="text-4xl font-black text-neutral-900 tracking-tight flex items-center gap-3">
                             {isAdminOrManager ? "Centro de Aprobaciones" : "Mis Solicitudes"}
                             <span className="text-sm font-medium px-3 py-1 rounded-full bg-neutral-100 text-neutral-500 border border-neutral-200">
-                                {total} Total
+                                {counts.total} Total
                             </span>
                         </h2>
                         <p className="text-neutral-500 mt-2 text-lg">
@@ -442,7 +458,7 @@ export function SolicitudesList({ empleadoId }: SolicitudesListProps) {
                         <div className="flex justify-between items-start relative z-10">
                             <div>
                                 <p className="text-sm font-medium text-neutral-500 uppercase tracking-wider">Total</p>
-                                <p className="text-3xl font-extrabold text-neutral-900 mt-2">{total}</p>
+                                <p className="text-3xl font-extrabold text-neutral-900 mt-2">{counts.total}</p>
                             </div>
                             <div className="p-3 bg-neutral-100 text-neutral-600 rounded-xl">
                                 <Clock className="w-6 h-6" />
@@ -454,7 +470,9 @@ export function SolicitudesList({ empleadoId }: SolicitudesListProps) {
                         <div className="flex justify-between items-start relative z-10">
                             <div>
                                 <p className="text-sm font-bold text-amber-600 uppercase tracking-wider">Pendientes</p>
-                                <p className="text-3xl font-extrabold text-amber-600 mt-2">{pendientes}</p>
+                                <p className="text-3xl font-extrabold text-amber-600 mt-2">
+                                    {counts.pendientes}{showPlus('PENDIENTE') && '+'}
+                                </p>
                             </div>
                             <div className="p-3 bg-amber-50 text-amber-600 rounded-xl">
                                 <AlertTriangle className="w-6 h-6" />
@@ -468,7 +486,9 @@ export function SolicitudesList({ empleadoId }: SolicitudesListProps) {
                         <div className="flex justify-between items-start relative z-10">
                             <div>
                                 <p className="text-sm font-medium text-neutral-500 uppercase tracking-wider">Aprobadas</p>
-                                <p className="text-3xl font-extrabold text-emerald-600 mt-2">{aprobadas}</p>
+                                <p className="text-3xl font-extrabold text-emerald-600 mt-2">
+                                    {counts.aprobadas}{showPlus('APROBADA') && '+'}
+                                </p>
                             </div>
                             <div className="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
                                 <CheckCircle className="w-6 h-6" />
@@ -480,7 +500,9 @@ export function SolicitudesList({ empleadoId }: SolicitudesListProps) {
                         <div className="flex justify-between items-start relative z-10">
                             <div>
                                 <p className="text-sm font-medium text-neutral-500 uppercase tracking-wider">Rechazadas</p>
-                                <p className="text-3xl font-extrabold text-red-500 mt-2">{data?.content.filter((s) => s.estado === "RECHAZADA").length || 0}</p>
+                                <p className="text-3xl font-extrabold text-red-500 mt-2">
+                                    {counts.rechazadas}{showPlus('RECHAZADA') && '+'}
+                                </p>
                             </div>
                             <div className="p-3 bg-red-50 text-red-500 rounded-xl">
                                 <XCircle className="w-6 h-6" />

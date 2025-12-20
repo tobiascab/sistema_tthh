@@ -20,7 +20,7 @@ spring:
   # DATASOURCE - MySQL (XAMPP)
   # ============================================
   datasource:
-    url: jdbc:mysql://localhost:3307/sistema_tthh?useSSL=false&serverTimezone=America/Asuncion&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
+    url: jdbc:mysql://localhost:3306/sistema_tthh?useSSL=false&serverTimezone=America/Asuncion&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true
     username: root
     password:
     driver-class-name: com.mysql.cj.jdbc.Driver
