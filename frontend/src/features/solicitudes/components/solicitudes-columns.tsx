@@ -1,10 +1,8 @@
-"use client";
-
 import { ColumnDef } from "@tanstack/react-table";
 import { Solicitud } from "@/src/types/solicitud";
 import { Badge } from "@/src/components/ui/badge";
 import { Button } from "@/src/components/ui/button";
-import { MoreHorizontal, Eye, CheckCircle, XCircle } from "lucide-react";
+import { MoreHorizontal, Eye, CheckCircle, XCircle, Trash2 } from "lucide-react";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -18,6 +16,7 @@ interface SolicitudesColumnsProps {
     onView: (solicitud: Solicitud) => void;
     onApprove?: (solicitud: Solicitud, comentario?: string) => void;
     onReject?: (solicitud: Solicitud, comentario?: string) => void;
+    onDelete?: (solicitud: Solicitud) => void;
     isAdminOrManager: boolean;
 }
 
@@ -25,6 +24,7 @@ export const getSolicitudesColumns = ({
     onView,
     onApprove,
     onReject,
+    onDelete,
     isAdminOrManager,
 }: SolicitudesColumnsProps): ColumnDef<Solicitud>[] => {
     const columns: ColumnDef<Solicitud>[] = [
@@ -55,7 +55,7 @@ export const getSolicitudesColumns = ({
             accessorKey: "createdAt",
             header: "Fecha Solicitud",
             cell: ({ row }) => {
-                const fecha = (row.original.createdAt || row.getValue("fechaSolicitud")) as string;
+                const fecha = (row.original.createdAt || row.getValue("createdAt")) as string;
                 return (
                     <div className="text-sm text-neutral-600">
                         {fecha ? new Date(fecha).toLocaleDateString('es-PY', { day: '2-digit', month: 'long', year: 'numeric' }) : "-"}
@@ -126,6 +126,18 @@ export const getSolicitudesColumns = ({
                                     >
                                         <XCircle className="h-4 w-4" />
                                         Rechazar
+                                    </DropdownMenuItem>
+                                </>
+                            )}
+                            {!isAdminOrManager && solicitud.estado === "PENDIENTE" && onDelete && (
+                                <>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuItem
+                                        onClick={() => onDelete(solicitud)}
+                                        className="gap-2 text-red-600 focus:text-red-700"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                        Eliminar
                                     </DropdownMenuItem>
                                 </>
                             )}

@@ -112,8 +112,27 @@ public class AusenciaController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('TTHH')")
-    public ResponseEntity<Void> deleteAusencia(@PathVariable Long id) {
+    @PreAuthorize("hasAnyRole('TTHH', 'COLABORADOR')")
+    public ResponseEntity<Void> deleteAusencia(@PathVariable Long id,
+            org.springframework.security.core.Authentication authentication) {
+        // If collaborator, validate ownership and pending status
+        if (authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_COLABORADOR"))) {
+            Long currentEmpleadoId = getCurrentUserId(authentication);
+            if (currentEmpleadoId == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            AusenciaDTO ausencia = ausenciaService.findById(id);
+            if (!currentEmpleadoId.equals(ausencia.getEmpleadoId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            if (!"PENDIENTE".equals(ausencia.getEstado())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+        }
+
         ausenciaService.delete(id);
         return ResponseEntity.noContent().build();
     }

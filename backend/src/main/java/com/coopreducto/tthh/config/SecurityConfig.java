@@ -40,6 +40,8 @@ public class SecurityConfig {
                         // Rutas públicas - sin autenticación (relativas al context-path /api)
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/public/**").permitAll()
+                        .requestMatchers("/push/**").permitAll()
+                        .requestMatchers("/configuraciones/status").permitAll()
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/reportes/ping").permitAll()

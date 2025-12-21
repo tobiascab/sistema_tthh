@@ -22,6 +22,7 @@ public class ReportesServiceImpl implements ReportesService {
 
     private final EmpleadoRepository empleadoRepository;
     private final SolicitudRepository solicitudRepository;
+    private final AusenciaRepository ausenciaRepository; // Added dependency
     private final CertificacionProfesionalRepository certificacionRepository;
     private final AsistenciaRepository asistenciaRepository;
     private final com.coopreducto.tthh.service.CumpleanosService cumpleanosService;
@@ -36,8 +37,10 @@ public class ReportesServiceImpl implements ReportesService {
             dashboard.setColaboradoresActivos(empleadoRepository.countByEstado("ACTIVO"));
             dashboard.setColaboradoresInactivos(empleadoRepository.countByEstado("INACTIVO"));
 
-            // Solicitudes pendientes
-            dashboard.setSolicitudesPendientes(solicitudRepository.countByEstado("PENDIENTE"));
+            // Solicitudes pendientes (Sumar Solicitudes Genéricas + Ausencias)
+            long solicitudesPendientes = solicitudRepository.countByEstado("PENDIENTE");
+            long ausenciasPendientes = ausenciaRepository.countByEstado("PENDIENTE");
+            dashboard.setSolicitudesPendientes(solicitudesPendientes + ausenciasPendientes);
 
             // Certificaciones por vencer (próximos 30 días)
             LocalDate hoy = LocalDate.now();
@@ -70,8 +73,10 @@ public class ReportesServiceImpl implements ReportesService {
             // Solicitudes por estado
             Map<String, Long> porEstado = new HashMap<>();
             porEstado.put("PENDIENTE", dashboard.getSolicitudesPendientes());
-            porEstado.put("APROBADA", solicitudRepository.countByEstado("APROBADA"));
-            porEstado.put("RECHAZADA", solicitudRepository.countByEstado("RECHAZADA"));
+            porEstado.put("APROBADA",
+                    solicitudRepository.countByEstado("APROBADA") + ausenciaRepository.countByEstado("APROBADA"));
+            porEstado.put("RECHAZADA",
+                    solicitudRepository.countByEstado("RECHAZADA") + ausenciaRepository.countByEstado("RECHAZADA"));
             dashboard.setSolicitudesPorEstado(porEstado);
 
             // Alertas
@@ -183,19 +188,26 @@ public class ReportesServiceImpl implements ReportesService {
             Map<String, Long> porTipo = new HashMap<>();
             porTipo.put("VACACIONES", solicitudRepository.countByTipo("VACACIONES"));
             porTipo.put("PERMISO", solicitudRepository.countByTipo("PERMISO"));
-            porTipo.put("CONSTANCIA_LABORAL", solicitudRepository.countByTipo("CONSTANCIA_LABORAL"));
-            porTipo.put("AUMENTO_SALARIO", solicitudRepository.countByTipo("AUMENTO_SALARIO"));
+            // porTipo.put("CONSTANCIA_LABORAL",
+            // solicitudRepository.countByTipo("CONSTANCIA_LABORAL"));
+            // porTipo.put("AUMENTO_SALARIO",
+            // solicitudRepository.countByTipo("AUMENTO_SALARIO"));
             dashboard.setSolicitudesPorTipo(porTipo);
 
-            // Últimas solicitudes pendientes (Top 20)
+            // Últimas solicitudes pendientes (Top 20 Mezclado)
             List<DashboardAdminDTO.SolicitudResumenDTO> ultimas = new ArrayList<>();
             try {
-                List<com.coopreducto.tthh.entity.Solicitud> pendientes = solicitudRepository
+                // Fetch Requests
+                List<com.coopreducto.tthh.entity.Solicitud> solicitudesPendientesList = solicitudRepository
                         .findTop20ByEstadoOrderByCreatedAtDesc("PENDIENTE");
-                if (pendientes != null) {
-                    for (com.coopreducto.tthh.entity.Solicitud s : pendientes) {
-                        if (s == null)
-                            continue;
+
+                // Fetch Absences
+                List<com.coopreducto.tthh.entity.Ausencia> ausenciasPendientesList = ausenciaRepository
+                        .findTop20ByEstadoOrderByCreatedAtDesc("PENDIENTE",
+                                org.springframework.data.domain.PageRequest.of(0, 20));
+
+                if (solicitudesPendientesList != null) {
+                    for (com.coopreducto.tthh.entity.Solicitud s : solicitudesPendientesList) {
                         ultimas.add(new DashboardAdminDTO.SolicitudResumenDTO(
                                 s.getId(),
                                 s.getTitulo() != null ? s.getTitulo() : "Sin título",
@@ -209,6 +221,33 @@ public class ReportesServiceImpl implements ReportesService {
                                         : LocalDateTime.now().toString()));
                     }
                 }
+
+                if (ausenciasPendientesList != null) {
+                    for (com.coopreducto.tthh.entity.Ausencia a : ausenciasPendientesList) {
+                        ultimas.add(new DashboardAdminDTO.SolicitudResumenDTO(
+                                a.getId(), // ID might clash in frontend URL if not handled carefully, assumes handled
+                                           // by context
+                                "Ausencia: " + (a.getMotivo() != null ? a.getMotivo() : "Solicitud de ausencia"),
+                                a.getTipo() != null ? a.getTipo() : "AUSENCIA",
+                                a.getEstado() != null ? a.getEstado() : "PENDIENTE",
+                                "MEDIA", // Default priority for absences
+                                a.getEmpleado() != null
+                                        ? a.getEmpleado().getNombres() + " " + a.getEmpleado().getApellidos()
+                                        : "Sin asignar",
+                                a.getCreatedAt() != null ? a.getCreatedAt().toString()
+                                        : LocalDateTime.now().toString()));
+                    }
+                }
+
+                // Sort combined list by date descending
+                ultimas.sort((a, b) -> LocalDateTime.parse(b.getFechaCreacion())
+                        .compareTo(LocalDateTime.parse(a.getFechaCreacion())));
+
+                // Limit to 20
+                if (ultimas.size() > 20) {
+                    ultimas = ultimas.subList(0, 20);
+                }
+
             } catch (Exception ex) {
                 log.error("Error cargando solicitudes pendientes: " + ex.getMessage());
             }

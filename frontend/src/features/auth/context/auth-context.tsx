@@ -77,7 +77,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             nombre: payload.given_name || "",
             apellido: payload.family_name || "",
             roles: roles,
-            empleadoId: payload.empleadoId || payload.userId,
+            empleadoId: payload.empleadoId || (typeof payload.userId === 'number' ? payload.userId : undefined),
         };
     };
 

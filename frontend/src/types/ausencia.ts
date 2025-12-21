@@ -11,6 +11,7 @@ export interface Ausencia {
     documentoAdjuntoUrl?: string;
     aprobadoPor?: string;
     fechaAprobacion?: string;
+    createdAt?: string;
 }
 
 export interface AusenciaFormData {

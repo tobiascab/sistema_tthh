@@ -32,7 +32,7 @@ public class JwtService {
         return Keys.hmacShaKeyFor(paddedSecret.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(String username, Long userId, List<String> roles) {
+    public String generateToken(String username, Long userId, List<String> roles, Long empleadoId) {
         Instant now = Instant.now();
         Instant expiration = now.plusSeconds(expirationHours * 3600L);
 
@@ -40,11 +40,16 @@ public class JwtService {
                 .subject(username)
                 .claim("userId", userId)
                 .claim("roles", roles)
+                .claim("empleadoId", empleadoId)
                 .claim("iss", "sistema-tthh")
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiration))
                 .signWith(getSigningKey())
                 .compact();
+    }
+
+    public String generateToken(String username, Long userId, List<String> roles) {
+        return generateToken(username, userId, roles, null);
     }
 
     public boolean validateToken(String token) {
@@ -79,5 +84,16 @@ public class JwtService {
     @SuppressWarnings("unchecked")
     public List<String> getRoles(String token) {
         return getClaims(token).get("roles", List.class);
+    }
+
+    public Long getEmpleadoId(String token) {
+        Object id = getClaims(token).get("empleadoId");
+        if (id == null)
+            return null;
+        if (id instanceof Integer)
+            return ((Integer) id).longValue();
+        if (id instanceof Long)
+            return (Long) id;
+        return Long.parseLong(id.toString());
     }
 }

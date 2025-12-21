@@ -76,8 +76,9 @@ public class AuthServiceImpl implements AuthService {
                 ? List.of(usuario.getRol().getNombre())
                 : List.of("COLABORADOR");
 
-        // Generar token
-        String token = jwtService.generateToken(usuario.getUsername(), usuario.getId(), roles);
+        // Generar token con empleadoId si está disponible
+        Long empleadoId = usuario.getEmpleado() != null ? usuario.getEmpleado().getId() : null;
+        String token = jwtService.generateToken(usuario.getUsername(), usuario.getId(), roles, empleadoId);
 
         log.info("Login exitoso para usuario: {}", request.getUsername());
 
@@ -106,7 +107,8 @@ public class AuthServiceImpl implements AuthService {
             Long userId = jwtService.getUserId(token);
             List<String> roles = jwtService.getRoles(token);
 
-            String newToken = jwtService.generateToken(username, userId, roles);
+            Long empleadoId = jwtService.getEmpleadoId(token);
+            String newToken = jwtService.generateToken(username, userId, roles, empleadoId);
 
             return AuthResponseDTO.builder()
                     .token(newToken)

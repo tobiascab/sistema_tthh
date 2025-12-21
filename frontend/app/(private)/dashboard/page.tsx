@@ -329,22 +329,13 @@ function AdminDashboard() {
                             </div>
                         </div>
 
-                        {/* Right Section - Tip del Día con botón de edición */}
+                        {/* Right Section - Tip del Día (Solo lectura) */}
                         {fraseDelDia && (
                             <div className="hidden xl:flex flex-col items-end max-w-xs text-right flex-shrink-0 relative group">
                                 <div className="flex items-center gap-2 mb-1">
                                     <p className="text-xs font-semibold text-emerald-700 uppercase tracking-wider">
                                         Texto del día:
                                     </p>
-                                    <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="h-5 w-5 opacity-0 group-hover:opacity-100 transition-opacity text-emerald-600 hover:text-emerald-700 hover:bg-emerald-100"
-                                        onClick={() => setFrasesManagerOpen(true)}
-                                        title="Gestionar textos"
-                                    >
-                                        <Settings className="w-3 h-3" />
-                                    </Button>
                                 </div>
                                 <p className="text-sm text-gray-600 leading-relaxed italic">
                                     "{fraseDelDia.texto}"
@@ -355,17 +346,6 @@ function AdminDashboard() {
 
                         {/* Action Buttons */}
                         <div className="flex gap-2 flex-shrink-0 items-center">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                className="bg-white/80 border-emerald-300 text-emerald-700 hover:bg-emerald-50 hover:border-emerald-400 font-medium"
-                                onClick={() => setFrasesManagerOpen(true)}
-                                title="Gestionar textos/frases"
-                            >
-                                <BookOpen className="w-4 h-4 mr-1.5" />
-                                Textos
-                            </Button>
-
                             <Button
                                 variant="outline"
                                 size="sm"
@@ -412,9 +392,6 @@ function AdminDashboard() {
                     </motion.div>
                 )}
             </motion.div>
-
-            {/* Push Notification Banner for Admins */}
-            <NotificationBanner className="mb-2" />
 
             {/* KPI Cards - Compactas */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -666,7 +643,7 @@ function AdminDashboard() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {dashboardData.ultimasSolicitudes.slice(0, 10).map((solicitud: any) => {
+                                    {dashboardData.ultimasSolicitudes.slice(0, 10).map((solicitud: any, index: number) => {
                                         const tipoColor =
                                             solicitud.tipo === 'VACACIONES' ? 'bg-indigo-50 text-indigo-700 border-indigo-200' :
                                                 solicitud.tipo === 'AUMENTO_SALARIO' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
@@ -681,7 +658,7 @@ function AdminDashboard() {
                                         const iniciales = solicitud.empleadoNombre?.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || '??';
 
                                         return (
-                                            <TableRow key={solicitud.id} className="hover:bg-emerald-50/30 transition-colors">
+                                            <TableRow key={`${solicitud.id}-${index}`} className="hover:bg-emerald-50/30 transition-colors">
                                                 <TableCell className="pl-6 py-4 font-medium text-neutral-800">
                                                     <div className="flex items-center gap-3">
                                                         <Avatar className="h-9 w-9 border-2 border-white shadow-sm">
@@ -743,11 +720,6 @@ function AdminDashboard() {
                 open={birthdayManagerOpen}
                 onOpenChange={setBirthdayManagerOpen}
                 onConfigChange={() => refetch()}
-            />
-
-            <FrasesManagerDialog
-                open={frasesManagerOpen}
-                onOpenChange={setFrasesManagerOpen}
             />
         </div>
     );

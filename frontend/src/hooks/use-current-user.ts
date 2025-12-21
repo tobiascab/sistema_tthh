@@ -6,9 +6,15 @@ export function useCurrentUser() {
     const { user, hasRole } = useAuth();
 
     // Use the real empleadoId from user object, fallback to localStorage if available
-    const empleadoId = user?.empleadoId ||
-        (typeof window !== 'undefined' ? parseInt(localStorage.getItem('empleadoId') || '0', 10) : 0) ||
-        (user?.id ? parseInt(user.id, 10) : 0);
+    let resolvedId = user?.empleadoId ||
+        (typeof window !== 'undefined' ? parseInt(localStorage.getItem('empleadoId') || '0', 10) : 0);
+
+    // If still 0 and user.id is numeric, use it as last resort
+    if (!resolvedId && user?.id && !isNaN(Number(user.id))) {
+        resolvedId = Number(user.id);
+    }
+
+    const empleadoId = resolvedId || 0;
 
     // El username en nuestro mock/keycloak actúa como número de socio o identificador de negocio
     const numeroSocio = user?.username || "PENDIENTE";

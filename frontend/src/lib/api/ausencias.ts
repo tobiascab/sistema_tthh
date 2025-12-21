@@ -5,7 +5,6 @@ import { PageResponse, PaginationParams } from '@/src/types/api';
 const AUSENCIAS_URL = '/ausencias';
 
 export const ausenciasApi = {
-    // Get all ausencias with pagination and filters
     getAll: async (params?: PaginationParams & {
         estado?: string;
         tipo?: string;
@@ -19,12 +18,21 @@ export const ausenciasApi = {
         if (params?.sort) queryParams.append('sort', params.sort);
         if (params?.estado) queryParams.append('estado', params.estado);
         if (params?.tipo) queryParams.append('tipo', params.tipo);
-        if (params?.empleadoId) queryParams.append('empleadoId', params.empleadoId.toString());
         if (params?.fechaInicio) queryParams.append('fechaInicio', params.fechaInicio);
         if (params?.fechaFin) queryParams.append('fechaFin', params.fechaFin);
 
-        const url = `${AUSENCIAS_URL}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
-        return get<PageResponse<Ausencia>>(url);
+        let url = AUSENCIAS_URL;
+
+        // If filtering by employee, use the specific endpoint to avoid 403 for collaborators
+        // and to actually filter by employee (since main endpoint ignores this param)
+        if (params?.empleadoId) {
+            url = `${AUSENCIAS_URL}/empleado/${params.empleadoId}`;
+        }
+
+        const queryString = queryParams.toString();
+        const finalUrl = queryString ? `${url}?${queryString}` : url;
+
+        return get<PageResponse<Ausencia>>(finalUrl);
     },
 
     // Get ausencia by ID

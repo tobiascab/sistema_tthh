@@ -51,6 +51,9 @@ public class AusenciaDTO {
 
     private String documentoUrl;
 
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private java.time.LocalDateTime createdAt;
+
     public Long getId() {
         return id;
     }
@@ -145,5 +148,13 @@ public class AusenciaDTO {
 
     public void setDocumentoUrl(String documentoUrl) {
         this.documentoUrl = documentoUrl;
+    }
+
+    public java.time.LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(java.time.LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

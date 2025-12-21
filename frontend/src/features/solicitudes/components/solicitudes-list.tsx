@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { solicitudesApi } from "@/src/lib/api/solicitudes";
+import { ausenciasApi } from "@/src/lib/api/ausencias";
 import { Solicitud, SolicitudFormData } from "@/src/types/solicitud";
 import { DataTable } from "@/src/components/data-table/data-table";
 import { getSolicitudesColumns } from "./solicitudes-columns";
@@ -103,23 +104,83 @@ export function SolicitudesList({ empleadoId }: SolicitudesListProps) {
 
     // Fetch solicitudes - Depende de appliedDateRange
     const { data, isLoading, refetch } = useQuery({
-        queryKey: ["solicitudes", empleadoId, filterEstado, appliedDateRange],
-        queryFn: () => solicitudesApi.getAll({
-            page: 0,
-            size: 50,
-            empleadoId,
-            estado: filterEstado,
-            fechaInicio: appliedDateRange?.from ? format(appliedDateRange.from, 'yyyy-MM-dd') : undefined,
-            fechaFin: appliedDateRange?.to ? format(appliedDateRange.to, 'yyyy-MM-dd') : undefined,
-            sort: "createdAt,desc"
-        }),
+        queryKey: ["solicitudes-unificadas", empleadoId, filterEstado, appliedDateRange],
+        queryFn: async () => {
+            const params = {
+                page: 0,
+                size: 50,
+                empleadoId,
+                estado: filterEstado,
+                fechaInicio: appliedDateRange?.from ? format(appliedDateRange.from, 'yyyy-MM-dd') : undefined,
+                fechaFin: appliedDateRange?.to ? format(appliedDateRange.to, 'yyyy-MM-dd') : undefined,
+                sort: "createdAt,desc"
+            };
+
+            const [solicitudesRes, ausenciasRes] = await Promise.all([
+                solicitudesApi.getAll(params),
+                ausenciasApi.getAll({ ...params, sort: "createdAt,desc" })
+            ]);
+
+            // Map Ausencias to Solicitudes structure with client-side filtering
+            // (Backend endpoint /empleado/{id} does not support filtering yet)
+            const ausenciasMapped = ausenciasRes.content
+                .filter((a: any) => {
+                    // Filter by Estado
+                    if (filterEstado && a.estado !== filterEstado) return false;
+
+                    // Filter by Date Range
+                    if (appliedDateRange?.from) {
+                        const fecha = new Date(a.createdAt || a.fechaCreacion);
+                        if (fecha < appliedDateRange.from) return false;
+                    }
+                    if (appliedDateRange?.to) {
+                        const fecha = new Date(a.createdAt || a.fechaCreacion);
+                        // Set end date to end of day
+                        const endOfDay = new Date(appliedDateRange.to);
+                        endOfDay.setHours(23, 59, 59, 999);
+                        if (fecha > endOfDay) return false;
+                    }
+                    return true;
+                })
+                .map((a: any) => ({
+                    id: a.id,
+                    tipo: a.tipo,
+                    titulo: `Ausencia: ${a.motivo || a.tipo}`,
+                    descripcion: `Del ${a.fechaInicio} al ${a.fechaFin}. ${a.observaciones || ''}`,
+                    estado: a.estado,
+                    prioridad: 'MEDIA', // Default
+                    createdAt: a.createdAt || a.fechaCreacion,
+                    empleadoNombre: a.empleado ? `${a.empleado.nombres} ${a.empleado.apellidos}` : 'Usuario',
+                    empleado: a.empleado,
+                    isAusencia: true // marker for unified handling
+                }));
+
+            // Combine and sort
+            const combined = [...solicitudesRes.content, ...ausenciasMapped].sort((a: any, b: any) => {
+                const dateA = new Date(a.createdAt).getTime();
+                const dateB = new Date(b.createdAt).getTime();
+                return dateB - dateA;
+            });
+
+            return {
+                content: combined as any[], // Cast to allow merged type
+                totalElements: solicitudesRes.totalElements + ausenciasRes.totalElements,
+                totalPages: 1,
+                size: combined.length,
+                number: 0,
+                empty: combined.length === 0,
+                first: true,
+                last: true,
+                numberOfElements: combined.length
+            };
+        },
     });
 
     // Create mutation
     const createMutation = useMutation({
         mutationFn: (data: SolicitudFormData) => solicitudesApi.create(data),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["solicitudes"] });
+            queryClient.invalidateQueries({ queryKey: ["solicitudes-unificadas"] });
             setIsDialogOpen(false);
             toast({
                 title: "Solicitud enviada",
@@ -135,11 +196,16 @@ export function SolicitudesList({ empleadoId }: SolicitudesListProps) {
         },
     });
 
-    // Approve mutation
+    // Approve mutation (Unified)
     const approveMutation = useMutation({
-        mutationFn: ({ id, respuesta }: { id: number; respuesta?: string }) => solicitudesApi.approve(id, respuesta),
+        mutationFn: async ({ id, respuesta, isAusencia }: { id: number; respuesta?: string; isAusencia?: boolean }) => {
+            if (isAusencia) {
+                return ausenciasApi.approve(id);
+            }
+            return solicitudesApi.approve(id, respuesta);
+        },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["solicitudes"] });
+            queryClient.invalidateQueries({ queryKey: ["solicitudes-unificadas"] });
             queryClient.invalidateQueries({ queryKey: ["dashboard-admin"] });
             toast({
                 title: "Solicitud aprobada",
@@ -149,15 +215,44 @@ export function SolicitudesList({ empleadoId }: SolicitudesListProps) {
         },
     });
 
-    // Reject mutation
+    // Reject mutation (Unified)
     const rejectMutation = useMutation({
-        mutationFn: ({ id, respuesta }: { id: number; respuesta?: string }) => solicitudesApi.reject(id, respuesta || "Rechazada por administrador"),
+        mutationFn: async ({ id, respuesta, isAusencia }: { id: number; respuesta?: string; isAusencia?: boolean }) => {
+            if (isAusencia) {
+                return ausenciasApi.reject(id, respuesta);
+            }
+            return solicitudesApi.reject(id, respuesta || "Rechazada por administrador");
+        },
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ["solicitudes"] });
+            queryClient.invalidateQueries({ queryKey: ["solicitudes-unificadas"] });
             queryClient.invalidateQueries({ queryKey: ["dashboard-admin"] });
             toast({
                 title: "Solicitud rechazada",
                 description: "La solicitud ha sido rechazada.",
+                variant: "destructive",
+            });
+        },
+    });
+
+    // Delete mutation (Unified)
+    const deleteMutation = useMutation({
+        mutationFn: async ({ id, isAusencia }: { id: number; isAusencia?: boolean }) => {
+            if (isAusencia) {
+                return ausenciasApi.delete(id);
+            }
+            return solicitudesApi.cancel(id);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["solicitudes-unificadas"] });
+            toast({
+                title: "Solicitud eliminada",
+                description: "La solicitud ha sido eliminada exitosamente.",
+            });
+        },
+        onError: () => {
+            toast({
+                title: "Error",
+                description: "No se pudo eliminar la solicitud.",
                 variant: "destructive",
             });
         },
@@ -172,12 +267,29 @@ export function SolicitudesList({ empleadoId }: SolicitudesListProps) {
         setIsDetailDialogOpen(true);
     };
 
-    const handleApprove = async (solicitud: Solicitud, comentario?: string) => {
-        await approveMutation.mutateAsync({ id: solicitud.id, respuesta: comentario });
+    const handleApprove = async (solicitud: Solicitud | any, comentario?: string) => {
+        await approveMutation.mutateAsync({
+            id: solicitud.id,
+            respuesta: comentario,
+            isAusencia: solicitud.isAusencia
+        });
     };
 
-    const handleReject = async (solicitud: Solicitud, comentario?: string) => {
-        await rejectMutation.mutateAsync({ id: solicitud.id, respuesta: comentario });
+    const handleReject = async (solicitud: Solicitud | any, comentario?: string) => {
+        await rejectMutation.mutateAsync({
+            id: solicitud.id,
+            respuesta: comentario,
+            isAusencia: solicitud.isAusencia
+        });
+    };
+
+    const handleDelete = async (solicitud: Solicitud | any) => {
+        if (window.confirm('¿Está seguro que desea eliminar esta solicitud?')) {
+            await deleteMutation.mutateAsync({
+                id: solicitud.id,
+                isAusencia: solicitud.isAusencia
+            });
+        }
     };
 
     const handleSubmit = async (data: SolicitudFormData) => {
@@ -193,6 +305,7 @@ export function SolicitudesList({ empleadoId }: SolicitudesListProps) {
         onView: handleView,
         onApprove: handleApprove,
         onReject: handleReject,
+        onDelete: handleDelete,
         isAdminOrManager,
     });
 

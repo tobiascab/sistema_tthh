@@ -32,17 +32,21 @@ public class DataSeeder {
         private final ReciboComisionRepository reciboComisionRepository;
         private final PasswordEncoder passwordEncoder;
         private final FraseDelDiaService fraseDelDiaService;
+        private final com.coopreducto.tthh.repository.ModuloRepository moduloRepository;
 
         @Bean
         public CommandLineRunner initData() {
                 return args -> {
                         try {
+                                log.info("🚀 INICIANDO POBLADO MASIVO Y LIMPIO DE DATOS...");
+
+                                // 1.5 Módulos del Sistema
+                                crearModulosSistema();
+
                                 if (empleadoRepository.count() > 0) {
                                         log.info("⚠️ Los datos ya existen. Saltando poblado masivo para evitar duplicados.");
                                         return;
                                 }
-
-                                log.info("🚀 INICIANDO POBLADO MASIVO Y LIMPIO DE DATOS...");
 
                                 // 1. Roles
                                 ensureRoles();
@@ -74,6 +78,7 @@ public class DataSeeder {
                                 log.error("❌ ERROR EN EL SEEDER: ", e);
                         }
                 };
+
         }
 
         private void ensureRoles() {
@@ -249,5 +254,73 @@ public class DataSeeder {
                         res.setFechaPago(LocalDate.of(anio, m, 28));
                         reciboSalarioRepository.save(res);
                 }
+        }
+
+        private void crearModulosSistema() {
+                log.info("📦 Sincronizando módulos del sistema...");
+
+                List<Modulo> modulosDefinidos = List.of(
+                                new Modulo("DASHBOARD", "Dashboard Principal",
+                                                "Vista general del colaborador con estadísticas y accesos rápidos",
+                                                "LayoutDashboard", "/dashboard", 1, true),
+
+                                new Modulo("PERFIL", "Mi Perfil",
+                                                "Visualización y edición de datos personales del colaborador",
+                                                "User", "/colaborador/perfil", 2, true),
+
+                                new Modulo("SOLICITUDES", "Mis Solicitudes",
+                                                "Gestión de solicitudes de permisos, certificados y otros",
+                                                "FileText", "/colaborador/solicitudes", 3, true),
+
+                                new Modulo("AUSENCIAS", "Gestión de Ausencias",
+                                                "Calendario y solicitud de vacaciones, licencias médicas, etc.",
+                                                "Calendar", "/colaborador/ausencias", 4, true),
+
+                                new Modulo("RECIBOS_SALARIO", "Recibos de Salario",
+                                                "Consulta y descarga de recibos de sueldo mensuales",
+                                                "Receipt", "/colaborador/recibos", 5, true),
+
+                                new Modulo("COMISIONES", "Mis Comisiones",
+                                                "Consulta de liquidaciones de comisiones (solo para asesores)",
+                                                "DollarSign", "/colaborador/comisiones", 6, false),
+
+                                new Modulo("MARCACIONES", "Mis Marcaciones",
+                                                "Historial de asistencia y marcaciones de entrada/salida",
+                                                "Clock", "/colaborador/marcaciones", 7, true),
+
+                                new Modulo("DOCUMENTOS", "Mis Documentos",
+                                                "Contratos, certificados y otros documentos personales",
+                                                "FolderOpen", "/colaborador/documentos", 8, true),
+
+                                // Módulos Administrativos
+                                new Modulo("ADMIN_EMPLEADOS", "Gestión de Empleados",
+                                                "Administración completa de empleados (solo Admin/TTHH)",
+                                                "Users", "/admin/empleados", 10, false),
+
+                                new Modulo("ADMIN_NOMINA", "Gestión de Nómina",
+                                                "Procesamiento de nómina y recibos (solo Admin/TTHH)",
+                                                "Banknote", "/admin/nomina", 11, false),
+
+                                new Modulo("ADMIN_REPORTES", "Reportes Globales",
+                                                "Reportes y estadísticas del sistema (solo Admin/TTHH)",
+                                                "BarChart3", "/admin/reportes", 12, false),
+
+                                new Modulo("ADMIN_ROLES", "Gestión de Roles y Permisos",
+                                                "Administración de roles y permisos modulares (solo Admin/TTHH)",
+                                                "Shield", "/admin/roles", 13, false));
+
+                for (Modulo def : modulosDefinidos) {
+                        moduloRepository.findByCodigo(def.getCodigo()).ifPresentOrElse(
+                                        existente -> {
+                                                existente.setEsDefault(def.getEsDefault());
+                                                existente.setNombre(def.getNombre());
+                                                existente.setRutaMenu(def.getRutaMenu());
+                                                existente.setIcono(def.getIcono());
+                                                moduloRepository.save(existente);
+                                        },
+                                        () -> moduloRepository.save(def));
+                }
+
+                log.info("✅ Módulos del sistema sincronizados.");
         }
 }

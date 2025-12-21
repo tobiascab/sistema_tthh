@@ -1,12 +1,61 @@
+"use client";
+
 import { AuthGuard } from "@/src/features/auth/components/auth-guard";
 import { Sidebar } from "@/src/components/layout/sidebar";
 import { Topbar } from "@/src/components/layout/topbar";
+import { useEffect, useState } from "react";
+import { configuracionApi } from "@/src/lib/api/configuracion";
+import { useAuth } from "@/src/features/auth/context/auth-context";
+import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 
 export default function PrivateLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const { user, hasRole, isLoading: authLoading } = useAuth();
+    const router = useRouter();
+    const [isCheckingMaintenance, setIsCheckingMaintenance] = useState(true);
+
+    useEffect(() => {
+        const checkStatus = async () => {
+            // Si aún está cargando el usuario, esperamos
+            if (authLoading) return;
+
+            try {
+                // Obtenemos estado del sistema
+                const status = await configuracionApi.getSystemStatus();
+
+                // Si hay mantenimiento y el usuario NO es admin/gerencia
+                if (status.maintenanceMode) {
+                    const isAdmin = hasRole('TTHH') || hasRole('GERENCIA');
+
+                    if (!isAdmin) {
+                        router.replace('/mantenimiento');
+                        return;
+                    }
+                }
+            } catch (error) {
+                // Ignorar errores silenciosamente (ej: backend no disponible aún)
+                // El sistema continuará funcionando normalmente
+                console.debug('Could not check maintenance status:', error);
+            } finally {
+                setIsCheckingMaintenance(false);
+            }
+        };
+
+        checkStatus();
+    }, [router, authLoading, hasRole]); // Dependencias para re-verificar si cambia usuario
+
+    if (authLoading || isCheckingMaintenance) {
+        return (
+            <div className="h-screen w-screen flex items-center justify-center bg-[#f8fafc]">
+                <Loader2 className="w-10 h-10 animate-spin text-emerald-600" />
+            </div>
+        );
+    }
+
     return (
         <AuthGuard>
             <div className="flex h-screen overflow-hidden bg-[#f8fafc]">

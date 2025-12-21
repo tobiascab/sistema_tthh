@@ -103,10 +103,11 @@ export function usePushNotifications() {
                 hasRole('GERENCIA') ? 'GERENCIA' :
                     hasRole('COLABORADOR') ? 'COLABORADOR' : 'OTHER';
 
-            const usuarioId = user?.id ? `&usuarioId=${user.id}` : '';
+            // Send subscription to server - only append ID if it's a number
+            const userIdParam = user?.id && !isNaN(Number(user.id)) ? `&usuarioId=${user.id}` : '';
 
             // Send subscription to server
-            await post(`/push/subscribe?rolName=${rolName}${usuarioId}`, subscription);
+            await post(`/push/subscribe?rolName=${rolName}${userIdParam}`, subscription);
 
             setState(prev => ({
                 ...prev,

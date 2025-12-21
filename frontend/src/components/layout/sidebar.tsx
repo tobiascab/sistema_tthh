@@ -30,6 +30,7 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/src/components/ui/tooltip";
+import { useModulePermissions } from "@/src/hooks/use-module-permissions";
 
 const menuItems = [
     {
@@ -37,85 +38,111 @@ const menuItems = [
         href: "/dashboard",
         icon: LayoutDashboard,
         roles: ["TTHH", "GERENCIA", "AUDITORIA", "COLABORADOR"],
+        module: "DASHBOARD"
     },
     {
         title: "Empleados",
         href: "/tthh/empleados",
         icon: Users,
         roles: ["TTHH", "GERENCIA", "AUDITORIA"],
+        module: "ADMIN_EMPLEADOS"
     },
     {
         title: "Legajos",
         href: "/tthh/legajos",
         icon: FileText,
         roles: ["TTHH", "GERENCIA", "AUDITORIA"],
+        module: "ADMIN_EMPLEADOS" // Linked to employees module
     },
     {
         title: "Gestión de Nómina",
         href: "/tthh/nominas",
         icon: DollarSign,
         roles: ["TTHH", "GERENCIA"],
+        module: "ADMIN_NOMINA"
     },
     {
         title: "Gestión de Comisiones",
         href: "/admin/comisiones",
         icon: BadgeDollarSign,
         roles: ["TTHH", "GERENCIA"],
+        module: "ADMIN_NOMINA" // Or a specific ADMIN_COMISIONES if we had it, but ADMIN_NOMINA works for now
     },
     {
         title: "Marcaciones",
         href: "/admin/marcaciones",
         icon: Calendar,
         roles: ["TTHH", "GERENCIA", "AUDITORIA"],
+        module: "MARCACIONES"
     },
     {
         title: "Centro de Solicitudes",
         href: "/colaborador/solicitudes",
         icon: ClipboardList,
         roles: ["TTHH", "GERENCIA", "AUDITORIA", "COLABORADOR"],
+        module: "SOLICITUDES"
     },
     {
         title: "Recibos de Salario",
         href: "/colaborador/recibos",
         icon: FileText,
         roles: ["TTHH", "GERENCIA", "COLABORADOR", "ASESOR_DE_CREDITO", "JUDICIAL", "RECUPERADOR_DE_CREDITO"],
+        module: "RECIBOS_SALARIO"
     },
     {
         title: "Recibos de Comisión",
         href: "/colaborador/comisiones",
         icon: BadgeDollarSign,
-        roles: ["TTHH", "GERENCIA", "ASESOR_DE_CREDITO", "JUDICIAL", "RECUPERADOR_DE_CREDITO"],
+        roles: ["TTHH", "GERENCIA", "COLABORADOR", "ASESOR_DE_CREDITO", "JUDICIAL", "RECUPERADOR_DE_CREDITO"],
+        module: "COMISIONES"
     },
     {
         title: "Reportes",
         href: "/reportes",
         icon: BarChart3,
         roles: ["TTHH", "GERENCIA", "AUDITORIA"],
+        module: "ADMIN_REPORTES"
     },
     {
         title: "Auditoría",
         href: "/auditoria",
         icon: Shield,
         roles: ["TTHH", "GERENCIA", "AUDITORIA"],
+        module: "ADMIN_REPORTES" // Using reportes for audit for now
+    },
+    {
+        title: "Gestión de Roles",
+        href: "/admin/roles",
+        icon: Shield,
+        roles: ["TTHH"],
+        module: "ADMIN_ROLES"
     },
     {
         title: "Configuración",
         href: "/admin",
         icon: Settings,
         roles: ["TTHH", "GERENCIA"],
+        module: "ADMIN_ROLES"
     },
     {
         title: "Usuarios y Roles",
         href: "/tthh/usuarios",
         icon: UserCog,
         roles: ["TTHH"],
+        module: "ADMIN_ROLES"
     },
 ];
 
 export function Sidebar() {
     const pathname = usePathname();
     const { user, hasAnyRole } = useAuth();
+    const { tieneAcceso, isLoading: loadingPermissions } = useModulePermissions();
     const [isCollapsed, setIsCollapsed] = useState(false);
+
+    const handleGuardar = () => {
+        console.log("💾 Guardando módulos para empleado ", empleadoId, ":", modulosSeleccionados);
+        sincronizarMutation.mutate();
+    };
 
     const getUserInitials = () => {
         if (!user) return "U";
@@ -200,8 +227,16 @@ export function Sidebar() {
                     </AnimatePresence>
 
                     {menuItems.map((item) => {
-                        // Filter items based on user roles
-                        if (!user || (item.roles && !hasAnyRole(item.roles))) {
+                        // Filter items based on module permissions (priority) or user roles (fallback)
+                        const hasModuleAccess = item.module ? tieneAcceso(item.module) : false;
+                        const hasRoleAccess = item.roles && hasAnyRole(item.roles);
+
+                        // If it's a module item, follow module access (with Admin bypass inside tieneAcceso)
+                        // If it's not a module item, follow role access
+                        const isPowerUser = hasAnyRole(['TTHH', 'GERENCIA', 'ADMIN']);
+                        const canSee = isPowerUser || (item.module ? hasModuleAccess : hasRoleAccess);
+
+                        if (!user || !canSee) {
                             return null;
                         }
 

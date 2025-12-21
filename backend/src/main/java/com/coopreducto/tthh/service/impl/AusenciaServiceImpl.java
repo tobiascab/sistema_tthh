@@ -22,6 +22,7 @@ public class AusenciaServiceImpl implements AusenciaService {
 
     private final AusenciaRepository ausenciaRepository;
     private final EmpleadoRepository empleadoRepository;
+    private final com.coopreducto.tthh.service.WebPushService webPushService;
 
     @Override
     @Transactional(readOnly = true)
@@ -60,6 +61,15 @@ public class AusenciaServiceImpl implements AusenciaService {
         ausencia.setEstado("PENDIENTE");
 
         Ausencia savedAusencia = ausenciaRepository.save(ausencia);
+
+        // Notify TTHH Admins
+        String empleadoNombre = empleado.getNombres() + " " + empleado.getApellidos();
+        webPushService.sendToRole(
+                "TTHH",
+                "📅 Nueva Ausencia",
+                empleadoNombre + " ha solicitado " + savedAusencia.getTipo(),
+                "/colaborador/solicitudes?tipo=ausencia");
+
         return convertToDTO(savedAusencia);
     }
 
@@ -131,6 +141,7 @@ public class AusenciaServiceImpl implements AusenciaService {
         dto.setObservaciones(ausencia.getObservaciones());
         dto.setAprobadoPor(ausencia.getAprobadoPor());
         dto.setDocumentoUrl(ausencia.getDocumentoUrl());
+        dto.setCreatedAt(ausencia.getCreatedAt());
         return dto;
     }
 

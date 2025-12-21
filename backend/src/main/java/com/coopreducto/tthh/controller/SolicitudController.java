@@ -99,8 +99,26 @@ public class SolicitudController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('TTHH')")
-    public ResponseEntity<Void> deleteSolicitud(@PathVariable("id") Long id) {
+    @PreAuthorize("hasAnyRole('TTHH', 'COLABORADOR')")
+    public ResponseEntity<Void> deleteSolicitud(@PathVariable("id") Long id, Authentication authentication) {
+        // If collaborator, validate ownership and pending status
+        if (authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_COLABORADOR"))) {
+            Long currentEmpleadoId = getCurrentUserId(authentication);
+            if (currentEmpleadoId == null) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            SolicitudDTO solicitud = solicitudService.findById(id);
+            if (!currentEmpleadoId.equals(solicitud.getEmpleadoId())) {
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+            }
+
+            if (!"PENDIENTE".equals(solicitud.getEstado())) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            }
+        }
+
         solicitudService.delete(id);
         return ResponseEntity.noContent().build();
     }

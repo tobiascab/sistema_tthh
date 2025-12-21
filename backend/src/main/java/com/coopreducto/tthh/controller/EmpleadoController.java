@@ -30,6 +30,7 @@ public class EmpleadoController {
     // ========================================
 
     @PostMapping
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('TTHH', 'GERENCIA')")
     public ResponseEntity<EmpleadoDTO> crear(@Valid @RequestBody EmpleadoDTO empleadoDTO) {
         log.info("POST /empleados - Creando empleado: {}", empleadoDTO.getNombres());
         EmpleadoDTO creado = empleadoService.crear(empleadoDTO);
@@ -37,6 +38,7 @@ public class EmpleadoController {
     }
 
     @PutMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('TTHH', 'GERENCIA')")
     public ResponseEntity<EmpleadoDTO> actualizar(
             @PathVariable("id") Long id,
             @Valid @RequestBody EmpleadoDTO empleadoDTO) {
@@ -62,6 +64,7 @@ public class EmpleadoController {
     }
 
     @DeleteMapping("/{id}")
+    @org.springframework.security.access.prepost.PreAuthorize("hasRole('TTHH')")
     public ResponseEntity<Void> eliminar(@PathVariable("id") Long id) {
         log.info("DELETE /empleados/{}", id);
         empleadoService.eliminar(id);
@@ -70,9 +73,12 @@ public class EmpleadoController {
 
     @GetMapping
     public ResponseEntity<Page<EmpleadoDTO>> listar(
+            @RequestParam(value = "search", required = false) String search,
             @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
-        log.info("GET /empleados - Listando con paginación");
-        Page<EmpleadoDTO> empleados = empleadoService.listarTodos(pageable);
+        log.info("GET /empleados - Listando con paginación, search: {}", search);
+        Page<EmpleadoDTO> empleados = (search != null && !search.isBlank())
+                ? empleadoService.buscar(search, pageable)
+                : empleadoService.listarTodos(pageable);
         return ResponseEntity.ok(empleados);
     }
 
