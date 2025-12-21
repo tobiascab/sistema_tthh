@@ -55,16 +55,18 @@ const getNotificationBg = (type: NotificationType, read: boolean) => {
 };
 
 export function NotificationsButton() {
-    const { empleadoId } = useCurrentUser();
+    const { user } = useCurrentUser();
     const queryClient = useQueryClient();
     const [isOpen, setIsOpen] = useState(false);
 
     // Polling cada 30 segundos
     const { data: notifications = [], isLoading } = useQuery({
-        queryKey: ["notificaciones", empleadoId],
-        queryFn: () => notificacionesApi.getMisNotificaciones(empleadoId!),
-        enabled: !!empleadoId,
+        queryKey: ["notificaciones", user?.id],
+        queryFn: () => notificacionesApi.getMisNotificaciones(Number(user?.id)),
+        enabled: !!user?.id,
         refetchInterval: 30000,
+        refetchOnWindowFocus: true,
+        refetchOnReconnect: true
     });
 
     const unreadCount = notifications.filter(n => !n.leido).length;

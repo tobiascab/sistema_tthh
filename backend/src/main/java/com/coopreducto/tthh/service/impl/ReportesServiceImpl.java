@@ -28,7 +28,7 @@ public class ReportesServiceImpl implements ReportesService {
     private final com.coopreducto.tthh.service.CumpleanosService cumpleanosService;
 
     @Override
-    // @Cacheable(value = "dashboardAdmin")
+    @Cacheable(value = "dashboardAdmin")
     public DashboardAdminDTO getDashboardAdmin() {
         try {
             DashboardAdminDTO dashboard = new DashboardAdminDTO();
@@ -161,7 +161,8 @@ public class ReportesServiceImpl implements ReportesService {
             log.info("KPIs cargados con éxito para {} empleados.", dashboard.getColaboradoresActivos());
 
             // Simular nómina pagada (95% de la estimada como ejemplo)
-            dashboard.setNominaMensualPagada(nominaTotal.multiply(new BigDecimal("0.95")));
+            dashboard.setNominaMensualPagada(nominaTotal.multiply(new BigDecimal("0.95"))
+                    .setScale(0, java.math.RoundingMode.HALF_UP));
 
             // Generar tendencia de nómina últimos 6 meses con variaciones realistas
             List<DashboardAdminDTO.TendenciaMensual> nominaHistorica = new ArrayList<>();
@@ -172,9 +173,9 @@ public class ReportesServiceImpl implements ReportesService {
 
             for (int i = 5; i >= 0; i--) {
                 java.time.YearMonth mes = mesActual.minusMonths(i);
-                // Variación de ±5% sobre la nómina base para simular cambios
                 double variacion = 0.95 + (rand.nextDouble() * 0.10); // 0.95 a 1.05
-                BigDecimal nominaMes = nominaTotal.multiply(new BigDecimal(variacion));
+                BigDecimal nominaMes = nominaTotal.multiply(new BigDecimal(variacion))
+                        .setScale(0, java.math.RoundingMode.HALF_UP);
 
                 nominaHistorica.add(new DashboardAdminDTO.TendenciaMensual(
                         nombresMeses[mes.getMonthValue()],

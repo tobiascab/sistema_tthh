@@ -141,8 +141,6 @@ export default function MiPerfilPage() {
                 <div className="bg-white rounded-xl border border-neutral-200 p-6 min-h-[500px]">
                     <TabsContent value="info" className="m-0 focus-visible:outline-none">
                         <div className="max-w-4xl">
-                            {/* Reusing EmpleadoForm but maybe we want to disable some fields or show readonly view */}
-                            {/* For now allowing edit of own data */}
                             <EmpleadoForm
                                 empleado={empleado}
                                 onSubmit={handleUpdate}
@@ -153,19 +151,25 @@ export default function MiPerfilPage() {
                     </TabsContent>
 
                     <TabsContent value="documentos" className="m-0 focus-visible:outline-none">
-                        <DocumentosList
-                            empleadoId={empleadoId}
-                            empleadoNombre={`${empleado.nombres} ${empleado.apellidos}`}
-                            showHeader={false}
-                        />
+                        {activeTab === "documentos" && (
+                            <DocumentosList
+                                empleadoId={empleadoId}
+                                empleadoNombre={`${empleado.nombres} ${empleado.apellidos}`}
+                                showHeader={false}
+                            />
+                        )}
                     </TabsContent>
 
                     <TabsContent value="solicitudes" className="m-0 focus-visible:outline-none">
-                        <SolicitudesList empleadoId={empleadoId} />
+                        {activeTab === "solicitudes" && (
+                            <SolicitudesList empleadoId={empleadoId} />
+                        )}
                     </TabsContent>
 
                     <TabsContent value="recibos" className="m-0 focus-visible:outline-none">
-                        <RecibosList empleadoId={empleadoId} isAdmin={false} />
+                        {activeTab === "recibos" && (
+                            <RecibosList empleadoId={empleadoId} isAdmin={false} />
+                        )}
                     </TabsContent>
                 </div>
             </Tabs>

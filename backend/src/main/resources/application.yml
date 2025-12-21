@@ -38,7 +38,7 @@ spring:
   # JPA / HIBERNATE
   # ============================================
   jpa:
-    database-platform: org.hibernate.dialect.MariaDBDialect
+    database-platform: org.hibernate.dialect.MySQL8Dialect
     defer-datasource-initialization: true
     hibernate:
       ddl-auto: update  # Conservar esquema y datos corregidos

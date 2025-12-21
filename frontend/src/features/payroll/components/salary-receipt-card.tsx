@@ -1,5 +1,5 @@
 import { ReciboSalario, MESES, ESTADOS_RECIBO } from "@/src/types/payroll";
-import { Download, FileText, ChevronRight, CalendarCheck } from "lucide-react";
+import { Download, FileText, ChevronRight, CalendarCheck, Eye } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { Badge } from "@/src/components/ui/badge";
 import { cn } from "@/src/lib/utils";
@@ -7,6 +7,7 @@ import { cn } from "@/src/lib/utils";
 interface SalaryReceiptCardProps {
     recibo: ReciboSalario;
     onDownload: (id: number, periodo: string) => void;
+    onView?: (id: number, periodo: string) => void;
     isDownloading?: boolean;
     showEmployeeName?: boolean;
 }
@@ -14,6 +15,7 @@ interface SalaryReceiptCardProps {
 export function SalaryReceiptCard({
     recibo,
     onDownload,
+    onView,
     isDownloading = false,
     showEmployeeName = false
 }: SalaryReceiptCardProps) {
@@ -31,7 +33,6 @@ export function SalaryReceiptCard({
 
     return (
         <div
-            onClick={() => !isDownloading && onDownload(recibo.id, downloadLabel)}
             className="group relative bg-white rounded-2xl border border-neutral-200 transition-all duration-300 hover:shadow-xl hover:border-emerald-200/50 hover:-translate-y-1 cursor-pointer overflow-hidden flex flex-col h-full"
         >
             {/* Background Pattern */}
@@ -130,13 +131,29 @@ export function SalaryReceiptCard({
                 </div>
 
                 {/* CTA Overlay on Hover */}
-                <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out bg-gradient-to-t from-emerald-50/90 to-transparent flex justify-center">
+                <div className="absolute inset-x-0 bottom-0 p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 ease-out bg-gradient-to-t from-emerald-50/90 to-transparent flex gap-3 justify-between">
                     <Button
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20 font-bold rounded-xl w-full"
+                        className="flex-1 bg-white hover:bg-emerald-50 text-emerald-700 border border-emerald-200 shadow-md font-bold rounded-xl"
                         size="sm"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onView?.(recibo.id, downloadLabel);
+                        }}
+                    >
+                        <Eye className="w-4 h-4 mr-2" />
+                        Visualizar PDF
+                    </Button>
+                    <Button
+                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white shadow-lg shadow-emerald-600/20 font-bold rounded-xl"
+                        size="sm"
+                        disabled={isDownloading}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (!isDownloading) onDownload(recibo.id, downloadLabel);
+                        }}
                     >
                         <Download className="w-4 h-4 mr-2" />
-                        {isDownloading ? "Generando PDF..." : "Descargar Recibo"}
+                        {isDownloading ? "..." : "Descargar"}
                     </Button>
                 </div>
             </div>

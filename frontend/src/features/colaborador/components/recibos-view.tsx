@@ -104,6 +104,15 @@ export function RecibosView() {
     }, [filteredRecibos]);
 
     const handleDownloadPDF = async (id: number, periodo: string) => {
+        if (!id || isNaN(id)) {
+            console.error("ID de recibo inválido para descarga:", id);
+            toast({
+                title: "Error",
+                description: "No se puede descargar el recibo: ID inválido.",
+                variant: "destructive",
+            });
+            return;
+        }
         try {
             setDownloadingId(id);
             const blob = await payrollApi.downloadPdf(id);
@@ -125,6 +134,45 @@ export function RecibosView() {
             toast({
                 title: "Error",
                 description: "No se pudo descargar el recibo.",
+                variant: "destructive",
+            });
+        } finally {
+            setDownloadingId(null);
+        }
+    };
+
+    const handleViewPDF = async (id: number, periodo: string) => {
+        console.log("🔍 [DEBUG] handleViewPDF llamado con ID:", id, "tipo:", typeof id);
+
+        // Validación estricta
+        const numericId = Number(id);
+        if (!id || isNaN(numericId) || numericId <= 0) {
+            console.error("❌ ID de recibo inválido:", id, "convertido a:", numericId);
+            toast({
+                title: "Error - ID Inválido",
+                description: `No se puede visualizar el recibo. ID recibido: ${id}`,
+                variant: "destructive",
+            });
+            return;
+        }
+
+        console.log("✅ ID válido, procediendo con descarga:", numericId);
+
+        try {
+            setDownloadingId(numericId);
+            const blob = await payrollApi.downloadPdf(numericId);
+            const url = window.URL.createObjectURL(blob);
+            window.open(url, '_blank');
+
+            toast({
+                title: "Éxito",
+                description: "PDF abierto en nueva pestaña",
+            });
+        } catch (error) {
+            console.error("Error al ver PDF:", error);
+            toast({
+                title: "Error",
+                description: "No se pudo visualizar el recibo.",
                 variant: "destructive",
             });
         } finally {
@@ -368,6 +416,7 @@ export function RecibosView() {
                                     key={recibo.id}
                                     recibo={recibo}
                                     onDownload={handleDownloadPDF}
+                                    onView={handleViewPDF}
                                     isDownloading={downloadingId === recibo.id}
                                     showEmployeeName={isAdminOrManager}
                                 />

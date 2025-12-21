@@ -287,7 +287,8 @@ public class ReciboSalarioServiceImpl implements ReciboSalarioService {
                         // Egresos
                         // Deduce components from 'otrosDescuentos' or user fixed values if this is the
                         // demo user
-                        BigDecimal otros = recibo.getOtrosDescuentos();
+                        BigDecimal otros = recibo.getOtrosDescuentos() != null ? recibo.getOtrosDescuentos()
+                                        : BigDecimal.ZERO;
                         BigDecimal ips = recibo.getDescuentosIps();
 
                         if (ips != null && ips.compareTo(BigDecimal.ZERO) > 0) {
@@ -298,7 +299,8 @@ public class ReciboSalarioServiceImpl implements ReciboSalarioService {
                         // Total seeded 'otrosDescuentos' = 69k + 10k + Anticipo + (Almuerzo 65k?)
                         BigDecimal corp = new BigDecimal("69000");
                         BigDecimal fondo = new BigDecimal("10000");
-                        BigDecimal remainder = otros.subtract(corp).subtract(fondo);
+                        BigDecimal remainder = otros.subtract(corp.min(otros))
+                                        .subtract(fondo.min(otros.subtract(corp.min(otros))));
 
                         // Anticipo? (Nov = 600k, others 500k or 0)
                         if (remainder.compareTo(new BigDecimal("600000")) >= 0) {
@@ -320,8 +322,9 @@ public class ReciboSalarioServiceImpl implements ReciboSalarioService {
                         }
 
                         // Fixed ones
-                        addConceptRow(conceptTable, "DESCUENTOS CORPORATIVOS", null, corp, normalFont, nf);
-                        addConceptRow(conceptTable, "FONDO SOCIAL EMPLEADO", null, fondo, normalFont, nf);
+                        addConceptRow(conceptTable, "DESCUENTOS CORPORATIVOS", null, corp.min(otros), normalFont, nf);
+                        addConceptRow(conceptTable, "FONDO SOCIAL EMPLEADO", null,
+                                        fondo.min(otros.subtract(corp.min(otros))), normalFont, nf);
 
                         if (remainder.compareTo(BigDecimal.ZERO) > 0) {
                                 addConceptRow(conceptTable, "OTROS DESCUENTOS", null, remainder, normalFont, nf);

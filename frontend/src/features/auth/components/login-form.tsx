@@ -11,6 +11,7 @@ import { Loader2, Lock, User, AlertCircle, Eye, EyeOff, ArrowRight, ShieldCheck,
 import { useAuth } from "@/src/features/auth/context/auth-context";
 import { motion, AnimatePresence } from "framer-motion";
 import { cn } from "@/src/lib/utils";
+import { useLoginTab } from "@/app/(public)/login/page";
 
 const loginSchema = z.object({
     username: z.string().min(1, "El usuario es requerido"),
@@ -25,7 +26,8 @@ export function LoginForm() {
     const [isLoading, setIsLoading] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
     const [focusedField, setFocusedField] = useState<string | null>(null);
-    const [activeTab, setActiveTab] = useState<'admin' | 'colaborador'>('admin');
+    // Usar el contexto compartido
+    const { activeTab, setActiveTab } = useLoginTab();
 
     const {
         register,
@@ -41,7 +43,7 @@ export function LoginForm() {
     });
 
     const handleTabChange = (tab: 'admin' | 'colaborador') => {
-        setActiveTab(tab);
+        setActiveTab(tab); // Actualizar el contexto (que actualiza el padre)
         if (tab === 'admin') {
             setValue('username', 'admin');
             setValue('password', 'admin123');

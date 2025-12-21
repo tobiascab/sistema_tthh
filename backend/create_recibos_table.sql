@@ -1,0 +1,22 @@
+CREATE TABLE IF NOT EXISTS `recibos_salario` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `empleado_id` bigint(20) NOT NULL,
+  `anio` int(11) NOT NULL,
+  `mes` int(11) NOT NULL,
+  `fecha_pago` date NOT NULL,
+  `salario_bruto` decimal(10,2) NOT NULL,
+  `descuentos_ips` decimal(10,2) DEFAULT NULL,
+  `descuentos_jubilacion` decimal(10,2) DEFAULT NULL,
+  `otros_descuentos` decimal(10,2) DEFAULT NULL,
+  `bonificaciones` decimal(10,2) DEFAULT NULL,
+  `salario_neto` decimal(10,2) NOT NULL,
+  `pdf_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `estado` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `observaciones` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` datetime(6) NOT NULL,
+  `updated_at` datetime(6) DEFAULT NULL,
+  `created_by` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_recibos_empleado` (`empleado_id`),
+  CONSTRAINT `fk_recibos_empleado` FOREIGN KEY (`empleado_id`) REFERENCES `empleados` (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

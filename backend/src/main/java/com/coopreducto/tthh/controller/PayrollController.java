@@ -63,9 +63,34 @@ public class PayrollController {
     }
 
     @GetMapping("/{id}/pdf")
-    @PreAuthorize("hasAnyRole('TTHH', 'GERENCIA', 'COLABORADOR')")
     @SuppressWarnings("null")
-    public ResponseEntity<Resource> downloadPdf(@PathVariable Long id) {
+    public ResponseEntity<Resource> downloadPdf(@PathVariable Long id, Authentication authentication) {
+        org.slf4j.LoggerFactory.getLogger(PayrollController.class)
+                .info("📥 Solicitud de descarga de PDF para recibo ID: {}", id);
+
+        // Obtener usuario actual
+        Long currentUserId = getCurrentUserId(authentication);
+        org.slf4j.LoggerFactory.getLogger(PayrollController.class)
+                .info("Usuario actual ID: {}", currentUserId);
+
+        // Obtener el recibo para verificar permisos
+        ReciboSalarioDTO recibo = reciboSalarioService.findById(id);
+
+        // Verificar permisos: Admin puede ver todo, Colaborador solo sus recibos
+        boolean isAdmin = hasRole("TTHH", authentication) || hasRole("GERENCIA", authentication);
+
+        if (!isAdmin) {
+            // Si no es admin, verificar que el recibo pertenece al empleado del usuario
+            // actual
+            if (!recibo.getEmpleadoId().equals(currentUserId)) {
+                org.slf4j.LoggerFactory.getLogger(PayrollController.class)
+                        .warn("⚠️ Usuario {} intentó acceder al recibo del empleado {}",
+                                currentUserId, recibo.getEmpleadoId());
+                throw new org.springframework.security.access.AccessDeniedException(
+                        "No tiene permisos para acceder a este recibo");
+            }
+        }
+
         Resource resource = reciboSalarioService.getPdfResource(id);
 
         return ResponseEntity.ok()
@@ -183,5 +208,15 @@ public class PayrollController {
                 .contentType(MediaType.APPLICATION_PDF)
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"reporte_salarios.pdf\"")
                 .body(resource);
+    }
+
+    // Método auxiliar para verificar roles
+    private boolean hasRole(String role, Authentication authentication) { // Modified to accept Authentication
+        if (authentication == null) {
+            return false;
+        }
+
+        return authentication.getAuthorities().stream()
+                .anyMatch(auth -> auth.getAuthority().equals("ROLE_" + role) || auth.getAuthority().equals(role));
     }
 }

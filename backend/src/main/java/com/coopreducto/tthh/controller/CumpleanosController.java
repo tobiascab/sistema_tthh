@@ -11,9 +11,10 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/cumpleanos")
+@RequestMapping("/cumpleanos")
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
+@org.springframework.security.access.prepost.PreAuthorize("hasAnyRole('TTHH', 'GERENCIA')")
 public class CumpleanosController {
 
     private final CumpleanosService service;
@@ -33,6 +34,7 @@ public class CumpleanosController {
     }
 
     @GetMapping("/mes")
+    @org.springframework.security.access.prepost.PreAuthorize("permitAll()")
     public ResponseEntity<List<CumpleanosManualDTO>> getDelMes() {
         return ResponseEntity.ok(service.getCumpleanosDelMes());
     }

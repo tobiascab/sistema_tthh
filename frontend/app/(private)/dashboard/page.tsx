@@ -5,10 +5,12 @@ import { useAuth } from "@/src/features/auth/context/auth-context";
 import { useCurrentUser } from "@/src/hooks/use-current-user";
 import apiClient from "@/src/lib/api/client";
 import { ausenciasApi } from "@/src/lib/api/ausencias";
+import { solicitudesApi } from "@/src/lib/api/solicitudes";
 import { motion } from "framer-motion";
 import {
     PieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area,
-    XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend
+    XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend,
+    BarChart, Bar
 } from 'recharts';
 
 import {
@@ -46,7 +48,7 @@ import { Avatar, AvatarFallback } from "@/src/components/ui/avatar";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import Link from "next/link";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { RefreshCw } from "lucide-react";
 import { useToast } from "@/src/components/ui/use-toast";
@@ -58,10 +60,10 @@ import { NotificationBanner } from "@/src/components/notifications/notification-
 // ESTILO PREMIUM EMERALD
 // ==========================================
 const EMERALD_THEME = {
-    card: "bg-white border border-emerald-100 shadow-sm rounded-2xl hover:shadow-lg transition-all duration-300",
-    gradientHeader: "bg-gradient-to-r from-emerald-600 to-teal-700 text-white rounded-2xl p-8 shadow-xl shadow-emerald-900/10",
-    accentIcon: "bg-emerald-50 text-emerald-700",
-    badge: "bg-emerald-50 text-emerald-700 border-emerald-100 font-medium",
+    card: "bg-white dark:bg-neutral-800 border border-emerald-100 dark:border-neutral-700 shadow-sm rounded-2xl hover:shadow-lg transition-all duration-300",
+    gradientHeader: "bg-gradient-to-r from-emerald-600 to-teal-700 dark:from-emerald-700 dark:to-teal-800 text-white rounded-2xl p-8 shadow-xl shadow-emerald-900/10",
+    accentIcon: "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400",
+    badge: "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-100 dark:border-emerald-800 font-medium",
     buttonPrimary: "bg-emerald-600 text-white hover:bg-emerald-700 font-bold rounded-xl shadow-lg shadow-emerald-600/20 transition-all",
     chartColors: ['#10b981', '#3b82f6', '#ef4444', '#f59e0b', '#8b5cf6', '#06b6d4', '#ec4899', '#14b8a6'],
     statusColors: {
@@ -91,7 +93,6 @@ const getAbbreviation = (name: string) => {
         "SUCURSAL HERNANDARIAS": "Hern.",
         "SUCURSAL SAN LORENZO CENTRO": "SL",
         "SUCURSAL VILLARRICA": "VCA",
-        "CENTRO DE DISTRIBUCION": "CD",
     };
 
     const upperName = name.toUpperCase();
@@ -109,11 +110,12 @@ const transformMapToData = (mapData: Record<string, number> | undefined) => {
 const CustomTooltip = ({ active, payload, label }: any) => {
     if (active && payload && payload.length) {
         const data = payload[0].payload;
+        const val = payload[0].value;
         return (
             <div className="bg-white p-3 border border-emerald-100 shadow-lg rounded-xl text-xs">
                 <p className="font-bold text-emerald-800">{data.fullName || label || data.name}</p>
                 <p className="text-emerald-600">
-                    {payload[0].value} {data.name === 'monto' ? 'Gs' : ''}
+                    {val?.toLocaleString('es-PY')} {data.name === 'monto' || payload[0].dataKey === 'monto' ? 'Gs' : ''}
                 </p>
             </div>
         );
@@ -585,7 +587,12 @@ function AdminDashboard() {
                                         </defs>
                                         <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
                                         <XAxis dataKey="mes" axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
-                                        <YAxis axisLine={false} tickLine={false} tick={{ fill: '#6B7280', fontSize: 12 }} />
+                                        <YAxis
+                                            axisLine={false}
+                                            tickLine={false}
+                                            tick={{ fill: '#6B7280', fontSize: 10 }}
+                                            tickFormatter={(value) => `${(value / 1000000).toFixed(0)}M`}
+                                        />
                                         <RechartsTooltip content={<CustomTooltip />} />
                                         <Area
                                             type="monotone"
@@ -736,6 +743,12 @@ function ColaboradorDashboard() {
         enabled: !!empleadoId,
     });
 
+    const { data: solicitudes, isLoading: loadingSolicitudes } = useQuery({
+        queryKey: ["mis-solicitudes-unificadas", empleadoId],
+        queryFn: () => solicitudesApi.getAll({ empleadoId }),
+        enabled: !!empleadoId,
+    });
+
     const { data: saldoVacaciones, isLoading: loadingSaldo } = useQuery({
         queryKey: ["saldo-vacaciones", empleadoId],
         queryFn: () => ausenciasApi.getSaldoVacaciones(empleadoId),
@@ -756,7 +769,36 @@ function ColaboradorDashboard() {
         staleTime: 1000 * 60 * 60, // Cache por 1 hora
     });
 
-    const solicitudesPendientes = ausencias?.content?.filter(a => a.estado === "PENDIENTE")?.length || 0;
+    // Unificar ausencias y solicitudes generales
+    const solicitudesUnificadas = useMemo(() => {
+        const listA = ausencias?.content?.map(a => ({
+            id: `a-${a.id}`,
+            originalId: a.id,
+            isAusencia: true,
+            tipo: a.tipo,
+            titulo: a.motivo || a.tipo,
+            subtitulo: `${format(new Date(a.fechaInicio), "dd MMM", { locale: es })} • ${a.diasSolicitados} días`,
+            estado: a.estado,
+            fecha: a.createdAt || a.fechaCreacion || a.fechaInicio
+        })) || [];
+
+        const listS = solicitudes?.content?.map(s => ({
+            id: `s-${s.id}`,
+            originalId: s.id,
+            isAusencia: false,
+            tipo: s.tipo,
+            titulo: s.titulo || s.tipo,
+            subtitulo: format(new Date(s.createdAt || new Date()), "dd 'de' MMMM", { locale: es }),
+            estado: s.estado,
+            fecha: s.createdAt || new Date().toISOString()
+        })) || [];
+
+        return [...listA, ...listS].sort((a, b) =>
+            new Date(b.fecha).getTime() - new Date(a.fecha).getTime()
+        );
+    }, [ausencias, solicitudes]);
+
+    const solicitudesPendientes = solicitudesUnificadas.filter(s => s.estado === "PENDIENTE").length;
 
     const greeting = () => {
         const hour = new Date().getHours();
@@ -908,36 +950,43 @@ function ColaboradorDashboard() {
                         </CardHeader>
                         <CardContent>
                             <div className="space-y-3 mt-2">
-                                {loadingAusencias ? (
+                                {loadingAusencias || loadingSolicitudes ? (
                                     <div className="space-y-2">
                                         {[1, 2].map(i => <Skeleton key={i} className="h-14 w-full rounded-xl" />)}
                                     </div>
-                                ) : ausencias?.content && ausencias.content.length > 0 ? (
+                                ) : solicitudesUnificadas.length > 0 ? (
                                     <>
-                                        {ausencias.content.slice(0, 3).map(ausencia => (
-                                            <div key={ausencia.id} className="flex items-center justify-between p-3 bg-neutral-50 rounded-xl border border-neutral-100">
+                                        {solicitudesUnificadas.slice(0, 4).map(solicitud => (
+                                            <div key={solicitud.id} className="flex items-center justify-between p-3 bg-neutral-50 rounded-xl border border-neutral-100 group hover:border-emerald-200 transition-colors">
                                                 <div className="flex items-center gap-3">
-                                                    <div className={`w-2 h-10 rounded-full ${ausencia.estado === 'PENDIENTE' ? 'bg-amber-500' :
-                                                        ausencia.estado === 'APROBADA' ? 'bg-emerald-500' : 'bg-red-500'
+                                                    <div className={`w-2 h-10 rounded-full ${solicitud.estado === 'PENDIENTE' ? 'bg-amber-500' :
+                                                        solicitud.estado === 'APROBADA' ? 'bg-emerald-500' : 'bg-red-500'
                                                         }`} />
-                                                    <div>
-                                                        <p className="font-bold text-sm text-neutral-800">{ausencia.tipo}</p>
+                                                    <div className="min-w-0">
+                                                        <p className="font-bold text-sm text-neutral-800 truncate">{solicitud.titulo}</p>
                                                         <p className="text-xs text-neutral-500">
-                                                            {format(new Date(ausencia.fechaInicio), "dd MMM", { locale: es })} • {ausencia.diasSolicitados} días
+                                                            {solicitud.subtitulo}
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <Badge variant="outline" className={`text-xs font-bold ${ausencia.estado === 'PENDIENTE' ? 'text-amber-600 bg-amber-50 border-amber-200' :
-                                                    ausencia.estado === 'APROBADA' ? 'text-emerald-600 bg-emerald-50 border-emerald-200' :
-                                                        'text-red-600 bg-red-50 border-red-200'
-                                                    }`}>
-                                                    {ausencia.estado}
-                                                </Badge>
+                                                <div className="flex items-center gap-2">
+                                                    <Badge variant="outline" className={`text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0 h-5 ${solicitud.estado === 'PENDIENTE' ? 'text-amber-600 bg-amber-50 border-amber-200' :
+                                                        solicitud.estado === 'APROBADA' ? 'text-emerald-600 bg-emerald-50 border-emerald-200' :
+                                                            'text-red-600 bg-red-50 border-red-200'
+                                                        }`}>
+                                                        {solicitud.estado}
+                                                    </Badge>
+                                                    <Link href={solicitud.isAusencia ? "/colaborador/ausencias" : "/colaborador/solicitudes"}>
+                                                        <Button size="icon" variant="ghost" className="h-7 w-7 rounded-lg text-neutral-400 group-hover:text-emerald-600">
+                                                            <ArrowRight className="h-4 w-4" />
+                                                        </Button>
+                                                    </Link>
+                                                </div>
                                             </div>
                                         ))}
-                                        <Link href="/colaborador/ausencias" className="block pt-2">
-                                            <Button variant="ghost" size="sm" className="w-full text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50">
-                                                Ver historial completo <ArrowRight className="w-3 h-3 ml-2" />
+                                        <Link href="/colaborador/solicitudes" className="block pt-2">
+                                            <Button variant="ghost" size="sm" className="w-full text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50 font-bold">
+                                                Ver gestión de solicitudes <ArrowRight className="w-3 h-3 ml-2" />
                                             </Button>
                                         </Link>
                                     </>

@@ -63,6 +63,7 @@
   * {
     @apply border-border;
   }
+
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
@@ -73,4 +74,54 @@
   .text-balance {
     text-wrap: balance;
   }
+}
+
+/* Optimized Dark Mode Styles - Using CSS variables instead of @apply */
+.dark {
+  color-scheme: dark;
+}
+
+/* Main layout elements */
+.dark body {
+  background-color: rgb(23 23 23);
+  color: rgb(245 245 245);
+}
+
+/* Sidebar, Header, Navigation */
+.dark aside,
+.dark header {
+  background-color: rgb(23 23 23);
+  border-color: rgb(38 38 38);
+  color: rgb(245 245 245);
+}
+
+/* Content background */
+.dark main {
+  background-color: rgb(23 23 23);
+}
+
+/* Cards default to dark */
+.dark [class*="bg-white"]:not(.dark-mode-light) {
+  background-color: rgb(38 38 38) !important;
+  border-color: rgb(64 64 64);
+}
+
+/* Input elements */
+.dark input:not([type="checkbox"]):not([type="radio"]),
+.dark textarea,
+.dark select {
+  background-color: rgb(38 38 38);
+  border-color: rgb(64 64 64);
+  color: rgb(245 245 245);
+}
+
+.dark input::placeholder,
+.dark textarea::placeholder {
+  color: rgb(115 115 115);
+}
+
+/* Fix for specific light elements that should stay light */
+.dark .dark-mode-light {
+  background-color: rgb(255 255 255) !important;
+  color: rgb(23 23 23) !important;
 }

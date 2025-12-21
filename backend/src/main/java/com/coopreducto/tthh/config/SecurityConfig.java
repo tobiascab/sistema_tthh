@@ -45,7 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**").permitAll()
                         .requestMatchers("/swagger-ui/**").permitAll()
                         .requestMatchers("/reportes/ping").permitAll()
-                        // Todo lo demás requiere autenticación
+                        // Todo lo demás requiere autenticación (estar logueado)
                         .anyRequest().authenticated())
                 // Añadir nuestro filtro JWT antes del filtro de autenticación estándar
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -57,6 +57,7 @@ public class SecurityConfig {
     public org.springframework.security.web.firewall.HttpFirewall allowUrlEncodedSlashHttpFirewall() {
         org.springframework.security.web.firewall.StrictHttpFirewall firewall = new org.springframework.security.web.firewall.StrictHttpFirewall();
         firewall.setAllowUrlEncodedSlash(true);
+        firewall.setAllowSemicolon(true);
         return firewall;
     }
 

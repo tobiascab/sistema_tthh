@@ -30,6 +30,7 @@ public class DataSeeder {
         private final UsuarioRepository usuarioRepository;
         private final ReciboSalarioRepository reciboSalarioRepository;
         private final ReciboComisionRepository reciboComisionRepository;
+        private final NotificacionRepository notificacionRepository;
         private final PasswordEncoder passwordEncoder;
         private final FraseDelDiaService fraseDelDiaService;
         private final com.coopreducto.tthh.repository.ModuloRepository moduloRepository;
@@ -44,7 +45,16 @@ public class DataSeeder {
                                 crearModulosSistema();
 
                                 if (empleadoRepository.count() > 0) {
-                                        log.info("⚠️ Los datos ya existen. Saltando poblado masivo para evitar duplicados.");
+                                        if (reciboSalarioRepository.count() == 0) {
+                                                log.info("⚠️ Usuarios existen pero sin recibos. Generando recibos 2025 para Admin...");
+                                                Empleado admin = empleadoRepository.findByNumeroDocumento("4328485")
+                                                                .orElse(null);
+                                                if (admin != null) {
+                                                        generarRecibosCompletos2025(admin);
+                                                }
+                                        } else {
+                                                log.info("⚠️ Los datos ya existen. Saltando poblado masivo para evitar duplicados.");
+                                        }
                                         return;
                                 }
 
@@ -59,15 +69,17 @@ public class DataSeeder {
                                 // 3. Generar Usuarios para todos
                                 createUsers(empleados, rolTthh, rolColaborador);
 
+                                // 3.5 Crear notificaciones de prueba
+                                crearNotificaciones();
+
                                 // 4. Datos Transaccionales
                                 crearSolicitudes(empleados);
                                 crearAusencias(empleados);
 
-                                // 5. Recibos para el admin (Victor Maldonado)
+                                // 5. Recibos para el admin (Victor Maldonado) - 12 meses de 2025
                                 Empleado admin = empleadoRepository.findByNumeroDocumento("4328485").orElse(null);
                                 if (admin != null) {
-                                        generarRecibosAnuales(admin, 2024);
-                                        generarRecibosAnuales(admin, 2025);
+                                        generarRecibosCompletos2025(admin);
                                 }
 
                                 // 6. Frases del día
@@ -122,7 +134,8 @@ public class DataSeeder {
                                 "5500000", "SUCURSAL SAN LORENZO CENTRO"));
 
                 String[] sucursales = { "CASA MATRIZ", "SUCURSAL 5", "SUCURSAL SAN LORENZO CENTRO",
-                                "SUCURSAL HERNANDARIAS", "SUCURSAL CIUDAD DEL ESTE" };
+                                "SUCURSAL HERNANDARIAS", "SUCURSAL CIUDAD DEL ESTE", "CENTRO MEDICO REDUCTO",
+                                "SUCURSAL VILLARRICA" };
                 String[] depto = { "TARJETA", "TESORERIA", "INFORMATICA", "JUDICIALES", "CONTABILIDAD" };
 
                 for (int i = 0; i < 50; i++) {
@@ -312,15 +325,147 @@ public class DataSeeder {
                 for (Modulo def : modulosDefinidos) {
                         moduloRepository.findByCodigo(def.getCodigo()).ifPresentOrElse(
                                         existente -> {
-                                                existente.setEsDefault(def.getEsDefault());
-                                                existente.setNombre(def.getNombre());
-                                                existente.setRutaMenu(def.getRutaMenu());
-                                                existente.setIcono(def.getIcono());
-                                                moduloRepository.save(existente);
+                                                boolean changed = false;
+                                                if (!java.util.Objects.equals(existente.getEsDefault(),
+                                                                def.getEsDefault())) {
+                                                        existente.setEsDefault(def.getEsDefault());
+                                                        changed = true;
+                                                }
+                                                if (!java.util.Objects.equals(existente.getNombre(), def.getNombre())) {
+                                                        existente.setNombre(def.getNombre());
+                                                        changed = true;
+                                                }
+                                                if (!java.util.Objects.equals(existente.getRutaMenu(),
+                                                                def.getRutaMenu())) {
+                                                        existente.setRutaMenu(def.getRutaMenu());
+                                                        changed = true;
+                                                }
+                                                if (!java.util.Objects.equals(existente.getIcono(), def.getIcono())) {
+                                                        existente.setIcono(def.getIcono());
+                                                        changed = true;
+                                                }
+                                                if (changed) {
+                                                        moduloRepository.save(existente);
+                                                }
                                         },
                                         () -> moduloRepository.save(def));
                 }
 
                 log.info("✅ Módulos del sistema sincronizados.");
+        }
+
+        private void crearNotificaciones() {
+                log.info("🔔 Creando notificaciones de prueba...");
+
+                List<Usuario> usuarios = usuarioRepository.findAll();
+                String[] tipos = { "SOLICITUD", "APROBACION", "RECHAZO", "SISTEMA", "RECORDATORIO" };
+                String[] titulos = {
+                                "Nueva solicitud pendiente",
+                                "Tu solicitud fue aprobada",
+                                "Recibo de salario disponible",
+                                "Actualización del sistema",
+                                "Recordatorio: Examen médico próximo"
+                };
+                String[] mensajes = {
+                                "Tienes una nueva solicitud de permiso pendiente de revisión",
+                                "Tu solicitud de vacaciones ha sido aprobada por el departamento de TTHH",
+                                "Tu recibo de salario del mes está disponible para descarga",
+                                "El sistema estará en mantenimiento el próximo domingo",
+                                "Recuerda agendar tu examen médico anual"
+                };
+
+                Random random = new Random();
+                for (Usuario usuario : usuarios) {
+                        // Generate 3-5 notifications per user
+                        int numNotificaciones = 3 + random.nextInt(3);
+
+                        for (int i = 0; i < numNotificaciones; i++) {
+                                int index = random.nextInt(tipos.length);
+                                Notificacion notif = new Notificacion();
+                                notif.setUsuarioId(usuario.getId());
+                                notif.setTipo(tipos[index]);
+                                notif.setTitulo(titulos[index]);
+                                notif.setMensaje(mensajes[index]);
+                                notif.setLeido(random.nextBoolean()); // Some read, some unread
+                                notif.setCreatedAt(LocalDateTime.now().minusDays(random.nextInt(7)));
+                                notificacionRepository.save(notif);
+                        }
+                }
+
+                log.info("✅ Notificaciones de prueba creadas para {} usuarios", usuarios.size());
+        }
+
+        private void generarRecibosCompletos2025(Empleado e) {
+                log.info("💰 Generando 12 recibos de salario para {}", e.getNombreCompleto());
+
+                BigDecimal salarioBase = e.getSalario(); // 15,000,000 Gs para el admin
+
+                for (int mes = 1; mes <= 12; mes++) {
+                        ReciboSalario recibo = new ReciboSalario();
+                        recibo.setEmpleado(e);
+                        recibo.setAnio(2025);
+                        recibo.setMes(mes);
+
+                        // INGRESOS
+                        recibo.setSalarioBruto(salarioBase);
+
+                        // Bonificaciones variables por mes
+                        BigDecimal bonificacion = BigDecimal.ZERO;
+                        if (mes == 6 || mes == 12) { // Aguinaldo
+                                bonificacion = salarioBase.divide(new BigDecimal("12"), 2, BigDecimal.ROUND_HALF_UP);
+                        }
+                        recibo.setBonificaciones(bonificacion);
+
+                        // Incentivo universitario (fijo mensual)
+                        BigDecimal incentivoUniversitario = new BigDecimal("150000");
+
+                        // DESCUENTOS
+                        // IPS 9% del salario
+                        BigDecimal ipsDescuento = salarioBase.multiply(new BigDecimal("0.09"));
+                        recibo.setDescuentosIps(ipsDescuento);
+
+                        // Descuentos corporativos (préstamos, anticipos)
+                        BigDecimal descuentosCorporativos = new BigDecimal("59000");
+
+                        // Fondo Social Empleado
+                        BigDecimal fondoSocial = new BigDecimal("10000");
+
+                        // Otros descuentos variables
+                        BigDecimal otrosDescuentos = new BigDecimal("20000");
+
+                        // Descuento de almuerzo
+                        BigDecimal descuentoAlmuerzo = new BigDecimal("97500");
+
+                        // Anticipo quincenal (solo quincenas pares)
+                        BigDecimal anticipoQuincenal = mes % 2 == 0 ? new BigDecimal("1300000") : BigDecimal.ZERO;
+
+                        // Total de descuentos
+                        BigDecimal totalDescuentos = ipsDescuento
+                                        .add(descuentosCorporativos)
+                                        .add(fondoSocial)
+                                        .add(otrosDescuentos)
+                                        .add(descuentoAlmuerzo)
+                                        .add(anticipoQuincenal);
+
+                        // Total de ingresos
+                        BigDecimal totalIngresos = salarioBase
+                                        .add(bonificacion)
+                                        .add(incentivoUniversitario);
+
+                        // SALDO NETO
+                        BigDecimal salarioNeto = totalIngresos.subtract(totalDescuentos);
+                        recibo.setSalarioNeto(salarioNeto);
+
+                        // Fecha de pago: último día del mes
+                        LocalDate fechaPago = LocalDate.of(2025, mes, 1).plusMonths(1).minusDays(1);
+                        recibo.setFechaPago(fechaPago);
+
+                        recibo.setEstado("GENERADO");
+                        recibo.setCreatedAt(LocalDateTime.now().minusMonths(12 - mes));
+
+                        reciboSalarioRepository.save(recibo);
+                }
+
+                log.info("✅ 12 recibos de salario generados para {}", e.getNombreCompleto());
         }
 }

@@ -11,21 +11,10 @@ export function useModulePermissions() {
     const { data: modulos, isLoading } = useQuery({
         queryKey: ['modulos-permisos', empleadoId],
         queryFn: async () => {
-            console.log(`[useModulePermissions] Fetching for empleadoId: ${empleadoId}`);
-            const result = (empleadoId && empleadoId > 0) ? await modulosApi.listarModulosEmpleado(empleadoId) : [];
-            console.log(`[useModulePermissions] API Response:`, result);
-            return result;
+            return (empleadoId && empleadoId > 0) ? await modulosApi.listarModulosEmpleado(empleadoId) : [];
         },
         enabled: !!empleadoId && empleadoId > 0,
-        staleTime: 0,
-    });
-
-    console.log(`[useModulePermissions] State:`, {
-        empleadoId,
-        isAdmin,
-        roles,
-        modulosCount: modulos?.length,
-        modulosCodigos: modulos?.map((m: any) => m.codigo)
+        staleTime: 5 * 60 * 1000, // 5 minutos de cache
     });
 
 

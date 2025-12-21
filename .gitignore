@@ -8,6 +8,8 @@ node_modules/
 target/
 **/target/
 *.log
+logs/
+*.gz
 *.tmp
 .DS_Store
 Thumbs.db

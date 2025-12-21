@@ -13,7 +13,9 @@ import {
     BookOpen,
     MessageSquareQuote,
     CheckCircle2,
-    Loader2
+    Loader2,
+    Moon,
+    Sun
 } from "lucide-react";
 import { Button } from "@/src/components/ui/button";
 import { Input } from "@/src/components/ui/input";
@@ -23,6 +25,7 @@ import { useToast } from "@/src/hooks/use-toast";
 import { PushNotificationSettings } from "@/src/components/configuration/push-notification-settings";
 import { FrasesManagerDialog } from "@/src/components/dashboard/frases-manager-dialog";
 import { configuracionApi } from "@/src/lib/api/configuracion";
+import { useTheme } from "@/src/contexts/theme-context";
 
 // Premium Emerald Design Tokens
 const THEME = {
@@ -33,6 +36,7 @@ const THEME = {
 
 export default function AdminPage() {
     const { toast } = useToast();
+    const { theme, toggleTheme } = useTheme();
     const [isLoading, setIsLoading] = useState(false);
     const [frasesManagerOpen, setFrasesManagerOpen] = useState(false);
     const [maintenanceMode, setMaintenanceMode] = useState(false);
@@ -200,16 +204,35 @@ export default function AdminPage() {
                     whileHover={{ y: -2 }}
                     className={`${THEME.card} rounded-2xl overflow-hidden`}
                 >
-                    <div className="p-6 border-b border-neutral-100 bg-neutral-50/50 flex items-center gap-3">
-                        <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
+                    <div className="p-6 border-b border-neutral-100 bg-neutral-50/50 dark:bg-neutral-800/50 dark:border-neutral-700 flex items-center gap-3">
+                        <div className="p-2 bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg">
                             <Database className="w-5 h-5" />
                         </div>
                         <div>
-                            <h3 className="font-bold text-neutral-800">Parámetros</h3>
-                            <p className="text-sm text-neutral-500">Configuración base</p>
+                            <h3 className="font-bold text-neutral-800 dark:text-neutral-100">Parámetros</h3>
+                            <p className="text-sm text-neutral-500 dark:text-neutral-400">Configuración base</p>
                         </div>
                     </div>
                     <div className="p-6 space-y-6">
+                        <div className="flex items-center justify-between pb-4 border-b border-neutral-200 dark:border-neutral-700">
+                            <div className="space-y-1">
+                                <div className="flex items-center gap-2">
+                                    {theme === "dark" ? (
+                                        <Moon className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                                    ) : (
+                                        <Sun className="w-4 h-4 text-emerald-600" />
+                                    )}
+                                    <Label className="text-base font-semibold">Modo Oscuro</Label>
+                                </div>
+                                <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                                    Cambia la apariencia a colores oscuros para reducir la fatiga visual
+                                </p>
+                            </div>
+                            <Switch
+                                checked={theme === "dark"}
+                                onCheckedChange={toggleTheme}
+                            />
+                        </div>
                         <div className="space-y-2">
                             <Label htmlFor="systemName">Nombre del Sistema</Label>
                             <Input
