@@ -751,7 +751,7 @@ CREATE TABLE `push_subscriptions` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `auth` varchar(100) NOT NULL,
   `created_at` datetime(6) DEFAULT NULL,
-  `endpoint` varchar(1000) NOT NULL,
+  `endpoint` varchar(750) NOT NULL,
   `p256dh` varchar(500) NOT NULL,
   `rol_name` varchar(255) DEFAULT NULL,
   `updated_at` datetime(6) DEFAULT NULL,

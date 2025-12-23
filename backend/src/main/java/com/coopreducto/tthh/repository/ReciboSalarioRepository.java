@@ -15,6 +15,8 @@ import java.util.Optional;
 public interface ReciboSalarioRepository
         extends JpaRepository<ReciboSalario, Long>, JpaSpecificationExecutor<ReciboSalario> {
 
+    long countByEmpleado(Empleado empleado);
+
     Page<ReciboSalario> findByEmpleado(Empleado empleado, Pageable pageable);
 
     Page<ReciboSalario> findByEmpleadoAndAnio(Empleado empleado, Integer anio, Pageable pageable);

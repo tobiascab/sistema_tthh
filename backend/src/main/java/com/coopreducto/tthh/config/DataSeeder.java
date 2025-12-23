@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -39,75 +40,149 @@ public class DataSeeder {
         public CommandLineRunner initData() {
                 return args -> {
                         try {
-                                log.info("🚀 INICIANDO POBLADO MASIVO Y LIMPIO DE DATOS...");
+                                log.info("🚀 INICIANDO SINCRONIZACIÓN ROBUSTA DE DATOS (CMR 8 NÓMINA + SEGURIDAD EMAIL)...");
 
-                                // 1.5 Módulos del Sistema
+                                // 1. Módulos y Roles
                                 crearModulosSistema();
-
-                                if (empleadoRepository.count() > 0) {
-                                        if (reciboSalarioRepository.count() == 0) {
-                                                log.info("⚠️ Usuarios existen pero sin recibos. Generando recibos 2025 para Admin...");
-                                                Empleado admin = empleadoRepository.findByNumeroDocumento("4328485")
-                                                                .orElse(null);
-                                                if (admin != null) {
-                                                        generarRecibosCompletos2025(admin);
-                                                }
-                                        } else {
-                                                log.info("⚠️ Los datos ya existen. Saltando poblado masivo para evitar duplicados.");
-                                        }
-                                        return;
-                                }
-
-                                // 1. Roles
                                 ensureRoles();
+
                                 Rol rolTthh = rolRepository.findByNombre("TTHH").orElseThrow();
                                 Rol rolColaborador = rolRepository.findByNombre("COLABORADOR").orElseThrow();
+                                Rol rolCmr = rolRepository.findByNombre("ADMIN_CMR").orElse(rolTthh);
 
-                                // 2. Empleados y Usuarios
-                                List<Empleado> empleados = createEmployees();
+                                // 2. Sincronizar Empleados y Usuarios uno por uno
+                                synchronizedSymmetry(rolTthh, rolColaborador, rolCmr);
 
-                                // 3. Generar Usuarios para todos
-                                createUsers(empleados, rolTthh, rolColaborador);
-
-                                // 3.5 Crear notificaciones de prueba
-                                crearNotificaciones();
+                                List<Empleado> todosLosEmpleados = empleadoRepository.findAll();
 
                                 // 4. Datos Transaccionales
-                                crearSolicitudes(empleados);
-                                crearAusencias(empleados);
+                                if (solicitudRepository.count() < 50) {
+                                        crearSolicitudes(todosLosEmpleados);
+                                }
+                                if (ausenciaRepository.count() < 10) {
+                                        crearAusencias(todosLosEmpleados);
+                                }
 
-                                // 5. Recibos para el admin (Victor Maldonado) - 12 meses de 2025
+                                // 5. Recibos para Admin
                                 Empleado admin = empleadoRepository.findByNumeroDocumento("4328485").orElse(null);
-                                if (admin != null) {
+                                if (admin != null && reciboSalarioRepository.countByEmpleado(admin) < 12) {
                                         generarRecibosCompletos2025(admin);
                                 }
 
-                                // 6. Frases del día
+                                // 6. Comisiones
+                                if (reciboComisionRepository.count() == 0) {
+                                        for (Empleado e : todosLosEmpleados) {
+                                                if (e.getArea().contains("CREDITO")
+                                                                || e.getArea().equals("JUDICIALES")) {
+                                                        generarComisionesPrueba(e);
+                                                }
+                                        }
+                                }
+
+                                // 7. Misceláneos
+                                if (notificacionRepository.count() == 0) {
+                                        crearNotificaciones();
+                                }
                                 fraseDelDiaService.inicializarFrasesDefault();
 
-                                log.info("✅ PROCESO DE CARGA COMPLETADO: 50+ Empleados registrados.");
+                                log.info("✅ SINCRONIZACIÓN FINALIZADA CON ÉXITO.");
                         } catch (Exception e) {
-                                log.error("❌ ERROR EN EL SEEDER: ", e);
+                                log.error("❌ ERROR CRÍTICO EN EL SEEDER: ", e);
                         }
                 };
+        }
 
+        private void synchronizedSymmetry(Rol tthh, Rol colab, Rol cmr) {
+                // Admin - Usar email EXACTO para evitar UK violation
+                ensureEmpAndUser("4328485", "S-1024", "Victor Ariel", "Maldonado Martinez", "TTHH",
+                                "Jefe de Talento Humano", "15000000", "CASA MATRIZ", "INDEFERIDO", tthh,
+                                "admin.tthh@coopreducto.com.py");
+
+                // CMR 8 Colaboradores en Nómina
+                ensureEmpAndUser("C-001", "S-9001", "Ana", "López", "ADMINISTRACION", "Secretaria CMR", "3500000",
+                                "CENTRO MEDICO REDUCTO", "INDEFERIDO", cmr, null);
+                ensureEmpAndUser("C-002", "S-9002", "Pedro", "García", "MANTENIMIENTO", "Limpieza CMR", "3000000",
+                                "CENTRO MEDICO REDUCTO", "INDEFERIDO", cmr, null);
+                ensureEmpAndUser("C-003", "S-9003", "Marta", "Rojas", "RECEPCION", "Recepcionista CMR", "3200000",
+                                "CENTRO MEDICO REDUCTO", "INDEFERIDO", cmr, null);
+                ensureEmpAndUser("C-004", "S-9004", "Luis", "Sosa", "ADMINISTRACION", "Asistente Contable CMR",
+                                "4000000", "CENTRO MEDICO REDUCTO", "INDEFERIDO", cmr, null);
+                ensureEmpAndUser("C-005", "S-9005", "Carmen", "Duarte", "RECEPCION", "Recepcionista Turno Tarde",
+                                "3200000", "CENTRO MEDICO REDUCTO", "INDEFERIDO", cmr, null);
+                ensureEmpAndUser("C-006", "S-9006", "Jorge", "Benitez", "MANTENIMIENTO", "Seguridad CMR", "3500000",
+                                "CENTRO MEDICO REDUCTO", "INDEFERIDO", cmr, null);
+                ensureEmpAndUser("C-007", "S-9007", "Sofia", "Mendoza", "ADMINISTRACION", "Coordinadora CMR", "5500000",
+                                "CENTRO MEDICO REDUCTO", "INDEFERIDO", cmr, null);
+                ensureEmpAndUser("C-008", "S-9008", "Raul", "Ortiz", "ADMINISTRACION", "Encargado de Farmacia CMR",
+                                "4500000", "CENTRO MEDICO REDUCTO", "INDEFERIDO", cmr, null);
+
+                // CMR Profesionales (Pago factura)
+                ensureEmpAndUser("P-001", "F-001", "Dr. Hugo", "Zárate", "SALUD", "Médico", "0",
+                                "CENTRO MEDICO REDUCTO", "PRESTADOR_SERVICIOS", cmr, null);
+                ensureEmpAndUser("P-002", "F-002", "Lic. Elena", "Benítez", "SALUD", "Enfermera", "0",
+                                "CENTRO MEDICO REDUCTO", "PRESTADOR_SERVICIOS", cmr, null);
+                ensureEmpAndUser("P-003", "F-003", "Dr. Ricardo", "Silva", "SALUD", "Psicólogo", "0",
+                                "CENTRO MEDICO REDUCTO", "PRESTADOR_SERVICIOS", cmr, null);
+                ensureEmpAndUser("P-004", "F-004", "Lic. Silvia", "Meza", "SALUD", "Terapeuta", "0",
+                                "CENTRO MEDICO REDUCTO", "PRESTADOR_SERVICIOS", cmr, null);
+
+                // Otros
+                if (empleadoRepository.count() < 35) {
+                        for (int i = 0; i < 10; i++) {
+                                ensureEmpAndUser("GEN-" + i, "S-" + (5000 + i), "Empleado_" + i, "Test_" + i, "VENTAS",
+                                                "Asesor", "3500000", "CASA MATRIZ", "INDEFERIDO", colab, null);
+                        }
+                }
+        }
+
+        private void ensureEmpAndUser(String ci, String socio, String n, String a, String area, String cargo,
+                        String sal, String suc, String tipo, Rol rol, String forcedEmail) {
+                Empleado e = empleadoRepository.findByNumeroDocumento(ci).orElseGet(() -> {
+                        Empleado newE = new Empleado();
+                        newE.setNumeroDocumento(ci);
+                        newE.setNombres(n);
+                        newE.setApellidos(a);
+                        newE.setNumeroSocio(socio);
+                        newE.setArea(area);
+                        newE.setCargo(cargo);
+                        newE.setSalario(new BigDecimal(sal));
+                        newE.setSucursal(suc);
+                        newE.setTipoContrato(tipo);
+                        newE.setEstado("ACTIVO");
+                        String baseEmail = (forcedEmail != null) ? forcedEmail
+                                        : n.toLowerCase().replace(" ", "").replace(".", "") + "." + ci
+                                                        + "@coopreducto.com.py";
+                        newE.setEmail(baseEmail);
+                        newE.setFechaIngreso(LocalDate.now().minusYears(1));
+                        newE.setFechaNacimiento(LocalDate.of(1985, 5, 20));
+                        newE.setCreatedAt(LocalDateTime.now());
+                        newE.setUpdatedAt(LocalDateTime.now());
+                        return empleadoRepository.save(newE);
+                });
+
+                String username = ci.equals("4328485") ? "admin" : e.getEmail().split("@")[0];
+                if (usuarioRepository.findByUsername(username).isEmpty()
+                                && !usuarioRepository.existsByEmail(e.getEmail())) {
+                        Usuario u = new Usuario();
+                        u.setUsername(username);
+                        u.setNombres(e.getNombres());
+                        u.setApellidos(e.getApellidos());
+                        u.setEmail(e.getEmail());
+                        u.setPassword(passwordEncoder.encode("admin123"));
+                        u.setRol(rol);
+                        u.setEmpleado(e);
+                        u.setEstado("ACTIVO");
+                        u.setCreatedAt(LocalDateTime.now());
+                        u.setUpdatedAt(LocalDateTime.now());
+                        usuarioRepository.save(u);
+                }
         }
 
         private void ensureRoles() {
-                if (rolRepository.count() >= 4)
-                        return;
-
-                crearRol("TTHH", "Talento Humano",
-                                "{\"empleados\":\"full\",\"usuarios\":\"full\",\"reportes\":\"full\"}");
-                crearRol("GERENCIA", "Gerencia",
-                                "{\"empleados\":\"read\",\"reportes\":\"full\",\"aprobaciones\":\"full\"}");
-                crearRol("AUDITORIA", "Auditoría",
-                                "{\"empleados\":\"read\",\"auditoria\":\"full\",\"reportes\":\"read\"}");
+                crearRol("TTHH", "Talento Humano", "{\"all\":\"full\"}");
+                crearRol("GERENCIA", "Gerencia", "{\"all\":\"read\"}");
                 crearRol("COLABORADOR", "Colaborador", "{\"perfil\":\"full\",\"solicitudes\":\"own\"}");
-                crearRol("ASESOR_DE_CREDITO", "Asesor de Crédito", "{\"perfil\":\"full\",\"comisiones\":\"own\"}");
-                crearRol("JUDICIAL", "Judicial", "{\"perfil\":\"full\",\"comisiones\":\"own\"}");
-                crearRol("RECUPERADOR_DE_CREDITO", "Recuperador de Crédito",
-                                "{\"perfil\":\"full\",\"comisiones\":\"own\"}");
+                crearRol("ADMIN_CMR", "Administrador Centro Médico", "{\"cmr\":\"full\",\"perfil\":\"full\"}");
         }
 
         private void crearRol(String nombre, String desc, String permisos) {
@@ -119,100 +194,18 @@ public class DataSeeder {
                 r.setPermisos(permisos);
                 r.setActivo(true);
                 r.setCreatedAt(LocalDateTime.now());
+                r.setUpdatedAt(LocalDateTime.now());
                 rolRepository.save(r);
         }
 
-        private List<Empleado> createEmployees() {
-                List<Empleado> list = new ArrayList<>();
-
-                // Empleados principales obligatorios
-                list.add(saveEmp("4328485", "S-1024", "Victor Ariel", "Maldonado Martinez", "TTHH",
-                                "Jefe de Talento Humano", "15000000", "CASA MATRIZ"));
-                list.add(saveEmp("3344556", "S-2045", "Juan Carlos", "Pérez Gomez", "CREDITO", "Analista de Créditos",
-                                "4500000", "SUCURSAL 5"));
-                list.add(saveEmp("5566778", "S-3012", "María Fernanda", "González", "AHORRO", "Ejecutiva de Ahorro",
-                                "5500000", "SUCURSAL SAN LORENZO CENTRO"));
-
-                String[] sucursales = { "CASA MATRIZ", "SUCURSAL 5", "SUCURSAL SAN LORENZO CENTRO",
-                                "SUCURSAL HERNANDARIAS", "SUCURSAL CIUDAD DEL ESTE", "CENTRO MEDICO REDUCTO",
-                                "SUCURSAL VILLARRICA" };
-                String[] depto = { "TARJETA", "TESORERIA", "INFORMATICA", "JUDICIALES", "CONTABILIDAD" };
-
-                for (int i = 0; i < 50; i++) {
-                        String s = sucursales[i % sucursales.length];
-                        String d = depto[i % depto.length];
-                        list.add(saveEmp("CI-" + (5000000 + i), "S-" + (4000 + i), "Empleado_" + i, "Test_" + i, d,
-                                        "Asistente " + d, "3500000", s));
-                }
-                return list;
-        }
-
-        private Empleado saveEmp(String ci, String socio, String n, String a, String area, String cargo, String sal,
-                        String suc) {
-                Empleado e = new Empleado();
-                e.setNumeroDocumento(ci);
-                e.setNombres(n);
-                e.setApellidos(a);
-                e.setNumeroSocio(socio);
-                e.setArea(area);
-                e.setCargo(cargo);
-                e.setSalario(new BigDecimal(sal));
-                e.setSucursal(suc);
-                e.setEstado("ACTIVO");
-                e.setEmail(n.toLowerCase().replace(" ", "") + "." + ci + "@coopreducto.com.py");
-                e.setFechaIngreso(LocalDate.now().minusYears(2));
-                e.setFechaNacimiento(LocalDate.of(1990, 1, 1));
-                e.setCreatedAt(LocalDateTime.now());
-                return empleadoRepository.save(e);
-        }
-
-        private void createUsers(List<Empleado> emps, Rol tthh, Rol colab) {
-                Rol rolAsesor = rolRepository.findByNombre("ASESOR_DE_CREDITO").orElse(colab);
-                Rol rolJudicial = rolRepository.findByNombre("JUDICIAL").orElse(colab);
-                Rol rolRecuperador = rolRepository.findByNombre("RECUPERADOR_DE_CREDITO").orElse(colab);
-
-                for (Empleado e : emps) {
-                        Usuario u = new Usuario();
-                        u.setUsername(e.getNumeroDocumento().equals("4328485") ? "admin" : e.getEmail().split("@")[0]);
-                        u.setNombres(e.getNombres());
-                        u.setApellidos(e.getApellidos());
-                        u.setEmail(e.getEmail());
-                        u.setPassword(passwordEncoder.encode("admin123"));
-
-                        Rol roleToAssign = colab;
-                        if (e.getArea().equals("TTHH"))
-                                roleToAssign = tthh;
-                        else if (e.getCargo().contains("Crédito"))
-                                roleToAssign = rolAsesor;
-                        else if (e.getArea().equals("JUDICIALES"))
-                                roleToAssign = rolJudicial;
-                        else if (e.getCargo().contains("Recuperador"))
-                                roleToAssign = rolRecuperador;
-
-                        u.setRol(roleToAssign);
-                        u.setEmpleado(e);
-                        u.setEstado("ACTIVO");
-                        u.setCreatedAt(LocalDateTime.now());
-                        usuarioRepository.save(u);
-
-                        // Generar comisiones si tiene rol de ventas/recupero
-                        if (roleToAssign != colab && roleToAssign != tthh) {
-                                generarComisionesPrueba(e);
-                        }
-                }
-        }
-
         private void generarComisionesPrueba(Empleado e) {
-                for (int m = 10; m <= 12; m++) {
+                for (int m = 11; m <= 12; m++) {
                         ReciboComision rc = new ReciboComision();
                         rc.setEmpleado(e);
                         rc.setAnio(2024);
                         rc.setMes(m);
-                        rc.setFechaPago(LocalDate.of(2024, m, 15));
-
-                        BigDecimal produccion = new BigDecimal(10000000 + (new Random().nextInt(5000000)));
-                        rc.setProduccionMensual(produccion);
-                        rc.setMontoComision(produccion.multiply(new BigDecimal("0.05"))); // 5% comision
+                        rc.setProduccionMensual(new BigDecimal("15000000"));
+                        rc.setMontoComision(new BigDecimal("750000"));
                         rc.setMetaAlcanzadaPorcentaje(new BigDecimal("100"));
                         rc.setEstado("GENERADO");
                         rc.setCreatedAt(LocalDateTime.now());
@@ -222,250 +215,82 @@ public class DataSeeder {
 
         private void crearSolicitudes(List<Empleado> emps) {
                 Random r = new Random();
-                String[] tipos = { "VACACIONES", "PERMISO", "CONSTANCIA_LABORAL", "ANTICIPO_SALARIO" };
-                for (int i = 0; i < 100; i++) {
+                for (int i = 0; i < 50; i++) {
+                        if (emps.isEmpty())
+                                break;
                         Empleado e = emps.get(r.nextInt(emps.size()));
                         Solicitud s = new Solicitud();
                         s.setEmpleado(e);
-                        s.setTipo(tipos[i % tipos.length]);
-                        s.setTitulo("Solicitud de " + s.getTipo());
-                        s.setDescripcion("Descripción de prueba para " + e.getNombreCompleto());
+                        s.setTipo("PERMISO");
+                        s.setTitulo("Solicitud " + i);
+                        s.setDescripcion("Generada automáticamente");
                         s.setEstado("PENDIENTE");
-                        s.setPrioridad("MEDIA");
-                        s.setCreatedAt(LocalDateTime.now().minusDays(r.nextInt(30)));
+                        s.setCreatedAt(LocalDateTime.now().minusDays(i));
                         solicitudRepository.save(s);
                 }
         }
 
         private void crearAusencias(List<Empleado> emps) {
-                Random r = new Random();
-                for (int i = 0; i < 20; i++) {
-                        Empleado e = emps.get(r.nextInt(emps.size()));
+                for (int i = 0; i < 10; i++) {
+                        if (emps.size() <= i)
+                                break;
+                        Empleado e = emps.get(i % emps.size());
                         Ausencia a = new Ausencia();
                         a.setEmpleado(e);
                         a.setTipo("VACACIONES");
-                        a.setFechaInicio(LocalDate.now().plusDays(r.nextInt(15)));
-                        a.setFechaFin(a.getFechaInicio().plusDays(2));
+                        a.setFechaInicio(LocalDate.now().plusWeeks(i + 1));
+                        a.setFechaFin(LocalDate.now().plusWeeks(i + 1).plusDays(5));
                         a.setEstado("PENDIENTE");
                         a.setCreatedAt(LocalDateTime.now());
                         ausenciaRepository.save(a);
                 }
         }
 
-        private void generarRecibosAnuales(Empleado e, int anio) {
-                for (int m = 11; m <= 12; m++) {
-                        ReciboSalario res = new ReciboSalario();
-                        res.setEmpleado(e);
-                        res.setAnio(anio);
-                        res.setMes(m);
-                        res.setSalarioBruto(e.getSalario());
-                        res.setBonificaciones(new BigDecimal("2000000"));
-                        res.setDescuentosIps(e.getSalario().multiply(new BigDecimal("0.09")));
-                        res.setSalarioNeto(
-                                        e.getSalario().add(res.getBonificaciones()).subtract(res.getDescuentosIps()));
-                        res.setEstado("GENERADO");
-                        res.setFechaPago(LocalDate.of(anio, m, 28));
-                        reciboSalarioRepository.save(res);
-                }
-        }
-
         private void crearModulosSistema() {
-                log.info("📦 Sincronizando módulos del sistema...");
-
                 List<Modulo> modulosDefinidos = List.of(
-                                new Modulo("DASHBOARD", "Dashboard Principal",
-                                                "Vista general del colaborador con estadísticas y accesos rápidos",
-                                                "LayoutDashboard", "/dashboard", 1, true),
-
-                                new Modulo("PERFIL", "Mi Perfil",
-                                                "Visualización y edición de datos personales del colaborador",
-                                                "User", "/colaborador/perfil", 2, true),
-
-                                new Modulo("SOLICITUDES", "Mis Solicitudes",
-                                                "Gestión de solicitudes de permisos, certificados y otros",
-                                                "FileText", "/colaborador/solicitudes", 3, true),
-
-                                new Modulo("AUSENCIAS", "Gestión de Ausencias",
-                                                "Calendario y solicitud de vacaciones, licencias médicas, etc.",
-                                                "Calendar", "/colaborador/ausencias", 4, true),
-
-                                new Modulo("RECIBOS_SALARIO", "Recibos de Salario",
-                                                "Consulta y descarga de recibos de sueldo mensuales",
-                                                "Receipt", "/colaborador/recibos", 5, true),
-
-                                new Modulo("COMISIONES", "Mis Comisiones",
-                                                "Consulta de liquidaciones de comisiones (solo para asesores)",
-                                                "DollarSign", "/colaborador/comisiones", 6, false),
-
-                                new Modulo("MARCACIONES", "Mis Marcaciones",
-                                                "Historial de asistencia y marcaciones de entrada/salida",
-                                                "Clock", "/colaborador/marcaciones", 7, true),
-
-                                new Modulo("DOCUMENTOS", "Mis Documentos",
-                                                "Contratos, certificados y otros documentos personales",
-                                                "FolderOpen", "/colaborador/documentos", 8, true),
-
-                                // Módulos Administrativos
-                                new Modulo("ADMIN_EMPLEADOS", "Gestión de Empleados",
-                                                "Administración completa de empleados (solo Admin/TTHH)",
-                                                "Users", "/admin/empleados", 10, false),
-
-                                new Modulo("ADMIN_NOMINA", "Gestión de Nómina",
-                                                "Procesamiento de nómina y recibos (solo Admin/TTHH)",
-                                                "Banknote", "/admin/nomina", 11, false),
-
-                                new Modulo("ADMIN_REPORTES", "Reportes Globales",
-                                                "Reportes y estadísticas del sistema (solo Admin/TTHH)",
-                                                "BarChart3", "/admin/reportes", 12, false),
-
-                                new Modulo("ADMIN_ROLES", "Gestión de Roles y Permisos",
-                                                "Administración de roles y permisos modulares (solo Admin/TTHH)",
-                                                "Shield", "/admin/roles", 13, false));
-
+                                new Modulo("DASHBOARD", "Dashboard", "Inicio", "LayoutDashboard", "/dashboard", 1,
+                                                true),
+                                new Modulo("PERFIL", "Mi Perfil", "Mis datos", "User", "/colaborador/perfil", 2, true),
+                                new Modulo("CMR", "Centro Médico (C.M.R)", "Gestión de profesionales y servicios",
+                                                "Stethoscope", "/admin/cmr", 20, false),
+                                new Modulo("ADMIN_EMPLEADOS", "Empleados", "Gestión RRHH", "Users", "/admin/empleados",
+                                                3, false));
                 for (Modulo def : modulosDefinidos) {
                         moduloRepository.findByCodigo(def.getCodigo()).ifPresentOrElse(
-                                        existente -> {
-                                                boolean changed = false;
-                                                if (!java.util.Objects.equals(existente.getEsDefault(),
-                                                                def.getEsDefault())) {
-                                                        existente.setEsDefault(def.getEsDefault());
-                                                        changed = true;
-                                                }
-                                                if (!java.util.Objects.equals(existente.getNombre(), def.getNombre())) {
-                                                        existente.setNombre(def.getNombre());
-                                                        changed = true;
-                                                }
-                                                if (!java.util.Objects.equals(existente.getRutaMenu(),
-                                                                def.getRutaMenu())) {
-                                                        existente.setRutaMenu(def.getRutaMenu());
-                                                        changed = true;
-                                                }
-                                                if (!java.util.Objects.equals(existente.getIcono(), def.getIcono())) {
-                                                        existente.setIcono(def.getIcono());
-                                                        changed = true;
-                                                }
-                                                if (changed) {
-                                                        moduloRepository.save(existente);
-                                                }
+                                        ex -> {
+                                                ex.setNombre(def.getNombre());
+                                                ex.setIcono(def.getIcono());
+                                                ex.setRutaMenu(def.getRutaMenu());
+                                                moduloRepository.save(ex);
                                         },
                                         () -> moduloRepository.save(def));
                 }
-
-                log.info("✅ Módulos del sistema sincronizados.");
         }
 
         private void crearNotificaciones() {
-                log.info("🔔 Creando notificaciones de prueba...");
-
-                List<Usuario> usuarios = usuarioRepository.findAll();
-                String[] tipos = { "SOLICITUD", "APROBACION", "RECHAZO", "SISTEMA", "RECORDATORIO" };
-                String[] titulos = {
-                                "Nueva solicitud pendiente",
-                                "Tu solicitud fue aprobada",
-                                "Recibo de salario disponible",
-                                "Actualización del sistema",
-                                "Recordatorio: Examen médico próximo"
-                };
-                String[] mensajes = {
-                                "Tienes una nueva solicitud de permiso pendiente de revisión",
-                                "Tu solicitud de vacaciones ha sido aprobada por el departamento de TTHH",
-                                "Tu recibo de salario del mes está disponible para descarga",
-                                "El sistema estará en mantenimiento el próximo domingo",
-                                "Recuerda agendar tu examen médico anual"
-                };
-
-                Random random = new Random();
-                for (Usuario usuario : usuarios) {
-                        // Generate 3-5 notifications per user
-                        int numNotificaciones = 3 + random.nextInt(3);
-
-                        for (int i = 0; i < numNotificaciones; i++) {
-                                int index = random.nextInt(tipos.length);
-                                Notificacion notif = new Notificacion();
-                                notif.setUsuarioId(usuario.getId());
-                                notif.setTipo(tipos[index]);
-                                notif.setTitulo(titulos[index]);
-                                notif.setMensaje(mensajes[index]);
-                                notif.setLeido(random.nextBoolean()); // Some read, some unread
-                                notif.setCreatedAt(LocalDateTime.now().minusDays(random.nextInt(7)));
-                                notificacionRepository.save(notif);
-                        }
+                for (Usuario u : usuarioRepository.findAll()) {
+                        Notificacion n = new Notificacion();
+                        n.setUsuarioId(u.getId());
+                        n.setTitulo("Bienvenido");
+                        n.setMensaje("El sistema ha sido actualizado.");
+                        n.setTipo("SISTEMA");
+                        n.setCreatedAt(LocalDateTime.now());
+                        notificacionRepository.save(n);
                 }
-
-                log.info("✅ Notificaciones de prueba creadas para {} usuarios", usuarios.size());
         }
 
         private void generarRecibosCompletos2025(Empleado e) {
-                log.info("💰 Generando 12 recibos de salario para {}", e.getNombreCompleto());
-
-                BigDecimal salarioBase = e.getSalario(); // 15,000,000 Gs para el admin
-
-                for (int mes = 1; mes <= 12; mes++) {
-                        ReciboSalario recibo = new ReciboSalario();
-                        recibo.setEmpleado(e);
-                        recibo.setAnio(2025);
-                        recibo.setMes(mes);
-
-                        // INGRESOS
-                        recibo.setSalarioBruto(salarioBase);
-
-                        // Bonificaciones variables por mes
-                        BigDecimal bonificacion = BigDecimal.ZERO;
-                        if (mes == 6 || mes == 12) { // Aguinaldo
-                                bonificacion = salarioBase.divide(new BigDecimal("12"), 2, BigDecimal.ROUND_HALF_UP);
-                        }
-                        recibo.setBonificaciones(bonificacion);
-
-                        // Incentivo universitario (fijo mensual)
-                        BigDecimal incentivoUniversitario = new BigDecimal("150000");
-
-                        // DESCUENTOS
-                        // IPS 9% del salario
-                        BigDecimal ipsDescuento = salarioBase.multiply(new BigDecimal("0.09"));
-                        recibo.setDescuentosIps(ipsDescuento);
-
-                        // Descuentos corporativos (préstamos, anticipos)
-                        BigDecimal descuentosCorporativos = new BigDecimal("59000");
-
-                        // Fondo Social Empleado
-                        BigDecimal fondoSocial = new BigDecimal("10000");
-
-                        // Otros descuentos variables
-                        BigDecimal otrosDescuentos = new BigDecimal("20000");
-
-                        // Descuento de almuerzo
-                        BigDecimal descuentoAlmuerzo = new BigDecimal("97500");
-
-                        // Anticipo quincenal (solo quincenas pares)
-                        BigDecimal anticipoQuincenal = mes % 2 == 0 ? new BigDecimal("1300000") : BigDecimal.ZERO;
-
-                        // Total de descuentos
-                        BigDecimal totalDescuentos = ipsDescuento
-                                        .add(descuentosCorporativos)
-                                        .add(fondoSocial)
-                                        .add(otrosDescuentos)
-                                        .add(descuentoAlmuerzo)
-                                        .add(anticipoQuincenal);
-
-                        // Total de ingresos
-                        BigDecimal totalIngresos = salarioBase
-                                        .add(bonificacion)
-                                        .add(incentivoUniversitario);
-
-                        // SALDO NETO
-                        BigDecimal salarioNeto = totalIngresos.subtract(totalDescuentos);
-                        recibo.setSalarioNeto(salarioNeto);
-
-                        // Fecha de pago: último día del mes
-                        LocalDate fechaPago = LocalDate.of(2025, mes, 1).plusMonths(1).minusDays(1);
-                        recibo.setFechaPago(fechaPago);
-
-                        recibo.setEstado("GENERADO");
-                        recibo.setCreatedAt(LocalDateTime.now().minusMonths(12 - mes));
-
-                        reciboSalarioRepository.save(recibo);
+                for (int m = 1; m <= 12; m++) {
+                        ReciboSalario r = new ReciboSalario();
+                        r.setEmpleado(e);
+                        r.setAnio(2025);
+                        r.setMes(m);
+                        r.setSalarioBruto(e.getSalario());
+                        r.setSalarioNeto(e.getSalario().multiply(new BigDecimal("0.91")));
+                        r.setEstado("GENERADO");
+                        r.setFechaPago(LocalDate.of(2025, m, 28));
+                        r.setCreatedAt(LocalDateTime.now());
+                        reciboSalarioRepository.save(r);
                 }
-
-                log.info("✅ 12 recibos de salario generados para {}", e.getNombreCompleto());
         }
 }

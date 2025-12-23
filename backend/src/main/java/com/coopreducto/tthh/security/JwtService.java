@@ -23,7 +23,10 @@ public class JwtService {
     @Value("${app.jwt.expiration-hours:8}")
     private int expirationHours;
 
-    private SecretKey getSigningKey() {
+    public JwtService() {
+    }
+
+    private SecretKey createSigningKey() {
         // Asegurar que la clave tenga al menos 256 bits (32 bytes)
         String paddedSecret = jwtSecret;
         while (paddedSecret.getBytes(StandardCharsets.UTF_8).length < 32) {
@@ -44,7 +47,7 @@ public class JwtService {
                 .claim("iss", "sistema-tthh")
                 .issuedAt(Date.from(now))
                 .expiration(Date.from(expiration))
-                .signWith(getSigningKey())
+                .signWith(createSigningKey())
                 .compact();
     }
 
@@ -55,7 +58,7 @@ public class JwtService {
     public boolean validateToken(String token) {
         try {
             Jwts.parser()
-                    .verifyWith(getSigningKey())
+                    .verifyWith(createSigningKey())
                     .build()
                     .parseSignedClaims(token);
             return true;
@@ -67,7 +70,7 @@ public class JwtService {
 
     public Claims getClaims(String token) {
         return Jwts.parser()
-                .verifyWith(getSigningKey())
+                .verifyWith(createSigningKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();

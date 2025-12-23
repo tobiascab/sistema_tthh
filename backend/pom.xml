@@ -17,6 +17,7 @@
     <version>1.0.0</version>
     <name>Sistema TTHH - Backend</name>
     <description>Backend de gestión de talento humano para Cooperativa Reducto</description>
+    <!-- Force IDE Reload -->
 
     <properties>
         <java.version>21</java.version>

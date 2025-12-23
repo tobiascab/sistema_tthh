@@ -20,7 +20,8 @@ import {
     ChevronRight,
     Menu,
     Calendar,
-    CheckCircle2
+    CheckCircle2,
+    Stethoscope
 } from "lucide-react";
 import { cn } from "@/src/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
@@ -53,6 +54,13 @@ const menuItems = [
         icon: FileText,
         roles: ["TTHH", "GERENCIA", "AUDITORIA"],
         module: "ADMIN_EMPLEADOS" // Linked to employees module
+    },
+    {
+        title: "Centro Médico (C.M.R)",
+        href: "/admin/cmr",
+        icon: Stethoscope,
+        roles: ["TTHH", "GERENCIA", "ADMIN_CMR"],
+        module: "CMR"
     },
     {
         title: "Gestión de Nómina",

@@ -4,8 +4,8 @@ import { SolicitudesList } from "@/src/features/solicitudes/components/solicitud
 import { useCurrentUser } from "@/src/hooks/use-current-user";
 
 export default function SolicitudesPage() {
-    const { empleadoId, roles } = useCurrentUser();
-    const isAdminOrManager = roles.some(role => ["TTHH", "GERENCIA", "ADMIN", "AUDITORIA"].includes(role));
+    const { empleadoId, isAdmin, isGerencia, isAuditoria } = useCurrentUser();
+    const isAdminOrManager = isAdmin || isGerencia || isAuditoria;
 
     return (
         <div className="space-y-6">

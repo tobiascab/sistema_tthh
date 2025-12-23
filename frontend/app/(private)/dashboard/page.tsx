@@ -85,9 +85,12 @@ const getMesNombre = (mes: number) => {
 
 // Utils para Charts
 const getAbbreviation = (name: string) => {
+    const normalize = (s: string) => s.toUpperCase().trim();
     const map: Record<string, string> = {
         "CASA MATRIZ": "CC",
         "CENTRO MEDICO REDUCTO": "C.M.R",
+        "CENTRO MÉDICO REDUCTO": "C.M.R", // Handle accent just in case
+        "C.M.R": "C.M.R",
         "SUCURSAL 5": "Suc. 5",
         "SUCURSAL CIUDAD DEL ESTE": "CDE",
         "SUCURSAL HERNANDARIAS": "Hern.",
@@ -95,9 +98,10 @@ const getAbbreviation = (name: string) => {
         "SUCURSAL VILLARRICA": "VCA",
     };
 
-    const upperName = name.toUpperCase();
-    if (map[upperName]) return map[upperName];
+    const key = normalize(name);
+    if (map[key]) return map[key];
 
+    // Fallback logic
     return name.replace(/SUCURSAL/i, "Suc.").substring(0, 18);
 };
 
@@ -123,7 +127,6 @@ const CustomTooltip = ({ active, payload, label }: any) => {
     return null;
 };
 
-// 1. Dashboard Administrativo (TTHH/Gerencia)
 // 1. Dashboard Administrativo (TTHH/Gerencia)
 function AdminDashboard() {
     const { user } = useCurrentUser();
@@ -223,6 +226,7 @@ function AdminDashboard() {
             icon: Users,
             iconBg: "bg-emerald-100",
             iconColor: "text-emerald-600",
+            href: "/tthh/empleados"
         },
         {
             title: "Solicitudes Pendientes",
@@ -231,7 +235,8 @@ function AdminDashboard() {
             icon: Clock,
             iconBg: "bg-amber-100",
             iconColor: "text-amber-600",
-            alert: (dashboardData?.solicitudesPendientes || 0) > 0
+            alert: (dashboardData?.solicitudesPendientes || 0) > 0,
+            href: "/colaborador/solicitudes"
         },
         {
             title: "Nómina Estimada",
@@ -240,6 +245,7 @@ function AdminDashboard() {
             icon: DollarSign,
             iconBg: "bg-blue-100",
             iconColor: "text-blue-600",
+            href: "/tthh/nominas"
         },
         {
             title: "Cumpleaños del Mes",
@@ -248,6 +254,7 @@ function AdminDashboard() {
             icon: Gift,
             iconBg: "bg-rose-100",
             iconColor: "text-rose-600",
+            href: "/tthh/empleados" // Opcional: Podría ser un query param ?filter=cumpleanos
         },
     ];
 
@@ -397,14 +404,9 @@ function AdminDashboard() {
 
             {/* KPI Cards - Compactas */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-                {metricsConfig.map((metric, index) => (
-                    <motion.div
-                        key={metric.title}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        transition={{ delay: index * 0.08 }}
-                    >
-                        <Card className={`${EMERALD_THEME.card} border-l-4 border-l-emerald-500`}>
+                {metricsConfig.map((metric, index) => {
+                    const CardComponent = (
+                        <Card className={`${EMERALD_THEME.card} border-l-4 border-l-emerald-500 hover:scale-[1.02] transition-transform cursor-pointer`}>
                             <CardContent className="p-4">
                                 <div className="flex items-center gap-3">
                                     <div className={`p-2.5 rounded-xl ${metric.iconBg}`}>
@@ -429,8 +431,25 @@ function AdminDashboard() {
                                 </div>
                             </CardContent>
                         </Card>
-                    </motion.div>
-                ))}
+                    );
+
+                    return (
+                        <motion.div
+                            key={metric.title}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            transition={{ delay: index * 0.08 }}
+                        >
+                            {metric.href ? (
+                                <Link href={metric.href}>
+                                    {CardComponent}
+                                </Link>
+                            ) : (
+                                CardComponent
+                            )}
+                        </motion.div>
+                    );
+                })}
             </div>
 
             {/* Analytics Section - Updated to 3 columns to include Birthdays */}

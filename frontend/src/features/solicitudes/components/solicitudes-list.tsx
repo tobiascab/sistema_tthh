@@ -60,11 +60,11 @@ export function SolicitudesList({ empleadoId }: SolicitudesListProps) {
     const [inputTo, setInputTo] = useState("");
     const { toast } = useToast();
     const queryClient = useQueryClient();
-    const { user } = useAuth();
+    const { user, hasAnyRole } = useAuth();
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const [showCalendar, setShowCalendar] = useState(false);
 
-    const isAdminOrManager = user?.roles?.some(r => ["TTHH", "GERENCIA"].includes(r)) || false;
+    const isAdminOrManager = hasAnyRole(["TTHH", "GERENCIA"]);
 
     // Sincronizar inputs cuando uiDateRange cambia (ej: selección en calendario)
     useEffect(() => {
@@ -116,10 +116,25 @@ export function SolicitudesList({ empleadoId }: SolicitudesListProps) {
                 sort: "createdAt,desc"
             };
 
-            const [solicitudesRes, ausenciasRes] = await Promise.all([
-                solicitudesApi.getAll(params),
-                ausenciasApi.getAll({ ...params, sort: "createdAt,desc" })
-            ]);
+            console.log("📡 Fetching solicitudes with params:", params);
+
+            // Fetch solicitudes with error handling
+            let solicitudesRes: any = { content: [], totalElements: 0, totalPages: 0, size: 0, number: 0, empty: true, first: true, last: true };
+            try {
+                solicitudesRes = await solicitudesApi.getAll(params);
+                console.log("✅ Solicitudes fetched:", solicitudesRes.totalElements);
+            } catch (error: any) {
+                console.error("❌ Error fetching solicitudes:", error.response?.status, error.message);
+            }
+
+            // Fetch ausencias with error handling
+            let ausenciasRes: any = { content: [], totalElements: 0, totalPages: 0, size: 0, number: 0, empty: true, first: true, last: true };
+            try {
+                ausenciasRes = await ausenciasApi.getAll({ ...params, sort: "createdAt,desc" });
+                console.log("✅ Ausencias fetched:", ausenciasRes.totalElements);
+            } catch (error: any) {
+                console.error("❌ Error fetching ausencias:", error.response?.status, error.message);
+            }
 
             // Map Ausencias to Solicitudes structure with client-side filtering
             // (Backend endpoint /empleado/{id} does not support filtering yet)

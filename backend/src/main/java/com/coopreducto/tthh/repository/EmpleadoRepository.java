@@ -191,5 +191,5 @@ public interface EmpleadoRepository extends JpaRepository<Empleado, Long> {
         long countByFechaNacimientoAfterAndEstado(@Param("date") LocalDate date, @Param("estado") String estado);
 
         @Query("SELECT SUM(e.salario) FROM Empleado e WHERE e.estado = :estado")
-        java.math.BigDecimal sumSalarioByEstado(String estado);
+        java.math.BigDecimal sumSalarioByEstado(@Param("estado") String estado);
 }

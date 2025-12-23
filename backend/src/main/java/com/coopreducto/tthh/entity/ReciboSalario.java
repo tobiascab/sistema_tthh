@@ -69,7 +69,7 @@ public class ReciboSalario {
     private LocalDateTime createdAt;
 
     @LastModifiedDate
-    @Column(nullable = false)
+    @Column(nullable = true)
     private LocalDateTime updatedAt;
 
     @Column(length = 100)

@@ -16,7 +16,7 @@ services:
     networks:
       - tthh-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -43,7 +43,7 @@ services:
     networks:
       - tthh-network
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/health/ready"]
+      test: [ "CMD", "curl", "-f", "http://localhost:8080/health/ready" ]
       interval: 30s
       timeout: 10s
       retries: 5
@@ -63,8 +63,25 @@ services:
     networks:
       - tthh-network
 
+  # MySQL Database (Main Application DB)
+  mysql:
+    image: mysql:8.0
+    container_name: tthh-mysql
+    environment:
+      MYSQL_DATABASE: sistema_tthh
+      MYSQL_ALLOW_EMPTY_PASSWORD: "yes"
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - tthh-network
+    command: --default-authentication-plugin=mysql_native_password
+
 volumes:
   postgres_data:
+    driver: local
+  mysql_data:
     driver: local
 
 networks:

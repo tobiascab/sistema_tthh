@@ -39,8 +39,13 @@ public class AusenciaController {
 
         AusenciaDTO ausencia = ausenciaService.findById(id);
 
-        // Validate access for collaborators
-        if (authentication.getAuthorities().stream()
+        // Validate access for collaborators ONLY if they are not admin
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_TTHH") ||
+                        a.getAuthority().equals("ROLE_GERENCIA") ||
+                        a.getAuthority().equals("ROLE_AUDITORIA"));
+
+        if (!isAdmin && authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_COLABORADOR"))) {
             Long currentEmpleadoId = getCurrentUserId(authentication);
             if (currentEmpleadoId == null || !currentEmpleadoId.equals(ausencia.getEmpleadoId())) {
@@ -58,8 +63,13 @@ public class AusenciaController {
             Pageable pageable,
             org.springframework.security.core.Authentication authentication) {
 
-        // Validate access for collaborators
-        if (authentication.getAuthorities().stream()
+        // Validate access for collaborators ONLY if not admin
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_TTHH") ||
+                        a.getAuthority().equals("ROLE_GERENCIA") ||
+                        a.getAuthority().equals("ROLE_AUDITORIA"));
+
+        if (!isAdmin && authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_COLABORADOR"))) {
             Long currentEmpleadoId = getCurrentUserId(authentication);
             if (currentEmpleadoId == null || !currentEmpleadoId.equals(empleadoId)) {

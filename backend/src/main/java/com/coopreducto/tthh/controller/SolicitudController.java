@@ -36,8 +36,14 @@ public class SolicitudController {
             Authentication authentication,
             Pageable pageable) {
 
-        // Si es colaborador, solo puede ver sus propias solicitudes
-        if (authentication.getAuthorities().stream()
+        // Si es colaborador Y NO es admin/gerencia/auditoria, solo puede ver sus
+        // propias solicitudes
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_TTHH") ||
+                        a.getAuthority().equals("ROLE_GERENCIA") ||
+                        a.getAuthority().equals("ROLE_AUDITORIA"));
+
+        if (!isAdmin && authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("ROLE_COLABORADOR"))) {
             empleadoId = getCurrentUserId(authentication);
             if (empleadoId == null) {

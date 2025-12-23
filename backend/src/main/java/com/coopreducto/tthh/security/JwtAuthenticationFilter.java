@@ -51,15 +51,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     String username = jwtService.getUsername(jwt);
                     List<String> roles = jwtService.getRoles(jwt);
 
+                    log.info("🔐 JWT válido para usuario: {} con roles JWT: {}", username, roles);
+
                     List<SimpleGrantedAuthority> authorities = roles.stream()
                             .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                             .collect(Collectors.toList());
+
+                    log.info("🔑 Authorities asignados: {}", authorities);
 
                     UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
                             username, null, authorities);
                     authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authentication);
-                    log.debug("Usuario autenticado: {} con roles: {}", username, roles);
+                    log.info("✅ Usuario autenticado: {} con roles: {}", username, roles);
+                } else {
+                    log.warn("❌ Token JWT inválido o expirado");
                 }
             }
         } catch (Exception ex) {

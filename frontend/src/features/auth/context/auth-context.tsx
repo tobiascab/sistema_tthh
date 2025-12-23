@@ -70,14 +70,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // Support both Keycloak format (realm_access.roles) and local JWT format (roles directly)
         const roles = payload.roles || payload.realm_access?.roles || ['COLABORADOR'];
 
+        // Fix: Prioritize userId from payload as the main ID, as it's the DB numeric ID
+        const userId = payload.userId ? String(payload.userId) : (payload.sub || "");
+
+        console.log("Parsed JWT Payload:", { ...payload, extractedId: userId });
+
         return {
-            id: payload.sub || payload.userId,
+            id: userId,
             username: payload.preferred_username || payload.sub,
             email: payload.email || "",
             nombre: payload.given_name || "",
             apellido: payload.family_name || "",
             roles: roles,
-            empleadoId: payload.empleadoId || (typeof payload.userId === 'number' ? payload.userId : undefined),
+            empleadoId: payload.empleadoId ? Number(payload.empleadoId) : undefined,
         };
     };
 
